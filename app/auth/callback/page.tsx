@@ -22,15 +22,38 @@ export default function AuthCallbackPage() {
         if (session?.user) {
           const user = session.user;
 
+          // Determine if this is an OAuth user or email/password user
+          const identities = user.identities || [];
+          const hasOAuthIdentity = identities.some(
+            (id) => id.provider === "google" || id.provider === "github"
+          );
+          const hasEmailIdentity = identities.some(
+            (id) => id.provider === "email"
+          );
+
           // Check if this is a new user by comparing created_at with last_sign_in_at
           // For new users, these will be equal (or very close) on their first login
-          // This works for both OAuth signups and email confirmation flows
           const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
           const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : 0;
-          const isNewUser = createdAt > 0 && Math.abs(createdAt - lastSignIn) < 5000;
+          
+          // For OAuth users: send welcome email immediately on first login
+          // For email/password users: send welcome email after email confirmation
+          // The callback is reached when:
+          // 1. OAuth user completes sign in (new or returning)
+          // 2. Email user clicks confirmation link (first login after signup)
+          const isNewOAuthUser = hasOAuthIdentity && !hasEmailIdentity && 
+            createdAt > 0 && Math.abs(createdAt - lastSignIn) < 5000;
+          
+          // For email users, this is their first confirmed login if:
+          // - They have an email identity
+          // - created_at and last_sign_in_at are close (first real login after confirmation)
+          const isEmailConfirmation = hasEmailIdentity && !hasOAuthIdentity &&
+            createdAt > 0 && Math.abs(createdAt - lastSignIn) < 60000; // 60 seconds buffer for email confirmation
 
-          if (isNewUser && user.email) {
-            // Send welcome email for new OAuth users
+          const shouldSendWelcomeEmail = (isNewOAuthUser || isEmailConfirmation) && user.email;
+
+          if (shouldSendWelcomeEmail) {
+            // Send welcome email for new users (OAuth or email confirmation)
             setStatus("Sending welcome email...");
             try {
               const name =

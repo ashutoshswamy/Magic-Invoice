@@ -53,34 +53,7 @@ export default function SignupPage() {
         },
       });
       if (error) throw error;
-      if (data?.user) {
-        try {
-          const response = await fetch("/api/welcome", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email,
-              name,
-            }),
-          });
-          if (!response.ok) {
-            const payload = (await response.json().catch(() => null)) as {
-              error?: string;
-            } | null;
-            setStatus(
-              payload?.error
-                ? `Signup succeeded, but welcome email failed: ${payload.error}`
-                : "Signup succeeded, but welcome email failed.",
-            );
-            return;
-          }
-        } catch {
-          setStatus("Signup succeeded, but welcome email failed.");
-          return;
-        }
-      }
+      // Welcome email will be sent after email confirmation in auth callback
       setStatus("Check your email to confirm your account.");
       router.push("/dashboard");
     } catch (error) {
