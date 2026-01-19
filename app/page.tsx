@@ -98,19 +98,6 @@ export default function Home() {
                 <Sparkles className="h-4 w-4" />
                 AI invoice studio for modern teams
               </div>
-              <a
-                href="https://www.producthunt.com/products/magic-invoice-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-magic-invoice-2"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1065115&theme=light&t=1768842848845"
-                  alt="Magic Invoice - Turn a sentence into a client-ready invoice. | Product Hunt"
-                  width="250"
-                  height="54"
-                  className="transition hover:opacity-90"
-                />
-              </a>
             </div>
             <div className="max-w-2xl">
               <h1 className="text-4xl font-semibold leading-tight text-white md:text-5xl">
