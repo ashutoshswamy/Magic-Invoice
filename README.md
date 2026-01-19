@@ -20,11 +20,11 @@ Magic Invoice is an AI-powered invoicing workspace that turns natural language i
 
 ## Documentation
 
-See [documentation.md](documentation.md) for a high-level architecture overview.
+See [documentation.md](DOCUMENTATION.md) for a high-level architecture overview.
 
 ## Security
 
-See [security.md](security.md) for vulnerability reporting.
+See [security.md](SECURITY.md) for vulnerability reporting.
 
 ## License
 

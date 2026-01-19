@@ -13,9 +13,45 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Magic Invoice",
+  metadataBase: new URL("https://magicinvoice.in"),
+  title: {
+    default: "Magic Invoice",
+    template: "%s | Magic Invoice",
+  },
   description:
     "Turn natural language into professional invoices with AI-assisted parsing.",
+  applicationName: "Magic Invoice",
+  keywords: [
+    "Magic Invoice",
+    "AI invoice",
+    "invoice generator",
+    "freelancer invoices",
+    "small business invoicing",
+    "client-ready invoices",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://magicinvoice.in/",
+    title: "Magic Invoice",
+    description:
+      "Turn natural language into professional invoices with AI-assisted parsing.",
+    siteName: "Magic Invoice",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
