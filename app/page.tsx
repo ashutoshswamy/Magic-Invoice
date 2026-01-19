@@ -93,9 +93,24 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="glass flex flex-col gap-8 rounded-3xl p-10"
           >
-            <div className="flex items-center gap-3 rounded-full border border-white/15 px-4 py-2 text-sm text-emerald-200">
-              <Sparkles className="h-4 w-4" />
-              AI invoice studio for modern teams
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-3 rounded-full border border-white/15 px-4 py-2 text-sm text-emerald-200">
+                <Sparkles className="h-4 w-4" />
+                AI invoice studio for modern teams
+              </div>
+              <a
+                href="https://www.producthunt.com/products/magic-invoice-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-magic-invoice-2"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1065115&theme=light&t=1768842848845"
+                  alt="Magic Invoice - Turn a sentence into a client-ready invoice. | Product Hunt"
+                  width="250"
+                  height="54"
+                  className="transition hover:opacity-90"
+                />
+              </a>
             </div>
             <div className="max-w-2xl">
               <h1 className="text-4xl font-semibold leading-tight text-white md:text-5xl">

@@ -43,6 +43,20 @@ export default function Footer() {
               The AI-ready invoice workspace that transforms a single sentence
               into a client-ready document.
             </p>
+            <a
+              href="https://www.producthunt.com/products/magic-invoice-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-magic-invoice-2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block"
+            >
+              <img
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1065115&theme=light&t=1768842848845"
+                alt="Magic Invoice - Turn a sentence into a client-ready invoice. | Product Hunt"
+                width="250"
+                height="54"
+                className="transition hover:opacity-90"
+              />
+            </a>
           </div>
           <div className="flex flex-wrap gap-6 text-sm text-slate-300">
             {isSignedIn ? null : (
