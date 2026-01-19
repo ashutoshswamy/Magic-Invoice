@@ -16,6 +16,25 @@ import {
 import TopNav from "../components/TopNav";
 import { isSupabaseConfigured, supabase } from "../lib/supabaseClient";
 
+const getPasswordStrength = (password: string) => {
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (password.length >= 12) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^A-Za-z0-9]/.test(password)) strength++;
+  return Math.min(strength, 4);
+};
+
+const strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
+const strengthColors = [
+  "bg-slate-700",
+  "bg-red-500",
+  "bg-yellow-500",
+  "bg-emerald-400",
+  "bg-emerald-300",
+];
+
 export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -139,6 +158,30 @@ export default function SignupPage() {
                 )}
               </button>
             </label>
+            {password && (
+              <div className="space-y-1">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4].map((level) => (
+                    <div
+                      key={level}
+                      className={`h-1 flex-1 rounded-full transition-colors ${
+                        getPasswordStrength(password) >= level
+                          ? strengthColors[getPasswordStrength(password)]
+                          : "bg-slate-700"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-400">
+                    {strengthLabels[getPasswordStrength(password)] || "Too short"}
+                  </span>
+                  <span className="text-slate-500">
+                    {password.length < 8 && "Min 8 characters"}
+                  </span>
+                </div>
+              </div>
+            )}
             <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm">
               <Lock className="h-4 w-4 text-emerald-200" />
               <input

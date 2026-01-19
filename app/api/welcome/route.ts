@@ -1,13 +1,37 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js";
 import { checkRateLimit, getClientIp } from "../../lib/rateLimit";
 
 export const runtime = "nodejs";
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const resendFrom = process.env.RESEND_FROM;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 export async function POST(request: Request) {
+  // Verify authentication
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return NextResponse.json(
+      { error: "Unauthorized. Authentication required." },
+      { status: 401 },
+    );
+  }
+
+  const token = authHeader.substring(7);
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+  if (authError || !user) {
+    return NextResponse.json(
+      { error: "Invalid or expired authentication token." },
+      { status: 401 },
+    );
+  }
+
+  
   const ip = getClientIp(request);
   const rate = checkRateLimit(`welcome:${ip}`, {
     windowMs: 60 * 60 * 1000,
@@ -72,7 +96,7 @@ export async function POST(request: Request) {
 
   try {
     const resend = new Resend(resendApiKey);
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: resendFrom,
       to: email,
       subject: "Welcome to Magic Invoice",
@@ -108,7 +132,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, messageId: data?.id });
   } catch {
     return NextResponse.json(
       { error: "Failed to send welcome email." },
@@ -116,3 +140,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

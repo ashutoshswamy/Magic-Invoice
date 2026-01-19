@@ -22,38 +22,41 @@ export default function AuthCallbackPage() {
         if (session?.user) {
           const user = session.user;
 
-          // Determine if this is an OAuth user or email/password user
-          const identities = user.identities || [];
-          const hasOAuthIdentity = identities.some(
-            (id) => id.provider === "google" || id.provider === "github"
-          );
-          const hasEmailIdentity = identities.some(
-            (id) => id.provider === "email"
-          );
+          // Check if we already sent a welcome email for this user (stored in localStorage)
+          const welcomeEmailKey = `welcome_email_sent_${user.id}`;
+          const alreadySentWelcome = localStorage.getItem(welcomeEmailKey) === "true";
 
-          // Check if this is a new user by comparing created_at with last_sign_in_at
-          // For new users, these will be equal (or very close) on their first login
+          if (alreadySentWelcome) {
+            setStatus("Success! Redirecting to dashboard...");
+            router.push("/dashboard");
+            return;
+          }
+
+          // Determine if this is a new user by checking:
+          // 1. For OAuth: if the account was created very recently (within last 5 minutes)
+          // 2. For email/password: if email was just confirmed (callback type is email confirmation)
           const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
-          const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : 0;
+          const now = Date.now();
+          const fiveMinutesAgo = now - (5 * 60 * 1000);
           
-          // For OAuth users: send welcome email immediately on first login
-          // For email/password users: send welcome email after email confirmation
-          // The callback is reached when:
-          // 1. OAuth user completes sign in (new or returning)
-          // 2. Email user clicks confirmation link (first login after signup)
-          const isNewOAuthUser = hasOAuthIdentity && !hasEmailIdentity && 
-            createdAt > 0 && Math.abs(createdAt - lastSignIn) < 5000;
+          // Check if this is a newly created account (created within last 5 minutes)
+          const isNewAccount = createdAt > fiveMinutesAgo;
           
-          // For email users, this is their first confirmed login if:
-          // - They have an email identity
-          // - created_at and last_sign_in_at are close (first real login after confirmation)
-          const isEmailConfirmation = hasEmailIdentity && !hasOAuthIdentity &&
-            createdAt > 0 && Math.abs(createdAt - lastSignIn) < 60000; // 60 seconds buffer for email confirmation
+          // Get the URL hash to check for email confirmation type
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const urlParams = new URLSearchParams(window.location.search);
+          const isEmailConfirmation = hashParams.get("type") === "email" || 
+                                       urlParams.get("type") === "email" ||
+                                       hashParams.get("type") === "signup" ||
+                                       urlParams.get("type") === "signup";
 
-          const shouldSendWelcomeEmail = (isNewOAuthUser || isEmailConfirmation) && user.email;
+
+
+          // Send welcome email if this is a new account OR an email confirmation
+          const shouldSendWelcomeEmail = (isNewAccount || isEmailConfirmation) && user.email;
+
 
           if (shouldSendWelcomeEmail) {
-            // Send welcome email for new users (OAuth or email confirmation)
             setStatus("Sending welcome email...");
             try {
               const name =
@@ -61,18 +64,28 @@ export default function AuthCallbackPage() {
                 user.user_metadata?.name ||
                 "";
 
-              await fetch("/api/welcome", {
+
+
+              const response = await fetch("/api/welcome", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
+                  "Authorization": `Bearer ${session.access_token}`,
                 },
                 body: JSON.stringify({
                   email: user.email,
                   name,
                 }),
               });
+
+              await response.json();
+
+              if (response.ok) {
+                // Mark welcome email as sent for this user
+                localStorage.setItem(welcomeEmailKey, "true");
+              }
             } catch {
-              // Silently fail - don't block auth flow for email issues
+              // Don't block auth flow for email issues
             }
           }
 
@@ -80,6 +93,7 @@ export default function AuthCallbackPage() {
           setStatus("Success! Redirecting to dashboard...");
           router.push("/dashboard");
         } else {
+
           // No session found, wait and retry
           setTimeout(async () => {
             const { data } = await supabase.auth.getSession();
