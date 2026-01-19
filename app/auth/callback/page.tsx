@@ -55,6 +55,17 @@ export default function AuthCallbackPage() {
           // Send welcome email if this is a new account OR an email confirmation
           const shouldSendWelcomeEmail = (isNewAccount || isEmailConfirmation) && user.email;
 
+          // Debug logging for production troubleshooting
+          console.log("[Welcome Email Debug]", {
+            isNewAccount,
+            isEmailConfirmation,
+            shouldSendWelcomeEmail,
+            alreadySentWelcome,
+            createdAt: user.created_at,
+            timeDiff: now - createdAt,
+            hashType: hashParams.get("type"),
+            urlType: urlParams.get("type"),
+          });
 
           if (shouldSendWelcomeEmail) {
             setStatus("Sending welcome email...");
@@ -64,7 +75,7 @@ export default function AuthCallbackPage() {
                 user.user_metadata?.name ||
                 "";
 
-
+              console.log("[Welcome Email] Calling /api/welcome with:", { email: user.email, name });
 
               const response = await fetch("/api/welcome", {
                 method: "POST",
@@ -78,15 +89,19 @@ export default function AuthCallbackPage() {
                 }),
               });
 
-              await response.json();
+              const responseData = await response.json();
+              console.log("[Welcome Email] API Response:", { status: response.status, ok: response.ok, data: responseData });
 
               if (response.ok) {
                 // Mark welcome email as sent for this user
                 localStorage.setItem(welcomeEmailKey, "true");
               }
-            } catch {
+            } catch (err) {
+              console.error("[Welcome Email] Error:", err);
               // Don't block auth flow for email issues
             }
+          } else {
+            console.log("[Welcome Email] Skipped - conditions not met");
           }
 
           // Redirect to dashboard
