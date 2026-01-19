@@ -22,10 +22,12 @@ export default function AuthCallbackPage() {
         if (session?.user) {
           const user = session.user;
 
-          // Check if this is a new user (created within the last 60 seconds)
-          const isNewUser =
-            user.created_at &&
-            new Date().getTime() - new Date(user.created_at).getTime() < 60000;
+          // Check if this is a new user by comparing created_at with last_sign_in_at
+          // For new users, these will be equal (or very close) on their first login
+          // This works for both OAuth signups and email confirmation flows
+          const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
+          const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : 0;
+          const isNewUser = createdAt > 0 && Math.abs(createdAt - lastSignIn) < 5000;
 
           if (isNewUser && user.email) {
             // Send welcome email for new OAuth users
