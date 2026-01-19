@@ -44,6 +44,7 @@ export async function POST(request: Request) {
 
   const email = body?.email?.trim();
   const name = body?.name?.trim() || "";
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (email && email.length > 254) {
     return NextResponse.json({ error: "Email is too long." }, { status: 400 });
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
             <p style="margin:16px 0 0;font-size:13px;color:#94a3b8;">
               Need help? Just reply to this email and we&apos;ll be happy to assist.
             </p>
-            <p style="margin:16px 0 0;font-size:12px;color:#64748b;">— The Magic Invoice Team</p>
+            <p style="margin:16px 0 0;font-size:12px;color:#64748b;">The Magic Invoice Team</p>
           </div>
         </div>
       `,
@@ -108,8 +109,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error("Welcome email error:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to send welcome email." },
       { status: 500 },
