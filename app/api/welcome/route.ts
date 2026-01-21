@@ -10,6 +10,14 @@ const resendFrom = process.env.RESEND_FROM;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 export async function POST(request: Request) {
   // Verify authentication
   const authHeader = request.headers.get("authorization");
@@ -22,7 +30,10 @@ export async function POST(request: Request) {
 
   const token = authHeader.substring(7);
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser(token);
 
   if (authError || !user) {
     return NextResponse.json(
@@ -31,9 +42,8 @@ export async function POST(request: Request) {
     );
   }
 
-  
   const ip = getClientIp(request);
-  const rate = checkRateLimit(`welcome:${ip}`, {
+  const rate = await checkRateLimit(`welcome:${user.id}:${ip}`, {
     windowMs: 60 * 60 * 1000,
     max: 10,
   });
@@ -78,10 +88,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email is required." }, { status: 400 });
   }
 
-  const emailRate = checkRateLimit(`welcome-email:${email.toLowerCase()}`, {
-    windowMs: 24 * 60 * 60 * 1000,
-    max: 3,
-  });
+  if (user.email && email.toLowerCase() !== user.email.toLowerCase()) {
+    return NextResponse.json(
+      { error: "Email does not match authenticated user." },
+      { status: 403 },
+    );
+  }
+
+  const emailRate = await checkRateLimit(
+    `welcome-email:${user.id}:${email.toLowerCase()}`,
+    {
+      windowMs: 24 * 60 * 60 * 1000,
+      max: 3,
+    },
+  );
   if (!emailRate.allowed) {
     return NextResponse.json(
       { error: "Email already sent recently." },
@@ -96,6 +116,7 @@ export async function POST(request: Request) {
 
   try {
     const resend = new Resend(resendApiKey);
+    const safeName = escapeHtml(name);
     const { data, error } = await resend.emails.send({
       from: resendFrom,
       to: email,
@@ -104,7 +125,7 @@ export async function POST(request: Request) {
         <div style="background:#020617;padding:32px 16px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#e2e8f0;">
           <div style="max-width:560px;margin:0 auto;background:#0f172a;border:1px solid rgba(148,163,184,0.2);border-radius:20px;padding:28px;">
             <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#a7f3d0;margin-bottom:10px;">Welcome to Magic Invoice</div>
-            <h1 style="margin:0 0 12px;font-size:24px;color:#f8fafc;">Welcome${name ? `, ${name}` : ""}!</h1>
+            <h1 style="margin:0 0 12px;font-size:24px;color:#f8fafc;">Welcome${safeName ? `, ${safeName}` : ""}!</h1>
             <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#cbd5f5;">
               You&apos;re in. Magic Invoice turns text into polished invoices and keeps everything organized in one place.
             </p>
@@ -140,4 +161,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
