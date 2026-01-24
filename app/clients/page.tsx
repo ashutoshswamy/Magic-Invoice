@@ -302,7 +302,7 @@ export default function ClientsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.04 }}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <p className="text-lg font-semibold text-white truncate">
                         {client.name}
@@ -353,7 +353,7 @@ export default function ClientsPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
+                    <div className="flex flex-row flex-wrap items-center gap-2 sm:flex-col sm:items-end">
                       {editingId === client.id ? (
                         <>
                           <button

@@ -120,7 +120,7 @@ export default function InvoicesPage() {
           {stored.map((invoice, index) => (
             <motion.div
               key={invoice.id}
-              className="glass flex items-center justify-between rounded-2xl p-4"
+              className="glass flex flex-col gap-4 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
@@ -141,7 +141,7 @@ export default function InvoicesPage() {
                 </div>
               </div>
               <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                className={`self-start rounded-full px-3 py-1 text-xs font-semibold sm:self-auto ${
                   invoice.paid
                     ? "bg-emerald-400/20 text-emerald-200"
                     : "bg-amber-400/20 text-amber-200"
@@ -149,7 +149,7 @@ export default function InvoicesPage() {
               >
                 {invoice.paid ? "Paid" : "Unpaid"}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 <Link
                   href={`/invoices/${invoice.id}`}
                   className="flex items-center gap-2 rounded-full border border-white/20 px-3 py-2 text-xs text-slate-100 transition hover:border-white/50"

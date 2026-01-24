@@ -606,7 +606,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
                   AI Composer
@@ -1051,7 +1051,7 @@ export default function DashboardPage() {
 
             {editorTab === "charges" ? (
               <div className="mt-6 rounded-2xl border border-white/10 bg-slate-900/50 p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
                       Charges & tax
@@ -1097,7 +1097,7 @@ export default function DashboardPage() {
                     {invoice.customCharges.map((charge) => (
                       <div
                         key={charge.id}
-                        className="grid items-center gap-3 md:grid-cols-[minmax(0,1fr)_140px_auto]"
+                        className="grid items-center gap-3 sm:grid-cols-[minmax(0,1fr)_140px_auto]"
                       >
                         <input
                           className="min-w-0 rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm text-white outline-none transition focus:border-emerald-300/60"
@@ -1120,7 +1120,7 @@ export default function DashboardPage() {
                         />
                         <button
                           onClick={() => removeCharge(charge.id)}
-                          className="flex h-10 w-10 items-center justify-center justify-self-end rounded-xl border border-white/10 text-slate-200 transition hover:border-white/50"
+                          className="flex h-10 w-10 items-center justify-center justify-self-start rounded-xl border border-white/10 text-slate-200 transition hover:border-white/50 sm:justify-self-end"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -1142,7 +1142,7 @@ export default function DashboardPage() {
                     key={line.id}
                     className="rounded-2xl border border-white/10 bg-slate-900/50 p-4"
                   >
-                    <div className="grid items-center gap-3 md:grid-cols-[minmax(0,1fr)_90px_110px_auto]">
+                    <div className="grid items-center gap-3 sm:grid-cols-[minmax(0,1fr)_90px_110px_auto]">
                       <input
                         className="min-w-0 rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm text-white outline-none transition focus:border-emerald-300/60"
                         value={line.description}
@@ -1168,7 +1168,7 @@ export default function DashboardPage() {
                       />
                       <button
                         onClick={() => removeLine(line.id)}
-                        className="flex h-10 w-10 items-center justify-center justify-self-end rounded-xl border border-white/10 text-slate-200 transition hover:border-white/50"
+                        className="flex h-10 w-10 items-center justify-center justify-self-start rounded-xl border border-white/10 text-slate-200 transition hover:border-white/50 sm:justify-self-end"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

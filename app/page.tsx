@@ -171,7 +171,7 @@ export default function Home() {
                 formats a beautiful invoice that’s ready to send.
               </p>
             </div>
-            <div className="glass rounded-3xl p-6 md:w-[360px]">
+            <div className="glass rounded-3xl p-6 w-full md:w-[360px]">
               <div className="flex items-center gap-3 text-sm text-emerald-200">
                 <BrainCircuit className="h-4 w-4" />
                 AI prompt input

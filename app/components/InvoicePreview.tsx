@@ -40,7 +40,7 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
   return (
     <div className="w-full max-w-none rounded-3xl border border-slate-200/80 bg-white text-slate-900 shadow-2xl">
       <div className="flex flex-col gap-6 border-b border-slate-200/80 p-6">
-        <div className="flex items-start justify-between gap-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
               Invoice
@@ -52,7 +52,7 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
               Issued {formatDisplayDate(invoice.issuedOn)}
             </p>
           </div>
-          <div className="text-right text-sm text-slate-500 min-w-0">
+          <div className="min-w-0 text-left text-sm text-slate-500 sm:text-right">
             <span
               className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                 invoice.paid
@@ -102,8 +102,8 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
         </div>
       </div>
       <div className="p-6">
-        <div className="overflow-hidden rounded-2xl border border-slate-200">
-          <div className="grid grid-cols-4 gap-3 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200">
+          <div className="hidden grid-cols-4 gap-3 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400 sm:grid">
             <span className="col-span-2">Description</span>
             <span>Qty</span>
             <span className="text-right">Rate</span>
@@ -111,13 +111,23 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
           {invoice.lines.map((line) => (
             <div
               key={line.id}
-              className="grid grid-cols-4 gap-3 border-t border-slate-200 px-4 py-3 text-sm text-slate-700"
+              className="grid grid-cols-1 gap-2 border-t border-slate-200 px-4 py-3 text-sm text-slate-700 sm:grid-cols-4 sm:gap-3"
             >
-              <span className="col-span-2 min-w-0 break-words font-medium text-slate-800">
+              <span className="min-w-0 break-words font-medium text-slate-800 sm:col-span-2">
                 {line.description}
               </span>
-              <span>{line.quantity}</span>
-              <span className="text-right">
+              <div className="flex items-center justify-between text-xs text-slate-500 sm:hidden">
+                <span>Qty</span>
+                <span className="text-slate-700">{line.quantity}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-500 sm:hidden">
+                <span>Rate</span>
+                <span className="text-slate-700">
+                  {formatCurrency(line.rate, invoice.currency)}
+                </span>
+              </div>
+              <span className="hidden sm:block">{line.quantity}</span>
+              <span className="hidden text-right sm:block">
                 {formatCurrency(line.rate, invoice.currency)}
               </span>
             </div>
