@@ -77,6 +77,49 @@ type InvoiceDefaults = {
   };
 };
 
+interface ParsedCharge {
+  label?: string;
+  amount?: number | string;
+}
+
+interface ParsedLine {
+  description?: string;
+  quantity?: number | string;
+  rate?: number | string;
+}
+
+interface ParsedInvoice {
+  invoiceNumber?: string;
+  dueDate?: string;
+  from?: {
+    name?: string;
+    company?: string;
+    email?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  to?: {
+    name?: string;
+    company?: string;
+    email?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  currency?: string;
+  taxRate?: number | string;
+  customCharges?: ParsedCharge[];
+  notes?: string;
+  lines?: ParsedLine[];
+}
+
 const buildPrompt = (prompt: string, defaults?: InvoiceDefaults) => `
 You are an expert invoicing assistant. Convert the user sentence into a JSON invoice.
 Return ONLY valid JSON with this shape:
@@ -124,7 +167,7 @@ User input: ${prompt}
 `;
 
 const normalizeInvoice = (
-  parsed: any,
+  parsed: ParsedInvoice | Record<string, never>,
   prompt: string,
   defaults?: InvoiceDefaults,
 ) => {
@@ -173,7 +216,7 @@ const normalizeInvoice = (
     currency: parsed?.currency || defaults?.currency || "USD",
     taxRate: Number(parsed?.taxRate ?? defaults?.taxRate ?? 0),
     customCharges: Array.isArray(parsed?.customCharges)
-      ? parsed.customCharges.map((charge: any, index: number) => ({
+      ? parsed.customCharges.map((charge: ParsedCharge, index: number) => ({
           id: `${index + 1}`,
           label: charge?.label ?? "Custom charge",
           amount: Number(charge?.amount ?? 0),
@@ -189,7 +232,7 @@ const normalizeInvoice = (
       parsed?.notes ||
       defaults?.notes ||
       "Payment is due within the agreed terms. Thank you for choosing Magic Invoice.",
-    lines: lines.map((line: any, index: number) => ({
+    lines: lines.map((line: ParsedLine, index: number) => ({
       id: `${index + 1}`,
       description: line.description ?? "Services rendered",
       quantity: Number(line.quantity ?? 1),
@@ -314,7 +357,7 @@ export async function POST(request: Request) {
           "Gemini returned an unreadable response. We generated a draft using defaults.",
       });
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Gemini could not generate the invoice." },
       { status: 502 },

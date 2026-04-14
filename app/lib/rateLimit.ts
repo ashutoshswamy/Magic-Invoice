@@ -42,7 +42,7 @@ export const getClientIp = (request: Request) => {
 const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
 const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-const getUpstashResult = <T>(response: any, index: number) => {
+const getUpstashResult = <T>(response: unknown, index: number) => {
   const item = Array.isArray(response) ? response[index] : null;
   if (!item || typeof item !== "object") return null;
   return (item as { result?: T }).result ?? null;

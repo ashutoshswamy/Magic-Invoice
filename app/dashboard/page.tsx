@@ -205,7 +205,7 @@ export default function DashboardPage() {
           invoicePrefix,
           lastInvoice?.invoice_number ?? null,
         );
-      } catch (error) {
+      } catch {
         nextInvoiceNumber = buildNextInvoiceNumber(invoicePrefix);
       }
       setInvoice((prev) => ({
@@ -242,7 +242,7 @@ export default function DashboardPage() {
           .order("created_at", { ascending: true });
         if (error) throw error;
         setClients((data ?? []) as SavedClient[]);
-      } catch (error) {
+      } catch {
         setClientStatus("Unable to load clients.");
       } finally {
         setIsLoadingClients(false);
@@ -325,7 +325,7 @@ export default function DashboardPage() {
         });
         setStatus(data.warning ?? "Invoice updated with AI parsing.");
       }
-    } catch (error) {
+    } catch {
       setStatus("Unable to parse. Please try again.");
     } finally {
       setIsParsing(false);
@@ -383,7 +383,7 @@ export default function DashboardPage() {
       setClients((prev) => [...prev, data as SavedClient]);
       setSelectedClientId(data.id);
       setClientStatus("Client saved.");
-    } catch (error) {
+    } catch {
       setClientStatus("Unable to save client.");
     } finally {
       setIsSavingClient(false);
@@ -457,7 +457,7 @@ export default function DashboardPage() {
       }
 
       setStatus("Saved to database.");
-    } catch (error) {
+    } catch {
       setStatus("Save failed. Check database permissions.");
     } finally {
       setIsSaving(false);

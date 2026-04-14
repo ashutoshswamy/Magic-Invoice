@@ -30,7 +30,7 @@ export default function LoginPage() {
       });
       if (error) throw error;
       router.push("/dashboard");
-    } catch (error) {
+    } catch {
       setStatus("Login failed. Check your credentials.");
     } finally {
       setIsLoading(false);

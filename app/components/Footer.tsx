@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { isSupabaseConfigured, supabase } from "../lib/supabaseClient";
 import { ArrowUpRight } from "lucide-react";
 
@@ -49,12 +50,13 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="mt-4 inline-block"
             >
-              <img
+              <Image
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1065115&theme=light&t=1768842848845"
                 alt="Magic Invoice - Turn a sentence into a client-ready invoice. | Product Hunt"
-                width="250"
-                height="54"
+                width={250}
+                height={54}
                 className="transition hover:opacity-90"
+                unoptimized
               />
             </a>
           </div>

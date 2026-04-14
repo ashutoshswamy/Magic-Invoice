@@ -65,9 +65,13 @@ export default function TopNav() {
     };
   }, []);
 
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  }
 
   return (
     <div className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/80 backdrop-blur">

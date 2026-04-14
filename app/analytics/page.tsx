@@ -86,7 +86,7 @@ export default function AnalyticsPage() {
           .eq("user_id", userId);
         if (clientError) throw clientError;
         setClientCount(clientsCount ?? 0);
-      } catch (error) {
+      } catch {
         setStatus("Unable to load analytics.");
       } finally {
         setIsLoading(false);

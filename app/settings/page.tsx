@@ -82,7 +82,7 @@ export default function SettingsPage() {
       });
       if (error) throw error;
       setStatus("Settings updated.");
-    } catch (error) {
+    } catch {
       setStatus("Unable to update settings.");
     } finally {
       setIsSaving(false);

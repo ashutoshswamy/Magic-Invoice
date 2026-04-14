@@ -148,7 +148,7 @@ export default function InvoiceDetailPage() {
 
         setInvoice(buildInvoice(invoiceRow, (lineRows ?? []) as LineRow[]));
         setStatus(null);
-      } catch (error) {
+      } catch {
         setStatus("Unable to load invoice.");
       } finally {
         setIsLoading(false);
@@ -181,7 +181,7 @@ export default function InvoiceDetailPage() {
       setStatus(
         nextPaid ? "Invoice marked as paid." : "Invoice marked as unpaid.",
       );
-    } catch (error) {
+    } catch {
       setStatus("Unable to update invoice status.");
     } finally {
       setIsUpdatingStatus(false);

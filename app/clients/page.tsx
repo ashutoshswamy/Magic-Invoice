@@ -101,7 +101,7 @@ export default function ClientsPage() {
           .order("created_at", { ascending: false });
         if (invoiceError) throw invoiceError;
         setInvoices((invoiceRows ?? []) as InvoiceSummary[]);
-      } catch (error) {
+      } catch {
         setStatus("Unable to load clients.");
       } finally {
         setIsLoading(false);
@@ -131,7 +131,7 @@ export default function ClientsPage() {
       if (error) throw error;
       setClients((prev) => prev.filter((client) => client.id !== clientId));
       setStatus("Client deleted.");
-    } catch (error) {
+    } catch {
       setStatus("Unable to delete client.");
     } finally {
       setDeletingId(null);
@@ -234,7 +234,7 @@ export default function ClientsPage() {
         return next;
       });
       setStatus("Client updated.");
-    } catch (error) {
+    } catch {
       setStatus("Unable to update client.");
     }
   };

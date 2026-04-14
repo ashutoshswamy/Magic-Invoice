@@ -129,7 +129,7 @@ export default function ProfilePage() {
       });
       if (error) throw error;
       setStatus("Profile updated.");
-    } catch (error) {
+    } catch {
       setStatus("Unable to update profile.");
     } finally {
       setIsSaving(false);
@@ -141,7 +141,7 @@ export default function ProfilePage() {
     try {
       await supabase.auth.signOut();
       router.replace("/");
-    } catch (error) {
+    } catch {
       setStatus("Unable to sign out.");
     }
   };
@@ -160,7 +160,7 @@ export default function ProfilePage() {
       });
       if (error) throw error;
       setStatus("Continue in the provider window to finish linking.");
-    } catch (error) {
+    } catch {
       setStatus("Unable to link account.");
     } finally {
       setIsLinking(null);

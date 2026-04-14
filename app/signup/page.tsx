@@ -62,7 +62,7 @@ export default function SignupPage() {
     setIsLoading(true);
     setStatus(null);
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -72,10 +72,9 @@ export default function SignupPage() {
         },
       });
       if (error) throw error;
-      // Welcome email will be sent after email confirmation in auth callback
       setStatus("Check your email to confirm your account.");
       router.push("/dashboard");
-    } catch (error) {
+    } catch {
       setStatus("Signup failed. Try a stronger password.");
     } finally {
       setIsLoading(false);

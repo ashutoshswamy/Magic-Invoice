@@ -50,7 +50,7 @@ export default function InvoicesPage() {
         })),
       );
       setStatus("Synced from database.");
-    } catch (error) {
+    } catch {
       setStatus("Unable to fetch invoices.");
     } finally {
       setIsLoading(false);
@@ -83,7 +83,7 @@ export default function InvoicesPage() {
       if (error) throw error;
       setStored((prev) => prev.filter((invoice) => invoice.id !== invoiceId));
       setStatus("Invoice deleted.");
-    } catch (error) {
+    } catch {
       setStatus("Unable to delete invoice.");
     } finally {
       setDeletingId(null);
