@@ -1,31 +1,33 @@
 # Magic Invoice
 
-Magic Invoice is an AI-powered invoicing workspace that turns natural language into polished invoices, stores them securely, and lets you manage clients, payments, and analytics in one place.
+Magic Invoice is a high-performance, AI-powered invoicing workspace built with **Next.js 16**, **React 19**, and **Tailwind CSS 4**. It transforms natural language prompts into structured invoice drafts, providing a seamless experience for managing clients, tracking revenue, and generating professional documents.
 
-## Features
+## Key Features
 
-- Draft invoices from a single sentence with AI parsing.
-- Save, print, and track invoices in Supabase.
-- Client directory with quick re-use in new invoices.
-- Paid/unpaid status tracking and analytics.
-- Built-in authentication and secure data isolation (RLS).
+- **AI-Powered Drafts**: Generate full invoices from simple sentences using Google Gemini.
+- **Client Management**: Maintain a reusable directory of clients for lightning-fast invoicing.
+- **Live Analytics**: Visual revenue tracking and payment status insights.
+- **Secure Storage**: Robust data isolation and persistence powered by Supabase.
+- **Modern UI**: Smooth transitions with Framer Motion and a premium design aesthetic.
 
-## How It’s Built
+## Tech Stack
 
-- Next.js App Router on React + TypeScript
-- Supabase for authentication and data storage
-- A generative AI layer for prompt parsing
-- Email delivery for onboarding
-- Tailwind CSS for UI styling
+- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
+- **UI & Styling**: [React 19](https://react.dev/), [Tailwind CSS 4](https://tailwindcss.com/)
+- **State & Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Backend & Auth**: [Supabase](https://supabase.com/)
+- **AI Engine**: [Google Generative AI (Gemini)](https://ai.google.dev/)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
 ## Documentation
 
-See [documentation.md](DOCUMENTATION.md) for a high-level architecture overview.
+For a deeper dive into the architecture, see [DOCUMENTATION.md](DOCUMENTATION.md).
 
 ## Security
 
-See [security.md](SECURITY.md) for vulnerability reporting.
+Please refer to [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
 ## License
 
 MIT License. See [LICENSE](LICENSE).
+

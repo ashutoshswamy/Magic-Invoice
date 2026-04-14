@@ -1,31 +1,44 @@
 # Magic Invoice Documentation
 
-## Overview
+## Architecture Overview
 
-Magic Invoice is a Next.js App Router application that turns natural-language prompts into invoice drafts, stores them in Supabase, and provides dashboard workflows for printing, tracking payments, and analyzing revenue.
+Magic Invoice is a modern web application built on the **Next.js App Router**. It leverages a serverless architecture with Supabase for the backend and Google's Gemini for AI-driven features.
 
-## Architecture
+### Key Technologies
+- **Frontend**: Next.js 16 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS 4, Framer Motion (animations)
+- **Database & Auth**: Supabase (PostgreSQL with RLS)
+- **AI**: Google Generative AI (Gemini Flash/Pro)
 
-- **App Router**: Feature pages and APIs are organized in the app directory.
-- **UI**: React with motion-enhanced interfaces and utility-first styling.
-- **Data**: Postgres-backed storage with row-level access controls.
-- **AI Parsing**: Generative AI converts natural language into structured invoices.
-- **Email**: Transactional onboarding and notification delivery.
+## Project Structure
 
-## Product Areas
+- `app/`: Contains the application routes and components.
+  - `(auth)/`: Authentication pages (Login, Signup, Callback).
+  - `analytics/`: Analytics dashboard and revenue visualization.
+  - `clients/`: Client directory and management.
+  - `dashboard/`: The main workspace for creating and managing invoices.
+  - `invoices/`: List and detail views for generated invoices.
+  - `api/`: Backend API routes for AI parsing and other server-side logic.
+  - `components/`: Reusable UI components (Shared between pages).
+  - `lib/`: Utility functions, Supabase clients, and AI configuration.
+- `public/`: Static assets like images and fonts.
+- `supabase/`: Database migrations and configuration.
 
-- **Dashboard**: Prompt-to-invoice workflow, preview, and persistence.
-- **Invoices**: Archive, payment status, and printable detail views.
-- **Clients**: Reusable client profiles for faster invoice creation.
-- **Analytics**: Revenue and payment insights across invoices.
-- **Account**: Authentication, preferences, and policy experiences.
+## Core Workflows
 
-## Data Model
+### 1. AI Invoice Generation
+The user provides a natural language description (e.g., "Invoice Google for $500 for SEO consulting"). The `api/parse` route uses Google Gemini to transform this into a structured JSON object representing the invoice, which is then previewed and can be saved to Supabase.
 
-Magic Invoice stores invoices, line items, and client records in a user-scoped data model. Access is protected with row-level policies to keep each workspace isolated.
+### 2. Client Management
+Clients are stored in a dedicated table. When creating an invoice, users can select from existing clients or create new ones on the fly.
 
-## Integrations
+### 3. Analytics
+The analytics page aggregates data from the `invoices` table to provide insights into total revenue, pending payments, and monthly trends.
 
-- **AI provider** for structured invoice parsing.
-- **Email provider** for onboarding and transactional delivery.
-- **Authentication and storage** for secure, persistent data.
+## Technical Standards
+
+- **Type Safety**: Full TypeScript integration for both frontend and backend logic.
+- **Visual Excellence**: Premium design using Tailwind 4 and professional animations.
+- **Security**: Supabase Row Level Security (RLS) ensures that users can only access their own data.
+- **Performance**: Optimized builds with Turbopack and React 19's rendering improvements.
+
