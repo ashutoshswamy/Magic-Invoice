@@ -750,6 +750,7 @@ export default function DashboardPage() {
 
             {/* Client row */}
             <div
+              className="client-selection-row"
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr auto",
@@ -780,7 +781,7 @@ export default function DashboardPage() {
                 className="btn-ghost"
                 style={{
                   fontSize: 10,
-                  padding: "8px 14px",
+                  padding: "13px 14px",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -1241,6 +1242,7 @@ export default function DashboardPage() {
                     {invoice.customCharges.map((charge) => (
                       <div
                         key={charge.id}
+                        className="custom-charge-row"
                         style={{
                           display: "grid",
                           gridTemplateColumns: "1fr 140px 36px",
@@ -1365,6 +1367,7 @@ export default function DashboardPage() {
                   </div>
                 )}
                 <div
+                  className="lines-header"
                   style={{
                     display: "grid",
                     gridTemplateColumns: "1fr 72px 100px 90px 36px",
@@ -1385,6 +1388,7 @@ export default function DashboardPage() {
                 {invoice.lines.map((line) => (
                   <div
                     key={line.id}
+                    className="invoice-line-row"
                     style={{
                       display: "grid",
                       gridTemplateColumns: "1fr 72px 100px 90px 36px",
@@ -1392,54 +1396,62 @@ export default function DashboardPage() {
                       alignItems: "center",
                     }}
                   >
-                    <input
-                      style={{
-                        ...fieldInput,
-                        ...fieldBox,
-                        padding: "10px 12px",
-                      }}
-                      value={line.description}
-                      onChange={(e) =>
-                        updateLine(line.id, "description", e.target.value)
-                      }
-                      placeholder="Description"
-                    />
-                    <input
-                      type="number"
-                      style={{
-                        ...fieldInput,
-                        ...fieldBox,
-                        padding: "10px 12px",
-                      }}
-                      value={line.quantity}
-                      onChange={(e) =>
-                        updateLine(line.id, "quantity", e.target.value)
-                      }
-                    />
-                    <input
-                      type="number"
-                      style={{
-                        ...fieldInput,
-                        ...fieldBox,
-                        padding: "10px 12px",
-                      }}
-                      value={line.rate}
-                      onChange={(e) =>
-                        updateLine(line.id, "rate", e.target.value)
-                      }
-                    />
-                    <input
-                      style={{
-                        ...fieldInput,
-                        ...fieldBox,
-                        padding: "10px 12px",
-                      }}
-                      value={line.hsnSacCode ?? ""}
-                      onChange={(e) =>
-                        updateLine(line.id, "hsnSacCode", e.target.value)
-                      }
-                      placeholder="998314"
-                    />
+                    <div className="line-desc">
+                      <input
+                        style={{
+                          ...fieldInput,
+                          ...fieldBox,
+                          padding: "10px 12px",
+                        }}
+                        value={line.description}
+                        onChange={(e) =>
+                          updateLine(line.id, "description", e.target.value)
+                        }
+                        placeholder="Description"
+                      />
+                    </div>
+                    <div className="line-qty">
+                      <input
+                        type="number"
+                        style={{
+                          ...fieldInput,
+                          ...fieldBox,
+                          padding: "10px 12px",
+                        }}
+                        value={line.quantity}
+                        onChange={(e) =>
+                          updateLine(line.id, "quantity", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="line-rate">
+                      <input
+                        type="number"
+                        style={{
+                          ...fieldInput,
+                          ...fieldBox,
+                          padding: "10px 12px",
+                        }}
+                        value={line.rate}
+                        onChange={(e) =>
+                          updateLine(line.id, "rate", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="line-hsn">
+                      <input
+                        style={{
+                          ...fieldInput,
+                          ...fieldBox,
+                          padding: "10px 12px",
+                        }}
+                        value={line.hsnSacCode ?? ""}
+                        onChange={(e) =>
+                          updateLine(line.id, "hsnSacCode", e.target.value)
+                        }
+                        placeholder="998314"
+                      />
+                    </div>
                     <button
                       onClick={() => removeLine(line.id)}
                       style={{
@@ -1463,6 +1475,54 @@ export default function DashboardPage() {
               </div>
             )}
           </motion.div>
+
+          <style jsx>{`
+            @media (max-width: 640px) {
+              .client-selection-row {
+                grid-template-columns: 1fr !important;
+              }
+              .custom-charge-row {
+                grid-template-columns: 1fr 100px 36px !important;
+              }
+              .lines-header {
+                display: none !important;
+              }
+              .invoice-line-row {
+                grid-template-columns: 1fr 1fr 36px !important;
+                grid-template-areas:
+                  "desc desc delete"
+                  "qty rate delete"
+                  "hsn hsn delete";
+                gap: 10px !important;
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 16px;
+              }
+              .line-desc {
+                grid-area: desc;
+              }
+              .line-qty {
+                grid-area: qty;
+              }
+              .line-rate {
+                grid-area: rate;
+              }
+              .line-hsn {
+                grid-area: hsn;
+              }
+              .invoice-line-row button {
+                grid-area: delete;
+                align-self: center;
+              }
+            }
+            @media (max-width: 480px) {
+              .custom-charge-row {
+                grid-template-columns: 1fr !important;
+              }
+              .custom-charge-row button {
+                justify-self: end;
+              }
+            }
+          `}</style>
 
           {/* Stats row */}
           <div

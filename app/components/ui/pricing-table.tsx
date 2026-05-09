@@ -162,16 +162,17 @@ const PlanCard: React.FC<{
   const isHighlighted = plan.isRecommended || isActive;
 
   return (
-    <motion.div
+      <motion.div
       whileHover={{ y: -8, boxShadow: "0 40px 80px -20px rgba(217, 119, 6, 0.2)" }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="pricing-card"
       style={{
         background: isHighlighted 
           ? "linear-gradient(165deg, rgba(22,19,16,0.9) 0%, rgba(12,10,6,1) 100%)" 
           : "rgba(18,15,12,0.6)",
         border: `1px solid ${isHighlighted ? "var(--gold-dim)" : "var(--border)"}`,
         borderRadius: 8,
-        padding: "48px 40px",
+        padding: "clamp(24px, 5vw, 48px) clamp(20px, 4vw, 40px)",
         display: "flex",
         flexDirection: "column",
         position: "relative",

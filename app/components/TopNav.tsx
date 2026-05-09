@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth, UserButton } from "@clerk/nextjs";
+import { Menu, X } from "lucide-react";
 
 const appNav = [
   { href: "/dashboard", label: "Dashboard" },
@@ -30,12 +31,18 @@ export default function TopNav() {
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup");
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Close menu when pathname changes
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   return (
     <header
@@ -46,8 +53,8 @@ export default function TopNav() {
         borderBottom: scrolled
           ? "1px solid var(--border)"
           : "1px solid transparent",
-        background: scrolled ? "rgba(12,10,6,0.92)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
+        background: scrolled || menuOpen ? "rgba(12,10,6,0.95)" : "transparent",
+        backdropFilter: scrolled || menuOpen ? "blur(12px)" : "none",
         transition: "background 0.2s, border-color 0.2s",
       }}
     >
@@ -61,7 +68,6 @@ export default function TopNav() {
           alignItems: "center",
           justifyContent: "space-between",
           gap: 16,
-          flexWrap: "wrap",
         }}
       >
         {/* Logo */}
@@ -73,6 +79,7 @@ export default function TopNav() {
             gap: 10,
             textDecoration: "none",
             flexShrink: 0,
+            zIndex: 60,
           }}
         >
           <span
@@ -111,13 +118,13 @@ export default function TopNav() {
           </span>
         </Link>
 
-        {/* Nav links — always visible, wrap on small screens */}
+        {/* Desktop Nav links — hidden on mobile */}
         <div
+          className="desktop-nav"
           style={{
             display: "flex",
             alignItems: "center",
             gap: 24,
-            flexWrap: "wrap",
             flex: 1,
             justifyContent: "center",
           }}
@@ -166,19 +173,23 @@ export default function TopNav() {
             alignItems: "center",
             gap: 12,
             flexShrink: 0,
+            zIndex: 60,
           }}
         >
           {isMarketing ? (
             isLoaded && isSignedIn ? (
               <Link
                 href="/dashboard"
-                className="btn-gold"
+                className="btn-gold desktop-only"
                 style={{ textDecoration: "none", fontSize: 11 }}
               >
                 Dashboard →
               </Link>
             ) : (
-              <div style={{ display: "flex", gap: 10 }}>
+              <div
+                className="desktop-only"
+                style={{ display: "flex", gap: 10 }}
+              >
                 <Link
                   href="/login"
                   className="btn-ghost"
@@ -199,6 +210,7 @@ export default function TopNav() {
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <Link
                 href="/settings"
+                className="desktop-only"
                 style={{
                   fontFamily: "var(--font-mono), monospace",
                   fontSize: 11,
@@ -222,8 +234,115 @@ export default function TopNav() {
               <UserButton />
             </div>
           )}
+
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+              padding: 4,
+              display: "none",
+            }}
+            className="mobile-menu-toggle"
+          >
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {menuOpen && (
+        <div
+          className="mobile-menu-overlay"
+          style={{
+            position: "fixed",
+            top: 60,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "var(--ink)",
+            zIndex: 40,
+            padding: "32px 24px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 24,
+            overflowY: "auto",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <p className="section-label" style={{ fontSize: 10 }}>Navigation</p>
+            {(isMarketing ? marketingNav : appNav).map((item) => {
+              const active = !isMarketing && pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    fontFamily: "var(--font-playfair), serif",
+                    fontSize: 24,
+                    fontWeight: 600,
+                    color: active ? "var(--gold)" : "var(--text-primary)",
+                    textDecoration: "none",
+                  }}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {!isMarketing && (
+             <div style={{ marginTop: "auto", paddingTop: 32, borderTop: "1px solid var(--border)" }}>
+                <Link
+                  href="/settings"
+                  style={{
+                    fontFamily: "var(--font-mono), monospace",
+                    fontSize: 14,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    color: "var(--text-secondary)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Settings
+                </Link>
+             </div>
+          )}
+
+          {isMarketing && !isSignedIn && (
+            <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
+              <Link
+                href="/login"
+                className="btn-ghost"
+                style={{ textDecoration: "none", justifyContent: "center", fontSize: 13, padding: "14px" }}
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="btn-gold"
+                style={{ textDecoration: "none", justifyContent: "center", fontSize: 13, padding: "14px" }}
+              >
+                Start free →
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      <style jsx>{`
+        @media (max-width: 960px) {
+          .desktop-nav, .desktop-only {
+            display: none !important;
+          }
+          .mobile-menu-toggle {
+            display: block !important;
+          }
+        }
+      `}</style>
     </header>
   );
 }

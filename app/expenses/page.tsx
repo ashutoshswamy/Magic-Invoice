@@ -195,13 +195,7 @@ export default function ExpensesPage() {
         </div>
 
         {/* Summary */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-            gap: 12,
-          }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
           {[
             { label: "Total expenses", value: formatINR(totalExpenses) },
             { label: "GST paid (total)", value: formatINR(totalGstPaid) },
@@ -419,16 +413,10 @@ export default function ExpensesPage() {
             </p>
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: 12,
-              }}
-            >
+          <div className="expenses-container">
+            <table className="expenses-table">
               <thead>
-                <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                <tr>
                   {[
                     "Date",
                     "Vendor",
@@ -439,17 +427,7 @@ export default function ExpensesPage() {
                     "ITC",
                     "",
                   ].map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        ...fieldLabel,
-                        textAlign: "left",
-                        padding: "8px 12px",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {h}
-                    </th>
+                    <th key={h}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -457,107 +435,27 @@ export default function ExpensesPage() {
                 {expenses.map((exp, i) => (
                   <motion.tr
                     key={exp.id}
-                    style={{
-                      borderBottom: "1px solid var(--border)",
-                      background:
-                        i % 2 === 0 ? "transparent" : "var(--ink-soft)",
-                    }}
+                    className="expense-row"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.02 }}
                   >
-                    <td
-                      style={{
-                        padding: "10px 12px",
-                        color: "var(--text-muted)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {exp.expense_date}
-                    </td>
-                    <td
-                      style={{
-                        padding: "10px 12px",
-                        color: "var(--text-primary)",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {exp.vendor}
-                    </td>
-                    <td
-                      style={{
-                        padding: "10px 12px",
-                        color: "var(--text-secondary)",
-                        maxWidth: 200,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {exp.description || "—"}
-                    </td>
-                    <td
-                      style={{
-                        padding: "10px 12px",
-                        color: "var(--text-muted)",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      {exp.category}
-                    </td>
-                    <td
-                      style={{
-                        padding: "10px 12px",
-                        fontFamily: "var(--font-mono), monospace",
-                        color: "var(--text-primary)",
-                      }}
-                    >
-                      {formatINR(exp.amount)}
-                    </td>
-                    <td
-                      style={{
-                        padding: "10px 12px",
-                        fontFamily: "var(--font-mono), monospace",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      {formatINR(exp.gst_paid)}
-                    </td>
-                    <td style={{ padding: "10px 12px" }}>
-                      <span
-                        style={{
-                          fontSize: 10,
-                          fontFamily: "var(--font-mono), monospace",
-                          padding: "2px 8px",
-                          borderRadius: 99,
-                          background: exp.itc_eligible
-                            ? "rgba(16,185,129,0.15)"
-                            : "var(--ink-soft)",
-                          color: exp.itc_eligible
-                            ? "#10B981"
-                            : "var(--text-muted)",
-                        }}
-                      >
+                    <td className="exp-date" data-label="Date">{exp.expense_date}</td>
+                    <td className="exp-vendor" data-label="Vendor">{exp.vendor}</td>
+                    <td className="exp-desc" data-label="Description">{exp.description || "—"}</td>
+                    <td className="exp-cat" data-label="Category">{exp.category}</td>
+                    <td className="exp-amt" data-label="Amount">{formatINR(exp.amount)}</td>
+                    <td className="exp-gst" data-label="GST Paid">{formatINR(exp.gst_paid)}</td>
+                    <td className="exp-itc" data-label="ITC">
+                      <span className={`itc-tag ${exp.itc_eligible ? "eligible" : ""}`}>
                         {exp.itc_eligible ? "eligible" : "no"}
                       </span>
                     </td>
-                    <td style={{ padding: "10px 12px" }}>
+                    <td className="exp-actions">
                       <button
                         onClick={() => handleDelete(exp.id)}
                         disabled={deletingId === exp.id}
-                        style={{
-                          background: "none",
-                          border: "1px solid rgba(248,113,113,0.2)",
-                          borderRadius: 2,
-                          width: 30,
-                          height: 30,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          color: "#FCA5A5",
-                          opacity: deletingId === exp.id ? 0.4 : 1,
-                        }}
+                        className="delete-btn"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -566,6 +464,91 @@ export default function ExpensesPage() {
                 ))}
               </tbody>
             </table>
+
+            <style jsx>{`
+              .expenses-container { overflow-x: auto; }
+              .expenses-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+              .expenses-table th {
+                font-family: var(--font-mono), monospace;
+                font-size: 9px;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: var(--text-muted);
+                text-align: left;
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--border);
+              }
+              .expense-row { border-bottom: 1px solid var(--border); }
+              .expense-row:nth-child(even) { background: var(--ink-soft); }
+              .expense-row td { padding: 10px 12px; }
+              .exp-date { color: var(--text-muted); white-space: nowrap; }
+              .exp-vendor { color: var(--text-primary); font-weight: 600; }
+              .exp-desc { color: var(--text-secondary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+              .exp-cat { color: var(--text-muted); text-transform: capitalize; }
+              .exp-amt { fontFamily: var(--font-mono), monospace; color: var(--text-primary); }
+              .exp-gst { fontFamily: var(--font-mono), monospace; color: var(--text-secondary); }
+              .itc-tag {
+                font-size: 10px;
+                font-family: var(--font-mono), monospace;
+                padding: 2px 8px;
+                border-radius: 99px;
+                background: var(--ink-soft);
+                color: var(--text-muted);
+              }
+              .itc-tag.eligible {
+                background: rgba(16,185,129,0.15);
+                color: #10B981;
+              }
+              .delete-btn {
+                background: none;
+                border: 1px solid rgba(248,113,113,0.2);
+                border-radius: 2px;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                color: #FCA5A5;
+              }
+              .delete-btn:disabled { opacity: 0.4; }
+
+              @media (max-width: 820px) {
+                .expenses-table thead { display: none; }
+                .expense-row {
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  grid-template-areas:
+                    "vendor date"
+                    "desc desc"
+                    "cat cat"
+                    "amt gst"
+                    "itc actions";
+                  gap: 8px;
+                  padding: 16px;
+                  border-bottom: 1px solid var(--border);
+                }
+                .expense-row td { padding: 0; border: none; }
+                .exp-vendor { grid-area: vendor; font-size: 14px; }
+                .exp-date { grid-area: date; text-align: right; }
+                .exp-desc { grid-area: desc; white-space: normal; max-width: none; }
+                .exp-cat { grid-area: cat; font-size: 11px; }
+                .exp-amt { grid-area: amt; font-size: 13px; }
+                .exp-gst { grid-area: gst; text-align: right; font-size: 13px; }
+                .exp-itc { grid-area: itc; }
+                .exp-actions { grid-area: actions; text-align: right; display: flex; justify-content: flex-end; }
+
+                .expense-row td[data-label]::before {
+                  content: attr(data-label) ": ";
+                  font-family: var(--font-mono), monospace;
+                  font-size: 8px;
+                  text-transform: uppercase;
+                  color: var(--text-muted);
+                  display: block;
+                  margin-bottom: 2px;
+                }
+              }
+            `}</style>
           </div>
         )}
 

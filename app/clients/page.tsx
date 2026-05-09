@@ -311,7 +311,7 @@ export default function ClientsPage() {
         {isLoading ? (
           <p style={{ fontSize: 13, color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>Loading clients...</p>
         ) : clients.length ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
             {clients.map((client, index) => {
               const matchedInvoices = invoiceMatches(client);
               return (

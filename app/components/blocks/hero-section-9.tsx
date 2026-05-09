@@ -142,8 +142,8 @@ const InvoiceMockup = () => (
         }}
       >
         <span style={{ color: "var(--gold)", marginRight: 6 }}>›</span>
-        &ldquo;Bill Rahul ₹15,000 for logo design + brand guidelines, 18% GST, due Mar
-        31. GSTIN 27AABCM1234R1Z5.&rdquo;
+        &ldquo;Bill Rahul ₹15,000 for logo design + brand guidelines, 18% GST,
+        due Mar 31. GSTIN 27AABCM1234R1Z5.&rdquo;
         <span
           style={{
             display: "inline-block",
@@ -294,9 +294,12 @@ export const HeroSection = () => {
         .hi-mob-link:hover { color: var(--cream); }
 
         @media (max-width: 768px) {
-          .hi-hero-grid { flex-direction: column !important; }
+          .hi-hero-grid { flex-direction: column !important; padding: 48px 24px 40px !important; }
           .hi-mockup-col { display: none !important; }
           .hi-copy-col { max-width: 100% !important; }
+        }
+        @media (max-width: 480px) {
+          .hi-sub { font-size: 15px !important; }
         }
       `}</style>
 

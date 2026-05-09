@@ -128,7 +128,7 @@ export default function SettingsPage() {
             <FileText size={13} style={{ color: "var(--gold)" }} />
             <p className="section-label" style={{ margin: 0 }}>Business &amp; invoice defaults</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
             {fields.map((f) => (
               <div key={f.label} style={fieldBox}>
                 <span style={fieldLabel}>{f.label}</span>
