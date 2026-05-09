@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "@clerk/nextjs";
 import {
   Building2,
-  FileText,
   Mail,
   MapPin,
   Pencil,
@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import TopNav from "../components/TopNav";
-import { isSupabaseConfigured, supabase } from "../lib/supabaseClient";
+import { isSupabaseConfigured } from "../lib/supabaseClient";
+import { useSupabase } from "../lib/useSupabase";
 import { formatDisplayDate } from "../lib/formatDate";
 
 type Client = {
@@ -59,6 +60,8 @@ type InvoiceSummary = {
 };
 
 export default function ClientsPage() {
+  const { userId, isLoaded } = useAuth();
+  const supabase = useSupabase();
   const [clients, setClients] = useState<Client[]>([]);
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [status, setStatus] = useState<string | null>(null);
@@ -69,19 +72,10 @@ export default function ClientsPage() {
 
   useEffect(() => {
     const loadClients = async () => {
-      if (!isSupabaseConfigured) {
-        setStatus("Connect your workspace to view clients.");
-        return;
-      }
+      if (!isSupabaseConfigured || !isLoaded || !userId) return;
       setIsLoading(true);
       setStatus(null);
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const userId = userData?.user?.id;
-        if (!userId) {
-          setStatus("Log in to view clients.");
-          return;
-        }
         const { data, error } = await supabase
           .from("clients")
           .select(
@@ -107,30 +101,58 @@ export default function ClientsPage() {
         setIsLoading(false);
       }
     };
-
     loadClients();
-  }, []);
+  }, [isLoaded, userId, supabase]);
 
   const handleDelete = async (clientId: string) => {
     if (!isSupabaseConfigured) {
       setStatus("Connect your workspace to delete clients.");
       return;
     }
-    const confirmed = window.confirm(
-      "Delete this client? This action cannot be undone.",
+
+    const client = clients.find((c) => c.id === clientId);
+    if (!client) return;
+
+    const linkedInvoices = invoices.filter(
+      (inv) =>
+        inv.to_name === client.name &&
+        (client.email ? inv.to_email === client.email : true),
     );
+    const invoiceCount = linkedInvoices.length;
+
+    const warningMessage =
+      invoiceCount > 0
+        ? `Delete "${client.name}"?\n\nThis will also permanently delete ${invoiceCount} invoice${invoiceCount === 1 ? "" : "s"} linked to this client.\n\nThis cannot be undone.`
+        : `Delete "${client.name}"? This cannot be undone.`;
+
+    const confirmed = window.confirm(warningMessage);
     if (!confirmed) return;
 
     setDeletingId(clientId);
     setStatus(null);
     try {
+      if (invoiceCount > 0) {
+        const invoiceIds = linkedInvoices.map((inv) => inv.id);
+        const { error: invoiceError } = await supabase
+          .from("invoices")
+          .update({ deleted_at: new Date().toISOString() })
+          .in("id", invoiceIds);
+        if (invoiceError) throw invoiceError;
+        setInvoices((prev) => prev.filter((inv) => !invoiceIds.includes(inv.id)));
+      }
+
       const { error } = await supabase
         .from("clients")
         .delete()
         .eq("id", clientId);
       if (error) throw error;
-      setClients((prev) => prev.filter((client) => client.id !== clientId));
-      setStatus("Client deleted.");
+
+      setClients((prev) => prev.filter((c) => c.id !== clientId));
+      setStatus(
+        invoiceCount > 0
+          ? `Client and ${invoiceCount} invoice${invoiceCount === 1 ? "" : "s"} deleted.`
+          : "Client deleted.",
+      );
     } catch {
       setStatus("Unable to delete client.");
     } finally {
@@ -264,299 +286,136 @@ export default function ClientsPage() {
     });
   };
 
+  const fieldBox = { background: "var(--ink-soft)", border: "1px solid var(--border)", borderRadius: 2, padding: "10px 14px", display: "flex", flexDirection: "column" as const, gap: 5 };
+  const fieldLabel = { fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "var(--text-muted)" };
+  const fieldInput = { background: "transparent", border: "none", outline: "none", color: "var(--text-primary)", fontSize: 13, width: "100%", padding: 0 };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50">
+    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
       <TopNav />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 pb-16 pt-10">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px 64px", display: "flex", flexDirection: "column", gap: 32 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
-              Clients
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold text-white">
+            <p className="section-label" style={{ marginBottom: 10 }}>Clients</p>
+            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text-primary)", margin: "0 0 8px" }}>
               Client directory
             </h1>
-            <p className="mt-2 text-sm text-slate-300">
-              Review the clients you have saved for quick invoicing.
-            </p>
+            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Saved clients for quick invoicing.</p>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-200">
-            <Users className="h-4 w-4 text-emerald-200" />
-            {clients.length} saved
+          <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid var(--border)", borderRadius: 2, padding: "8px 16px" }}>
+            <Users size={13} style={{ color: "var(--gold)" }} />
+            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.08em" }}>{clients.length} saved</span>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="glass rounded-3xl p-6 text-sm text-slate-300">
-            Loading clients...
-          </div>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>Loading clients...</p>
         ) : clients.length ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 16 }}>
             {clients.map((client, index) => {
               const matchedInvoices = invoiceMatches(client);
               return (
                 <motion.div
                   key={client.id}
-                  className="glass rounded-2xl p-4"
-                  initial={{ opacity: 0, y: 12 }}
+                  className="card"
+                  style={{ padding: "24px" }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.04 }}
                 >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                      <p className="text-lg font-semibold text-white truncate">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 17, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {client.name}
                       </p>
-                      <div className="mt-2 space-y-2 text-sm text-slate-300">
-                        <p className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-emerald-200" />
-                          {client.company || "No company"}
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-emerald-200" />
-                          {client.email || "No email"}
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-emerald-200" />
-                          {client.phone || "No phone"}
-                        </p>
-                        <div className="flex items-start gap-2 text-slate-300">
-                          <MapPin className="mt-0.5 h-4 w-4 text-emerald-200" />
-                          <div className="text-sm">
-                            {[
-                              client.address_line1,
-                              client.address_line2,
-                              [client.city, client.state, client.postal_code]
-                                .filter(Boolean)
-                                .join(", "),
-                              client.country,
-                            ]
-                              .filter(Boolean)
-                              .map((line, idx) => (
-                                <p key={`${client.id}-addr-${idx}`}>{line}</p>
-                              ))}
-                            {!client.address_line1 &&
-                            !client.address_line2 &&
-                            !client.city &&
-                            !client.state &&
-                            !client.postal_code &&
-                            !client.country ? (
-                              <p>No address</p>
-                            ) : null}
+                      <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 7 }}>
+                        {[
+                          { icon: Building2, val: client.company || "No company" },
+                          { icon: Mail, val: client.email || "No email" },
+                          { icon: Phone, val: client.phone || "No phone" },
+                        ].map(({ icon: Icon, val }) => (
+                          <p key={val} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-secondary)" }}>
+                            <Icon size={12} style={{ color: "var(--gold)", flexShrink: 0 }} />
+                            {val}
+                          </p>
+                        ))}
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                          <MapPin size={12} style={{ color: "var(--gold)", flexShrink: 0, marginTop: 2 }} />
+                          <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                            {[client.address_line1, client.address_line2, [client.city, client.state, client.postal_code].filter(Boolean).join(", "), client.country].filter(Boolean).map((line, idx) => (
+                              <p key={idx}>{line}</p>
+                            ))}
+                            {!client.address_line1 && !client.city && <p>No address</p>}
                           </div>
                         </div>
-                        <p className="text-xs text-slate-400">
-                          Added{" "}
-                          {client.created_at
-                            ? formatDisplayDate(client.created_at)
-                            : "recently"}
+                        <p style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>
+                          Added {client.created_at ? formatDisplayDate(client.created_at) : "recently"}
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-row flex-wrap items-center gap-2 sm:flex-col sm:items-end">
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
                       {editingId === client.id ? (
                         <>
-                          <button
-                            onClick={() => saveEdit(client.id)}
-                            className="flex items-center gap-2 rounded-full border border-emerald-300/40 px-3 py-2 text-xs text-emerald-100 transition hover:border-emerald-300"
-                          >
-                            <Save className="h-3 w-3" />
-                            Save
+                          <button onClick={() => saveEdit(client.id)} className="btn-gold" style={{ fontSize: 10, padding: "6px 12px" }}>
+                            <Save size={11} /> Save
                           </button>
-                          <button
-                            onClick={() => cancelEdit(client.id)}
-                            className="flex items-center gap-2 rounded-full border border-white/20 px-3 py-2 text-xs text-slate-200 transition hover:border-white/40"
-                          >
-                            <X className="h-3 w-3" />
-                            Cancel
+                          <button onClick={() => cancelEdit(client.id)} className="btn-ghost" style={{ fontSize: 10, padding: "6px 12px" }}>
+                            <X size={11} /> Cancel
                           </button>
                         </>
                       ) : (
                         <>
-                          <button
-                            onClick={() => startEdit(client)}
-                            className="flex items-center gap-2 rounded-full border border-white/20 px-3 py-2 text-xs text-slate-200 transition hover:border-white/40"
-                          >
-                            <Pencil className="h-3 w-3" />
-                            Edit
+                          <button onClick={() => startEdit(client)} className="btn-ghost" style={{ fontSize: 10, padding: "6px 12px" }}>
+                            <Pencil size={11} /> Edit
                           </button>
                           <button
                             onClick={() => handleDelete(client.id)}
                             disabled={deletingId === client.id}
-                            className="flex items-center gap-2 rounded-full border border-rose-400/40 px-3 py-2 text-xs text-rose-100 transition hover:border-rose-300 disabled:opacity-60"
+                            style={{ background: "none", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 2, padding: "6px 12px", fontSize: 10, fontFamily: "var(--font-mono), monospace", letterSpacing: "0.08em", textTransform: "uppercase", color: "#FCA5A5", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: deletingId === client.id ? 0.5 : 1 }}
                           >
-                            <Trash2 className="h-3 w-3" />
-                            {deletingId === client.id
-                              ? "Deleting..."
-                              : "Delete"}
+                            <Trash2 size={11} />
+                            {deletingId === client.id ? "..." : "Delete"}
                           </button>
                         </>
                       )}
                     </div>
                   </div>
-                  {editingId === client.id ? (
-                    <div className="mt-4 grid gap-3 md:grid-cols-2">
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm">
-                        <span className="text-xs text-slate-300">Name</span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.name ?? ""}
-                          onChange={(event) =>
-                            updateDraft(client.id, "name", event.target.value)
-                          }
-                        />
-                      </label>
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm">
-                        <span className="text-xs text-slate-300">Company</span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.company ?? ""}
-                          onChange={(event) =>
-                            updateDraft(
-                              client.id,
-                              "company",
-                              event.target.value,
-                            )
-                          }
-                        />
-                      </label>
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm">
-                        <span className="text-xs text-slate-300">Email</span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.email ?? ""}
-                          onChange={(event) =>
-                            updateDraft(client.id, "email", event.target.value)
-                          }
-                        />
-                      </label>
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm">
-                        <span className="text-xs text-slate-300">Phone</span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.phone ?? ""}
-                          onChange={(event) =>
-                            updateDraft(client.id, "phone", event.target.value)
-                          }
-                        />
-                      </label>
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm md:col-span-2">
-                        <span className="text-xs text-slate-300">
-                          Address line 1
-                        </span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.address_line1 ?? ""}
-                          onChange={(event) =>
-                            updateDraft(
-                              client.id,
-                              "address_line1",
-                              event.target.value,
-                            )
-                          }
-                        />
-                      </label>
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm md:col-span-2">
-                        <span className="text-xs text-slate-300">
-                          Address line 2
-                        </span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.address_line2 ?? ""}
-                          onChange={(event) =>
-                            updateDraft(
-                              client.id,
-                              "address_line2",
-                              event.target.value,
-                            )
-                          }
-                        />
-                      </label>
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm">
-                        <span className="text-xs text-slate-300">City</span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.city ?? ""}
-                          onChange={(event) =>
-                            updateDraft(client.id, "city", event.target.value)
-                          }
-                        />
-                      </label>
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm">
-                        <span className="text-xs text-slate-300">State</span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.state ?? ""}
-                          onChange={(event) =>
-                            updateDraft(client.id, "state", event.target.value)
-                          }
-                        />
-                      </label>
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm">
-                        <span className="text-xs text-slate-300">
-                          Postal code
-                        </span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.postal_code ?? ""}
-                          onChange={(event) =>
-                            updateDraft(
-                              client.id,
-                              "postal_code",
-                              event.target.value,
-                            )
-                          }
-                        />
-                      </label>
-                      <label className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm">
-                        <span className="text-xs text-slate-300">Country</span>
-                        <input
-                          className="mt-2 w-full bg-transparent text-white outline-none"
-                          value={drafts[client.id]?.country ?? ""}
-                          onChange={(event) =>
-                            updateDraft(
-                              client.id,
-                              "country",
-                              event.target.value,
-                            )
-                          }
-                        />
-                      </label>
+
+                  {editingId === client.id && (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10, marginBottom: 16 }}>
+                      {(["name", "company", "email", "phone", "address_line1", "address_line2", "city", "state", "postal_code", "country"] as const).map((f) => (
+                        <div key={f} style={fieldBox}>
+                          <span style={fieldLabel}>{f.replace(/_/g, " ")}</span>
+                          <input style={fieldInput} value={drafts[client.id]?.[f] ?? ""} onChange={(e) => updateDraft(client.id, f, e.target.value)} />
+                        </div>
+                      ))}
                     </div>
-                  ) : null}
-                  <div className="mt-4 border-t border-white/10 pt-4">
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
-                      <FileText className="h-4 w-4" />
-                      Invoices
-                    </div>
+                  )}
+
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                    <p className="section-label" style={{ marginBottom: 10, fontSize: 9 }}>Invoices</p>
                     {matchedInvoices.length ? (
-                      <div className="mt-3 space-y-2 text-sm text-slate-300">
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                         {matchedInvoices.slice(0, 3).map((invoice) => (
                           <Link
                             key={invoice.id}
                             href={`/invoices/${invoice.id}`}
-                            className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-slate-200 transition hover:border-white/30"
+                            style={{ display: "flex", justifyContent: "space-between", gap: 12, background: "var(--ink)", border: "1px solid var(--border)", borderRadius: 2, padding: "8px 12px", textDecoration: "none" }}
                           >
-                            <span className="min-w-0 truncate">
-                              {invoice.invoice_number || "Untitled invoice"}
+                            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {invoice.invoice_number || "Untitled"}
                             </span>
-                            <span className="text-xs text-slate-400">
-                              {invoice.issued_on
-                                ? formatDisplayDate(invoice.issued_on)
-                                : ""}
+                            <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>
+                              {invoice.issued_on ? formatDisplayDate(invoice.issued_on) : ""}
                             </span>
                           </Link>
                         ))}
-                        {matchedInvoices.length > 3 ? (
-                          <p className="text-xs text-slate-400">
-                            {matchedInvoices.length - 3} more invoices
-                          </p>
-                        ) : null}
+                        {matchedInvoices.length > 3 && (
+                          <p style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>+{matchedInvoices.length - 3} more</p>
+                        )}
                       </div>
                     ) : (
-                      <p className="mt-3 text-sm text-slate-400">
-                        No invoices yet for this client.
-                      </p>
+                      <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No invoices yet.</p>
                     )}
                   </div>
                 </motion.div>
@@ -564,13 +423,12 @@ export default function ClientsPage() {
             })}
           </div>
         ) : (
-          <div className="glass rounded-3xl p-6 text-sm text-slate-300">
-            No clients saved yet. Save a client from the dashboard to see them
-            here.
+          <div className="card" style={{ padding: 32 }}>
+            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>No clients saved yet. Save a client from the dashboard to see them here.</p>
           </div>
         )}
 
-        {status ? <p className="text-xs text-emerald-200">{status}</p> : null}
+        {status && <p style={{ fontSize: 11, color: "var(--gold)", fontFamily: "var(--font-mono), monospace" }}>{status}</p>}
       </div>
     </div>
   );

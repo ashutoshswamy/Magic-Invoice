@@ -3,41 +3,39 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useAuth } from "@clerk/nextjs";
 import { FileText, RefreshCw, Trash2, UploadCloud } from "lucide-react";
 import TopNav from "../components/TopNav";
-import { isSupabaseConfigured, supabase } from "../lib/supabaseClient";
+import { isSupabaseConfigured } from "../lib/supabaseClient";
+import { useSupabase } from "../lib/useSupabase";
 import { formatDisplayDate } from "../lib/formatDate";
 
 type StoredInvoice = {
   id: string;
   invoiceNumber: string;
+  due_date?: string | null;
+  to_email?: string | null;
   created_at?: string;
   paid?: boolean | null;
 };
 
-const sampleInvoices = [
-  { id: "1", invoiceNumber: "MI-20260115-882", created_at: "2026-01-15" },
-  { id: "2", invoiceNumber: "MI-20260112-640", created_at: "2026-01-12" },
-  { id: "3", invoiceNumber: "MI-20260108-312", created_at: "2026-01-08" },
-];
-
 export default function InvoicesPage() {
-  const [stored, setStored] = useState<StoredInvoice[]>(sampleInvoices);
+  const { userId, isLoaded } = useAuth();
+  const supabase = useSupabase();
+  const [stored, setStored] = useState<StoredInvoice[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadFromSupabase = async () => {
-    if (!isSupabaseConfigured) {
-      setStatus("Connect your workspace to sync invoices.");
-      return;
-    }
+    if (!isSupabaseConfigured || !userId) return;
     setIsLoading(true);
     setStatus(null);
     try {
       const { data, error } = await supabase
         .from("invoices")
-        .select("id, invoice_number, created_at, paid")
+        .select("id, invoice_number, due_date, to_email, created_at, paid")
+        .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(20);
       if (error) throw error;
@@ -45,6 +43,8 @@ export default function InvoicesPage() {
         (data ?? []).map((item, index) => ({
           id: item.id ?? `${index}`,
           invoiceNumber: item.invoice_number ?? "Untitled invoice",
+          due_date: item.due_date ?? null,
+          to_email: item.to_email ?? null,
           created_at: item.created_at ?? "",
           paid: item.paid ?? false,
         })),
@@ -58,10 +58,28 @@ export default function InvoicesPage() {
   };
 
   useEffect(() => {
-    if (isSupabaseConfigured) {
-      loadFromSupabase();
+    if (isLoaded && userId) {
+      setIsLoading(true);
+      supabase
+        .from("invoices")
+        .select("id, invoice_number, due_date, to_email, created_at, paid")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(20)
+        .then(({ data, error }) => {
+          if (error) { setStatus("Unable to fetch invoices."); return; }
+          setStored(
+            (data ?? []).map((item, index) => ({
+              id: item.id ?? `${index}`,
+              invoiceNumber: item.invoice_number ?? "Untitled invoice",
+              created_at: item.created_at ?? "",
+              paid: item.paid ?? false,
+            })),
+          );
+        })
+        .then(() => setIsLoading(false), () => setIsLoading(false));
     }
-  }, []);
+  }, [isLoaded, userId, supabase]);
 
   const handleDelete = async (invoiceId: string) => {
     if (!isSupabaseConfigured) {
@@ -90,87 +108,86 @@ export default function InvoicesPage() {
     }
   };
 
+
+
+  const today = new Date();
+  const isOverdue = (inv: StoredInvoice) =>
+    !inv.paid && inv.due_date && new Date(inv.due_date) < today;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50">
+    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
       <TopNav />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 pb-16 pt-10">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px 64px", display: "flex", flexDirection: "column", gap: 32 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
-              All invoices
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold text-white">
+            <p className="section-label" style={{ marginBottom: 10 }}>All invoices</p>
+            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text-primary)", margin: "0 0 8px" }}>
               Invoice archive
             </h1>
-            <p className="mt-2 text-sm text-slate-300">
-              Manage drafts and finalized invoices stored in your database.
-            </p>
+            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Manage drafts and finalized invoices stored in your database.</p>
           </div>
-          <button
-            onClick={loadFromSupabase}
-            disabled={isLoading}
-            className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/50 disabled:opacity-60"
-          >
-            <RefreshCw className="h-4 w-4" />
+          <button onClick={loadFromSupabase} disabled={isLoading} className="btn-ghost">
+            <RefreshCw size={13} />
             {isLoading ? "Syncing..." : "Sync database"}
           </button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        {isLoading && (
+          <p style={{ fontSize: 13, color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>Loading invoices...</p>
+        )}
+
+        {!isLoading && stored.length === 0 && (
+          <div className="card" style={{ padding: "48px 32px", textAlign: "center" }}>
+            <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 12 }}>No invoices yet</p>
+            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Create your first invoice from the dashboard.</p>
+          </div>
+        )}
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
           {stored.map((invoice, index) => (
             <motion.div
               key={invoice.id}
-              className="glass flex flex-col gap-4 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between"
-              initial={{ opacity: 0, y: 12 }}
+              className="card"
+              style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
+              transition={{ delay: index * 0.04 }}
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-                  <FileText className="h-4 w-4 text-emerald-200" />
+              <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
+                <div style={{ width: 36, height: 36, border: "1px solid var(--border-bright)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <FileText size={14} style={{ color: "var(--gold)" }} />
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 13, color: "var(--text-primary)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {invoice.invoiceNumber}
                   </p>
-                  <p className="text-xs text-slate-300">
-                    {invoice.created_at
-                      ? formatDisplayDate(invoice.created_at)
-                      : "Saved in database"}
+                  <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
+                    {invoice.created_at ? formatDisplayDate(invoice.created_at) : "Saved"}
                   </p>
                 </div>
               </div>
-              <span
-                className={`self-start rounded-full px-3 py-1 text-xs font-semibold sm:self-auto ${
-                  invoice.paid
-                    ? "bg-emerald-400/20 text-emerald-200"
-                    : "bg-amber-400/20 text-amber-200"
-                }`}
-              >
-                {invoice.paid ? "Paid" : "Unpaid"}
-              </span>
-              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                <Link
-                  href={`/invoices/${invoice.id}`}
-                  className="flex items-center gap-2 rounded-full border border-white/20 px-3 py-2 text-xs text-slate-100 transition hover:border-white/50"
-                >
-                  <UploadCloud className="h-3 w-3" />
-                  View
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0, flexWrap: "wrap" }}>
+                <span className={invoice.paid ? "stamp-paid" : "stamp-unpaid"}>
+                  {invoice.paid ? "Paid" : isOverdue(invoice) ? "Overdue" : "Unpaid"}
+                </span>
+
+                <Link href={`/invoices/${invoice.id}`} className="btn-ghost" style={{ fontSize: 10, padding: "5px 12px", textDecoration: "none" }}>
+                  <UploadCloud size={11} /> View
                 </Link>
                 <button
                   onClick={() => handleDelete(invoice.id)}
                   disabled={deletingId === invoice.id}
-                  className="flex items-center gap-2 rounded-full border border-rose-400/40 px-3 py-2 text-xs text-rose-100 transition hover:border-rose-300 disabled:opacity-60"
+                  style={{ background: "none", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 2, padding: "5px 12px", fontSize: 10, fontFamily: "var(--font-mono), monospace", letterSpacing: "0.08em", textTransform: "uppercase", color: "#FCA5A5", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: deletingId === invoice.id ? 0.5 : 1 }}
                 >
-                  <Trash2 className="h-3 w-3" />
-                  {deletingId === invoice.id ? "Deleting..." : "Delete"}
+                  <Trash2 size={11} />
+                  {deletingId === invoice.id ? "..." : "Delete"}
                 </button>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {status ? <p className="text-xs text-emerald-200">{status}</p> : null}
+        {status && <p style={{ fontSize: 11, color: "var(--gold)", fontFamily: "var(--font-mono), monospace" }}>{status}</p>}
       </div>
     </div>
   );

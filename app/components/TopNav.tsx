@@ -3,231 +3,227 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import {
-  BarChart2,
-  FileText,
-  LayoutDashboard,
-  LogIn,
-  Menu,
-  Settings,
-  Sparkles,
-  UserRound,
-  Users,
-  X,
-} from "lucide-react";
-import { isSupabaseConfigured, supabase } from "../lib/supabaseClient";
+import { useAuth, UserButton } from "@clerk/nextjs";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/invoices", label: "Invoices", icon: FileText },
-  { href: "/clients", label: "Clients", icon: Users },
-  { href: "/analytics", label: "Analytics", icon: BarChart2 },
-  { href: "/profile", label: "Profile", icon: UserRound },
+const appNav = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/invoices", label: "Invoices" },
+  { href: "/recurring", label: "Recurring" },
+  { href: "/clients", label: "Clients" },
+  { href: "/expenses", label: "Expenses" },
+  { href: "/items", label: "Items" },
+  { href: "/gstr", label: "GSTR" },
+  { href: "/analytics", label: "Analytics" },
 ];
 
-const marketingItems = [
-  { href: "/", label: "Product" },
+const marketingNav = [
   { href: "/#how-it-works", label: "How it works" },
-  { href: "/#pricing", label: "Pricing" },
+  { href: "/#pricing", label: "Free plan" },
   { href: "/#security", label: "Security" },
 ];
 
 export default function TopNav() {
   const pathname = usePathname();
+  const { isSignedIn, isLoaded } = useAuth();
   const isMarketing =
-    pathname === "/" || pathname === "/login" || pathname === "/signup";
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+    pathname === "/" ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/signup");
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
-    let isMounted = true;
-
-    const loadUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!isMounted) return;
-      setIsSignedIn(Boolean(data?.user));
-    };
-
-    loadUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!isMounted) return;
-        setIsSignedIn(Boolean(session?.user));
-      },
-    );
-
-    return () => {
-      isMounted = false;
-      authListener?.subscription?.unsubscribe();
-    };
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const [lastPathname, setLastPathname] = useState(pathname);
-  if (pathname !== lastPathname) {
-    setLastPathname(pathname);
-    if (isMenuOpen) {
-      setIsMenuOpen(false);
-    }
-  }
-
   return (
-    <div className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/80 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+    <header
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        borderBottom: scrolled
+          ? "1px solid var(--border)"
+          : "1px solid transparent",
+        background: scrolled ? "rgba(12,10,6,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        transition: "background 0.2s, border-color 0.2s",
+      }}
+    >
+      <nav
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 24px",
+          minHeight: 60,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 text-lg font-semibold"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            textDecoration: "none",
+            flexShrink: 0,
+          }}
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
-            <Sparkles className="h-5 w-5 text-emerald-300" />
+          <span
+            style={{
+              width: 28,
+              height: 28,
+              border: "1px solid var(--gold)",
+              borderRadius: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <span
+              style={{
+                color: "var(--gold)",
+                fontSize: 13,
+                fontFamily: "var(--font-mono), monospace",
+                fontWeight: 600,
+              }}
+            >
+              ₹
+            </span>
           </span>
-          Magic Invoice
+          <span
+            style={{
+              fontFamily: "var(--font-playfair), serif",
+              fontWeight: 600,
+              fontSize: 17,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Magic Invoice
+          </span>
         </Link>
 
-        <div className="hidden items-center gap-6 text-sm font-medium text-slate-200 md:flex">
-          {isMarketing
-            ? marketingItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="transition hover:text-white"
-                >
-                  {item.label}
-                </Link>
-              ))
-            : navItems.map((item) => {
-                const Icon = item.icon;
-                const active = pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-2 transition ${
-                      active ? "text-white" : "text-slate-300 hover:text-white"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-        </div>
-
-        <div className="flex items-center gap-3">
-          {isMarketing ? (
-            <>
-              {isSignedIn ? (
-                <Link
-                  href="/dashboard"
-                  className="hidden items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white transition hover:border-white/50 md:flex"
-                >
-                  <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="hidden items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white transition hover:border-white/50 md:flex"
-                  >
-                    <LogIn className="h-4 w-4" />
-                    Log in
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-emerald-300"
-                  >
-                    Start free
-                  </Link>
-                </>
-              )}
-            </>
-          ) : (
-            <Link
-              href="/settings"
-              className="hidden items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white transition hover:border-white/40 md:flex"
-            >
-              <Settings className="h-4 w-4" />
-              Settings
-            </Link>
-          )}
-
-          <motion.button
-            layout
-            type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 md:hidden"
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-            aria-label="Toggle navigation"
-            aria-expanded={isMenuOpen}
-          >
-            {isMenuOpen ? (
-              <X className="h-4 w-4" />
-            ) : (
-              <Menu className="h-4 w-4" />
-            )}
-          </motion.button>
-        </div>
-      </div>
-      {isMenuOpen ? (
-        <div className="md:hidden border-t border-white/10 bg-slate-950/95">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-4 text-sm">
-            {(isMarketing ? marketingItems : navItems).map((item) => (
+        {/* Nav links — always visible, wrap on small screens */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 24,
+            flexWrap: "wrap",
+            flex: 1,
+            justifyContent: "center",
+          }}
+        >
+          {(isMarketing ? marketingNav : appNav).map((item) => {
+            const active = !isMarketing && pathname.startsWith(item.href);
+            return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-slate-200 transition hover:border-white/30 hover:text-white"
+                style={{
+                  fontFamily: "var(--font-mono), monospace",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: active ? "var(--cream)" : "var(--text-muted)",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                  borderBottom: active
+                    ? "1px solid var(--gold)"
+                    : "1px solid transparent",
+                  paddingBottom: 2,
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => {
+                  if (!active)
+                    (e.target as HTMLElement).style.color =
+                      "var(--text-secondary)";
+                }}
+                onMouseLeave={(e) => {
+                  if (!active)
+                    (e.target as HTMLElement).style.color = "var(--text-muted)";
+                }}
               >
-                {"icon" in item && typeof item.icon === "function"
-                  ? React.createElement(item.icon as React.ElementType, {
-                      className: "h-4 w-4",
-                    })
-                  : null}
                 {item.label}
               </Link>
-            ))}
+            );
+          })}
+        </div>
 
-            {isMarketing ? (
-              isSignedIn ? (
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 rounded-2xl border border-white/20 px-4 py-3 font-semibold text-white"
-                >
-                  <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
-                </Link>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <Link
-                    href="/login"
-                    className="flex items-center gap-2 rounded-2xl border border-white/20 px-4 py-3 font-semibold text-white"
-                  >
-                    <LogIn className="h-4 w-4" />
-                    Log in
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="rounded-2xl bg-emerald-400 px-4 py-3 text-center font-semibold text-slate-900"
-                  >
-                    Start free
-                  </Link>
-                </div>
-              )
+        {/* Right actions */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            flexShrink: 0,
+          }}
+        >
+          {isMarketing ? (
+            isLoaded && isSignedIn ? (
+              <Link
+                href="/dashboard"
+                className="btn-gold"
+                style={{ textDecoration: "none", fontSize: 11 }}
+              >
+                Dashboard →
+              </Link>
             ) : (
+              <div style={{ display: "flex", gap: 10 }}>
+                <Link
+                  href="/login"
+                  className="btn-ghost"
+                  style={{ textDecoration: "none" }}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="btn-gold"
+                  style={{ textDecoration: "none" }}
+                >
+                  Start free
+                </Link>
+              </div>
+            )
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <Link
                 href="/settings"
-                className="flex items-center gap-2 rounded-2xl border border-white/20 px-4 py-3 font-semibold text-white"
+                style={{
+                  fontFamily: "var(--font-mono), monospace",
+                  fontSize: 11,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--text-muted)",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.color =
+                    "var(--text-secondary)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.color = "var(--text-muted)";
+                }}
               >
-                <Settings className="h-4 w-4" />
                 Settings
               </Link>
-            )}
-          </div>
+              <UserButton />
+            </div>
+          )}
         </div>
-      ) : null}
-    </div>
+      </nav>
+    </header>
   );
 }

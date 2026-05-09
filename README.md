@@ -15,8 +15,9 @@ Magic Invoice is a high-performance, AI-powered invoicing workspace built with *
 - **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
 - **UI & Styling**: [React 19](https://react.dev/), [Tailwind CSS 4](https://tailwindcss.com/)
 - **State & Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Backend & Auth**: [Supabase](https://supabase.com/)
+- **Backend & Auth**: [Supabase](https://supabase.com/), [Clerk](https://clerk.com/)
 - **AI Engine**: [Google Generative AI (Gemini)](https://ai.google.dev/)
+- **Payments**: [Razorpay](https://razorpay.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 
 ## Documentation

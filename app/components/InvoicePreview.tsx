@@ -1,13 +1,15 @@
 import { InvoiceData } from "../types";
 import { formatDisplayDate } from "../lib/formatDate";
 
-const formatCurrency = (amount: number, currency: string) =>
-  new Intl.NumberFormat("en-US", {
+const formatCurrency = (amount: number, currency: string) => {
+  const locale = currency === "INR" ? "en-IN" : "en-US";
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
   }).format(amount);
+};
 
-export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
+export default function InvoicePreview({ invoice, showBranding = false }: { invoice: InvoiceData; showBranding?: boolean }) {
   const subtotal = invoice.lines.reduce(
     (sum, line) => sum + line.quantity * line.rate,
     0,
@@ -16,10 +18,15 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
     (sum, charge) => sum + Number(charge.amount || 0),
     0,
   );
-  const taxAmount = Number(
-    ((subtotal * (invoice.taxRate || 0)) / 100).toFixed(2),
-  );
+  const taxRate = invoice.taxRate || 0;
+  const taxAmount = Number(((subtotal * taxRate) / 100).toFixed(2));
+  const halfTax = Number((taxAmount / 2).toFixed(2));
   const total = subtotal + taxAmount + chargesTotal;
+
+  const gstType = invoice.gstType ?? "CGST_SGST";
+  const isCGST = gstType === "CGST_SGST";
+  const isIGST = gstType === "IGST";
+
   const fromAddressLines = [
     invoice.from.addressLine1,
     invoice.from.addressLine2,
@@ -43,7 +50,7 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-              Invoice
+              Tax Invoice
             </p>
             <h3 className="mt-2 text-2xl font-semibold text-slate-900 break-words">
               {invoice.invoiceNumber}
@@ -83,6 +90,11 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
               </p>
             ))}
             <p className="text-slate-500 break-words">{invoice.from.email}</p>
+            {invoice.from.gstin && (
+              <p className="mt-1 text-xs font-mono text-slate-400 break-words">
+                GSTIN: {invoice.from.gstin}
+              </p>
+            )}
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
@@ -98,6 +110,11 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
               </p>
             ))}
             <p className="text-slate-500 break-words">{invoice.to.email}</p>
+            {invoice.to.gstin && (
+              <p className="mt-1 text-xs font-mono text-slate-400 break-words">
+                GSTIN: {invoice.to.gstin}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -113,9 +130,16 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
               key={line.id}
               className="grid grid-cols-1 gap-2 border-t border-slate-200 px-4 py-3 text-sm text-slate-700 sm:grid-cols-4 sm:gap-3"
             >
-              <span className="min-w-0 break-words font-medium text-slate-800 sm:col-span-2">
-                {line.description}
-              </span>
+              <div className="min-w-0 sm:col-span-2">
+                <span className="break-words font-medium text-slate-800">
+                  {line.description}
+                </span>
+                {line.hsnSacCode && (
+                  <span className="ml-2 text-xs text-slate-400">
+                    HSN/SAC: {line.hsnSacCode}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center justify-between text-xs text-slate-500 sm:hidden">
                 <span>Qty</span>
                 <span className="text-slate-700">{line.quantity}</span>
@@ -149,10 +173,30 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
                 <span>{formatCurrency(charge.amount, invoice.currency)}</span>
               </div>
             ))}
-            <div className="mt-2 flex items-center justify-between">
-              <span>Tax ({invoice.taxRate || 0}%)</span>
-              <span>{formatCurrency(taxAmount, invoice.currency)}</span>
-            </div>
+            {taxRate > 0 && isCGST && (
+              <>
+                <div className="mt-2 flex items-center justify-between">
+                  <span>CGST ({taxRate / 2}%)</span>
+                  <span>{formatCurrency(halfTax, invoice.currency)}</span>
+                </div>
+                <div className="mt-1 flex items-center justify-between">
+                  <span>SGST ({taxRate / 2}%)</span>
+                  <span>{formatCurrency(halfTax, invoice.currency)}</span>
+                </div>
+              </>
+            )}
+            {taxRate > 0 && isIGST && (
+              <div className="mt-2 flex items-center justify-between">
+                <span>IGST ({taxRate}%)</span>
+                <span>{formatCurrency(taxAmount, invoice.currency)}</span>
+              </div>
+            )}
+            {taxRate > 0 && !isCGST && !isIGST && (
+              <div className="mt-2 flex items-center justify-between">
+                <span>GST ({taxRate}%)</span>
+                <span>{formatCurrency(taxAmount, invoice.currency)}</span>
+              </div>
+            )}
             <div className="mt-3 flex items-center justify-between text-base font-semibold text-slate-900">
               <span>Total</span>
               <span>{formatCurrency(total, invoice.currency)}</span>
@@ -160,6 +204,15 @@ export default function InvoicePreview({ invoice }: { invoice: InvoiceData }) {
           </div>
         </div>
       </div>
+      {showBranding && (
+        <div className="mt-6 border-t border-slate-100 pt-4 text-center text-xs text-slate-400">
+          Built with{" "}
+          <a href="https://magicinvoice.ai" target="_blank" rel="noopener noreferrer" style={{ color: "#D97706" }}>
+            Magic Invoice
+          </a>{" "}
+          — AI-powered invoicing for India
+        </div>
+      )}
     </div>
   );
 }

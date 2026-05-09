@@ -1,17 +1,23 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { auth } from "@clerk/nextjs/server";
 import { checkRateLimit, getClientIp } from "../../lib/rateLimit";
+import { parseInvoiceRequestSchema } from "../../schemas";
 
 const parseAmount = (value: string) =>
   Number.parseFloat(value.replace(/,/g, "")) || 0;
 
 const toCurrency = (value: number) => Number(value.toFixed(2));
 
-const buildInvoiceNumber = () =>
-  `MI-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(
-    100 + Math.random() * 900,
-  )}`;
+const buildInvoiceNumber = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const fyStart = month >= 4 ? year : year - 1;
+  const fyEnd = String(fyStart + 1).slice(-2);
+  const seq = String(Math.floor(1 + Math.random() * 999)).padStart(3, "0");
+  return `INV-${fyStart}-${fyEnd}-${seq}`;
+};
 
 const extractDueDate = (prompt: string) => {
   const match = prompt.match(/due\s*(?:on|by)\s*([a-z0-9,\/-\s]+)/i);
@@ -54,8 +60,6 @@ const parseLines = (prompt: string) => {
 
 const geminiKey = process.env.GEMINI_API_KEY ?? "";
 const geminiModel = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 type InvoiceDefaults = {
   invoiceNumber?: string;
@@ -121,7 +125,8 @@ interface ParsedInvoice {
 }
 
 const buildPrompt = (prompt: string, defaults?: InvoiceDefaults) => `
-You are an expert invoicing assistant. Convert the user sentence into a JSON invoice.
+You are an expert Indian invoicing assistant specialised in GST compliance.
+Convert the user sentence into a JSON invoice.
 Return ONLY valid JSON with this shape:
 {
   "invoiceNumber": "string",
@@ -135,8 +140,10 @@ Return ONLY valid JSON with this shape:
     "addressLine2": "string",
     "city": "string",
     "state": "string",
+    "stateCode": "string",
     "postalCode": "string",
-    "country": "string"
+    "country": "string",
+    "gstin": "string"
   },
   "to": {
     "name": "string",
@@ -146,20 +153,30 @@ Return ONLY valid JSON with this shape:
     "addressLine2": "string",
     "city": "string",
     "state": "string",
+    "stateCode": "string",
     "postalCode": "string",
-    "country": "string"
+    "country": "string",
+    "gstin": "string"
   },
-  "currency": "USD",
-  "taxRate": 0,
+  "currency": "INR",
+  "taxRate": 18,
+  "gstType": "CGST_SGST",
   "customCharges": [
     { "label": "string", "amount": number }
   ],
   "notes": "string",
   "lines": [
-    { "description": "string", "quantity": number, "rate": number }
+    { "description": "string", "quantity": number, "rate": number, "hsnSacCode": "string" }
   ]
 }
-If missing, infer sensible defaults. Use USD if currency is unknown.
+Rules:
+- Default currency is INR. Parse ₹ and amounts like "15k" as 15000.
+- taxRate: common GST rates are 5, 12, 18, 28. Default 18 if not specified.
+- gstType: "CGST_SGST" if from.stateCode === to.stateCode (intrastate), "IGST" if interstate, "B2C" if no client GSTIN.
+- Leave gstin/stateCode as empty string if not mentioned.
+- hsnSacCode: infer from description where obvious (e.g. software services = 998314).
+- Invoice number format: INV-YYYY-YY-NNN (Indian Financial Year, April–March).
+If missing, infer sensible defaults. Default country is India.
 If available, use these user defaults when fields are missing:
 ${defaults ? JSON.stringify(defaults) : "{}"}
 
@@ -199,8 +216,10 @@ const normalizeInvoice = (
         parsed?.from?.addressLine2 || fallbackFrom.addressLine2 || "",
       city: parsed?.from?.city || fallbackFrom.city || "",
       state: parsed?.from?.state || fallbackFrom.state || "",
+      stateCode: (parsed?.from as { stateCode?: string })?.stateCode || "",
       postalCode: parsed?.from?.postalCode || fallbackFrom.postalCode || "",
-      country: parsed?.from?.country || fallbackFrom.country || "",
+      country: parsed?.from?.country || fallbackFrom.country || "India",
+      gstin: (parsed?.from as { gstin?: string })?.gstin || "",
     },
     to: {
       name: parsed?.to?.name || extractClient(prompt),
@@ -210,11 +229,14 @@ const normalizeInvoice = (
       addressLine2: parsed?.to?.addressLine2 || "",
       city: parsed?.to?.city || "",
       state: parsed?.to?.state || "",
+      stateCode: (parsed?.to as { stateCode?: string })?.stateCode || "",
       postalCode: parsed?.to?.postalCode || "",
-      country: parsed?.to?.country || "",
+      country: parsed?.to?.country || "India",
+      gstin: (parsed?.to as { gstin?: string })?.gstin || "",
     },
-    currency: parsed?.currency || defaults?.currency || "USD",
-    taxRate: Number(parsed?.taxRate ?? defaults?.taxRate ?? 0),
+    currency: parsed?.currency || defaults?.currency || "INR",
+    taxRate: Number(parsed?.taxRate ?? defaults?.taxRate ?? 18),
+    gstType: (parsed as { gstType?: string })?.gstType || inferGstType(parsed),
     customCharges: Array.isArray(parsed?.customCharges)
       ? parsed.customCharges.map((charge: ParsedCharge, index: number) => ({
           id: `${index + 1}`,
@@ -237,42 +259,34 @@ const normalizeInvoice = (
       description: line.description ?? "Services rendered",
       quantity: Number(line.quantity ?? 1),
       rate: toCurrency(Number(line.rate ?? 0)),
+      hsnSacCode: (line as { hsnSacCode?: string })?.hsnSacCode || "",
     })),
   };
 };
 
+const inferGstType = (
+  parsed: ParsedInvoice | Record<string, never>,
+): string => {
+  const fromCode = (parsed?.from as { stateCode?: string })?.stateCode || "";
+  const toCode = (parsed?.to as { stateCode?: string })?.stateCode || "";
+  const toGstin = (parsed?.to as { gstin?: string })?.gstin || "";
+  if (!toGstin) return "B2C";
+  if (fromCode && toCode && fromCode === toCode) return "CGST_SGST";
+  if (fromCode && toCode && fromCode !== toCode) return "IGST";
+  return "CGST_SGST";
+};
+
 export async function POST(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
+  const { userId } = await auth();
+  if (!userId) {
     return NextResponse.json(
       { error: "Unauthorized. Authentication required." },
       { status: 401 },
     );
   }
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json(
-      { error: "Supabase is not configured." },
-      { status: 500 },
-    );
-  }
-
-  const token = authHeader.substring(7);
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser(token);
-
-  if (authError || !user) {
-    return NextResponse.json(
-      { error: "Invalid or expired authentication token." },
-      { status: 401 },
-    );
-  }
-
   const ip = getClientIp(request);
-  const rate = await checkRateLimit(`parse:${user.id}:${ip}`, {
+  const rate = await checkRateLimit(`parse:${userId}:${ip}`, {
     windowMs: 60_000,
     max: 20,
   });
@@ -290,10 +304,16 @@ export async function POST(request: Request) {
 
   let body: { prompt?: string; defaults?: InvoiceDefaults } | null = null;
   try {
-    body = (await request.json()) as {
-      prompt?: string;
-      defaults?: InvoiceDefaults;
-    };
+    const parsedBody = parseInvoiceRequestSchema.safeParse(
+      await request.json(),
+    );
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        { error: "Invalid request payload." },
+        { status: 400 },
+      );
+    }
+    body = parsedBody.data;
   } catch {
     return NextResponse.json(
       { error: "Invalid JSON payload." },

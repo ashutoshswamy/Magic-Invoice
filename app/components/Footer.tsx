@@ -1,101 +1,263 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { isSupabaseConfigured, supabase } from "../lib/supabaseClient";
-import { ArrowUpRight } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 
 export default function Footer() {
-  const [isSignedIn, setIsSignedIn] = useState(false);
-
-  useEffect(() => {
-    if (!isSupabaseConfigured) return;
-    let isMounted = true;
-
-    const loadUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!isMounted) return;
-      setIsSignedIn(Boolean(data?.user));
-    };
-
-    loadUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!isMounted) return;
-        setIsSignedIn(Boolean(session?.user));
-      },
-    );
-
-    return () => {
-      isMounted = false;
-      authListener?.subscription?.unsubscribe();
-    };
-  }, []);
+  const { isSignedIn } = useAuth();
 
   return (
-    <footer className="border-t border-white/10 bg-slate-950">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-12">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    <footer
+      style={{
+        borderTop: "1px solid var(--border)",
+        background: "var(--ink)",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "64px 24px 40px",
+        }}
+      >
+        {/* Top row */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: 48,
+            paddingBottom: 48,
+            borderBottom: "1px solid var(--border)",
+          }}
+        >
+          {/* Brand */}
           <div>
-            <p className="text-lg font-semibold">Magic Invoice</p>
-            <p className="mt-2 max-w-sm text-sm text-slate-300">
-              The AI-ready invoice workspace that transforms a single sentence
-              into a client-ready document.
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <span
+                style={{
+                  width: 24,
+                  height: 24,
+                  border: "1px solid var(--gold)",
+                  borderRadius: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ color: "var(--gold)", fontSize: 11, fontFamily: "var(--font-mono), monospace", fontWeight: 600 }}>₹</span>
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-playfair), serif",
+                  fontWeight: 600,
+                  fontSize: 15,
+                  color: "var(--text-primary)",
+                }}
+              >
+                Magic Invoice
+              </span>
+            </div>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7, maxWidth: 260, margin: "0 0 24px" }}>
+              India-first AI invoicing. GST-compliant, Gemini-powered, built for
+              freelancers and SMEs.
             </p>
             <a
               href="https://www.producthunt.com/products/magic-invoice-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-magic-invoice-2"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-block"
             >
               <Image
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1065115&theme=light&t=1768842848845"
-                alt="Magic Invoice - Turn a sentence into a client-ready invoice. | Product Hunt"
-                width={250}
-                height={54}
-                className="transition hover:opacity-90"
+                alt="Magic Invoice on Product Hunt"
+                width={200}
+                height={44}
+                style={{ opacity: 0.85, transition: "opacity 0.15s" }}
                 unoptimized
               />
             </a>
           </div>
-          <div className="flex flex-wrap gap-6 text-sm text-slate-300">
-            {isSignedIn ? null : (
-              <>
-                <Link href="/login" className="transition hover:text-white">
-                  Sign in
-                </Link>
-                <Link href="/signup" className="transition hover:text-white">
-                  Start free
-                </Link>
-              </>
-            )}
-            <Link href="/dashboard" className="transition hover:text-white">
-              Dashboard
-            </Link>
-            <a
-              className="inline-flex items-center gap-1 text-emerald-300 transition hover:text-emerald-200"
-              href="mailto:ashutoshswamy397@gmail.com"
+
+          {/* Product links */}
+          <div>
+            <p
+              style={{
+                fontFamily: "var(--font-mono), monospace",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--gold)",
+                marginBottom: 20,
+              }}
             >
-              Contact sales <ArrowUpRight className="h-3 w-3" />
-            </a>
+              Product
+            </p>
+            <nav style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {[
+                { href: "/#how-it-works", label: "How it works" },
+                { href: "/#pricing", label: "Pricing" },
+                { href: "/#security", label: "Security" },
+                { href: "/dashboard", label: "Dashboard" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    fontFamily: "var(--font-mono), monospace",
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    textDecoration: "none",
+                    letterSpacing: "0.06em",
+                    transition: "color 0.15s",
+                  }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.color = "var(--text-secondary)"; }}
+                  onMouseLeave={(e) => { (e.target as HTMLElement).style.color = "var(--text-muted)"; }}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Account links */}
+          <div>
+            <p
+              style={{
+                fontFamily: "var(--font-mono), monospace",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--gold)",
+                marginBottom: 20,
+              }}
+            >
+              Account
+            </p>
+            <nav style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {isSignedIn ? (
+                <>
+                  <Link href="/invoices" style={{ fontFamily: "var(--font-mono), monospace", fontSize: 12, color: "var(--text-muted)", textDecoration: "none", letterSpacing: "0.06em" }}
+                    onMouseEnter={(e) => { (e.target as HTMLElement).style.color = "var(--text-secondary)"; }}
+                    onMouseLeave={(e) => { (e.target as HTMLElement).style.color = "var(--text-muted)"; }}>
+                    Invoices
+                  </Link>
+                  <Link href="/clients" style={{ fontFamily: "var(--font-mono), monospace", fontSize: 12, color: "var(--text-muted)", textDecoration: "none", letterSpacing: "0.06em" }}
+                    onMouseEnter={(e) => { (e.target as HTMLElement).style.color = "var(--text-secondary)"; }}
+                    onMouseLeave={(e) => { (e.target as HTMLElement).style.color = "var(--text-muted)"; }}>
+                    Clients
+                  </Link>
+                  <Link href="/settings" style={{ fontFamily: "var(--font-mono), monospace", fontSize: 12, color: "var(--text-muted)", textDecoration: "none", letterSpacing: "0.06em" }}
+                    onMouseEnter={(e) => { (e.target as HTMLElement).style.color = "var(--text-secondary)"; }}
+                    onMouseLeave={(e) => { (e.target as HTMLElement).style.color = "var(--text-muted)"; }}>
+                    Settings
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" style={{ fontFamily: "var(--font-mono), monospace", fontSize: 12, color: "var(--text-muted)", textDecoration: "none", letterSpacing: "0.06em" }}
+                    onMouseEnter={(e) => { (e.target as HTMLElement).style.color = "var(--text-secondary)"; }}
+                    onMouseLeave={(e) => { (e.target as HTMLElement).style.color = "var(--text-muted)"; }}>
+                    Sign in
+                  </Link>
+                  <Link href="/signup" style={{ fontFamily: "var(--font-mono), monospace", fontSize: 12, color: "var(--text-muted)", textDecoration: "none", letterSpacing: "0.06em" }}
+                    onMouseEnter={(e) => { (e.target as HTMLElement).style.color = "var(--text-secondary)"; }}
+                    onMouseLeave={(e) => { (e.target as HTMLElement).style.color = "var(--text-muted)"; }}>
+                    Start free
+                  </Link>
+                </>
+              )}
+            </nav>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <p
+              style={{
+                fontFamily: "var(--font-mono), monospace",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--gold)",
+                marginBottom: 20,
+              }}
+            >
+              Contact
+            </p>
+            <nav style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {[
+                { href: "mailto:ashutoshswamy397@gmail.com", label: "Email us" },
+                { href: "https://github.com/ashutoshswamy", label: "GitHub" },
+                { href: "https://linkedin.com/in/ashutoshswamy", label: "LinkedIn" },
+                { href: "https://twitter.com/ashutoshswamy_", label: "Twitter" },
+              ].map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target={item.href.startsWith("mailto") ? undefined : "_blank"}
+                  rel={item.href.startsWith("mailto") ? undefined : "noopener noreferrer"}
+                  style={{
+                    fontFamily: "var(--font-mono), monospace",
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    textDecoration: "none",
+                    letterSpacing: "0.06em",
+                    transition: "color 0.15s",
+                  }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.color = "var(--gold)"; }}
+                  onMouseLeave={(e) => { (e.target as HTMLElement).style.color = "var(--text-muted)"; }}
+                >
+                  {item.label} ↗
+                </a>
+              ))}
+            </nav>
           </div>
         </div>
-        <div className="flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-slate-400 md:flex-row md:items-center md:justify-between">
-          <span>
+
+        {/* Bottom row */}
+        <div
+          style={{
+            paddingTop: 28,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 16,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--font-mono), monospace",
+              fontSize: 11,
+              color: "var(--text-muted)",
+              letterSpacing: "0.06em",
+            }}
+          >
             © {new Date().getFullYear()} Magic Invoice. All rights reserved.
           </span>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/terms" className="transition hover:text-white">
-              Terms
-            </Link>
-            <Link href="/privacy" className="transition hover:text-white">
-              Privacy policy
-            </Link>
-            <Link href="/cookies" className="transition hover:text-white">
-              Cookie policy
-            </Link>
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            {[
+              { href: "/terms", label: "Terms" },
+              { href: "/privacy", label: "Privacy" },
+              { href: "/cookies", label: "Cookies" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  fontFamily: "var(--font-mono), monospace",
+                  fontSize: 11,
+                  color: "var(--text-muted)",
+                  textDecoration: "none",
+                  letterSpacing: "0.06em",
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) => { (e.target as HTMLElement).style.color = "var(--text-secondary)"; }}
+                onMouseLeave={(e) => { (e.target as HTMLElement).style.color = "var(--text-muted)"; }}
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
