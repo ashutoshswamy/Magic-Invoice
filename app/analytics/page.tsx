@@ -496,7 +496,7 @@ export default function AnalyticsPage() {
                 margin: "2px 0 0",
               }}
             >
-              Gemini-powered analysis
+              AI-powered analysis
             </h2>
           </div>
         </motion.div>

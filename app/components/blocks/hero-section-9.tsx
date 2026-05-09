@@ -235,7 +235,7 @@ const trustItems = [
   "CGST / SGST / IGST",
   "GSTR-1 Ready",
   "HSN / SAC Lookup",
-  "Gemini 2.5 Flash",
+  "Advanced AI Parser",
   "Supabase RLS",
   "Clerk Auth",
   "Resend Email",
@@ -551,7 +551,7 @@ export const HeroSection = () => {
                 }}
               >
                 <Sparkles size={11} />
-                India-first AI invoicing · Gemini 2.5 Flash
+                India-first AI invoicing · Built for GST
               </span>
             </div>
 
@@ -642,7 +642,7 @@ export const HeroSection = () => {
                 "CGST / SGST / IGST",
                 "GSTR-1 Ready",
                 "HSN / SAC Lookup",
-                "Gemini 2.5 Flash",
+                "AI-Powered Parsing",
               ].map((item) => (
                 <span
                   key={item}

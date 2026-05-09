@@ -60,7 +60,7 @@ export default function Footer() {
               </span>
             </div>
             <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7, maxWidth: 260, margin: "0 0 24px" }}>
-              India-first AI invoicing. GST-compliant, Gemini-powered, built for
+              India-first AI invoicing. GST-compliant, AI-powered, built for
               freelancers and SMEs.
             </p>
             <a

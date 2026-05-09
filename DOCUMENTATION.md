@@ -2,14 +2,14 @@
 
 ## Architecture Overview
 
-Magic Invoice is a modern web application built on the **Next.js App Router**. It leverages a serverless architecture with Supabase for the backend and Google's Gemini for AI-driven features.
+Magic Invoice is a modern web application built on the **Next.js App Router**. It leverages a serverless architecture with Supabase for the backend and advanced AI-driven features.
 
 ### Key Technologies
 - **Frontend**: Next.js 16 (App Router), React 19, TypeScript
 - **Styling**: Tailwind CSS 4, Framer Motion (animations)
 - **Database**: Supabase (PostgreSQL with RLS)
 - **Authentication**: Clerk
-- **AI**: Google Generative AI (Gemini Flash/Pro)
+- **AI**: Google Generative AI
 - **Payments**: Razorpay
 
 ## Project Structure
@@ -35,7 +35,7 @@ Magic Invoice is a modern web application built on the **Next.js App Router**. I
 ## Core Workflows
 
 ### 1. AI Invoice Generation
-The user provides a natural language description (e.g., "Invoice Google for $500 for SEO consulting"). The `api/parse` route uses Google Gemini to transform this into a structured JSON object representing the invoice, which is then previewed and can be saved to Supabase.
+The user provides a natural language description (e.g., "Invoice Google for $500 for SEO consulting"). The `api/parse` route uses advanced AI models to transform this into a structured JSON object representing the invoice, which is then previewed and can be saved to Supabase.
 
 ### 2. Client Management
 Clients are stored in a dedicated table. When creating an invoice, users can select from existing clients or create new ones on the fly.

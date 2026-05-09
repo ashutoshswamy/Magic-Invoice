@@ -121,7 +121,7 @@ export function Features() {
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
               position: 'relative', zIndex: 1,
-            }}>Gemini 2.5 Flash</p>
+            }}>              AI-Powered Stats</p>
           </div>
 
           {/* ── Card 2: GST Detection ── */}
@@ -214,7 +214,7 @@ export function Features() {
               lineHeight: 1.65,
               margin: '0 0 20px',
             }}>
-              Describe your work — Gemini maps it to the right GST code instantly.
+              Describe your work — AI maps it to the right GST code instantly.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>

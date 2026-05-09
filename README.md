@@ -4,7 +4,7 @@ Magic Invoice is a high-performance, AI-powered invoicing workspace built with *
 
 ## Key Features
 
-- **AI-Powered Drafts**: Generate full invoices from simple sentences using Google Gemini.
+- **AI-Powered Drafts**: Generate full invoices from simple sentences using advanced AI models.
 - **Client Management**: Maintain a reusable directory of clients for lightning-fast invoicing.
 - **Live Analytics**: Visual revenue tracking and payment status insights.
 - **Secure Storage**: Robust data isolation and persistence powered by Supabase.
@@ -16,7 +16,7 @@ Magic Invoice is a high-performance, AI-powered invoicing workspace built with *
 - **UI & Styling**: [React 19](https://react.dev/), [Tailwind CSS 4](https://tailwindcss.com/)
 - **State & Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Backend & Auth**: [Supabase](https://supabase.com/), [Clerk](https://clerk.com/)
-- **AI Engine**: [Google Generative AI (Gemini)](https://ai.google.dev/)
+- **AI Engine**: [Google Generative AI](https://ai.google.dev/)
 - **Payments**: [Razorpay](https://razorpay.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 

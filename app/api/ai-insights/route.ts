@@ -5,8 +5,8 @@ import { supabaseAdmin } from "../../lib/supabaseServer";
 import { checkRateLimit, getClientIp } from "../../lib/rateLimit";
 import { aiInsightsRequestSchema } from "../../schemas";
 
-const geminiKey = process.env.GEMINI_API_KEY ?? "";
-const geminiModel = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+const aiKey = process.env.GEMINI_API_KEY ?? "";
+const aiModel = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
 export async function POST(request: Request) {
   const { userId } = await auth();
@@ -39,9 +39,9 @@ export async function POST(request: Request) {
   }
 
   const { type = "cash_flow", question } = body;
-  if (!geminiKey)
+  if (!aiKey)
     return NextResponse.json(
-      { error: "Gemini API key not configured." },
+      { error: "AI API key not configured." },
       { status: 400 },
     );
 
@@ -139,8 +139,8 @@ Answer the question concisely based on the invoice data above. Plain English, no
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(geminiKey);
-    const model = genAI.getGenerativeModel({ model: geminiModel });
+    const genAI = new GoogleGenerativeAI(aiKey);
+    const model = genAI.getGenerativeModel({ model: aiModel });
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig: { temperature: 0.4, maxOutputTokens: 300 },
@@ -158,7 +158,7 @@ Answer the question concisely based on the invoice data above. Plain English, no
     });
   } catch {
     return NextResponse.json(
-      { error: "Gemini could not generate insights." },
+      { error: "AI could not generate insights." },
       { status: 502 },
     );
   }

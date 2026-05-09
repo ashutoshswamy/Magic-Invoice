@@ -58,8 +58,8 @@ const parseLines = (prompt: string) => {
   }));
 };
 
-const geminiKey = process.env.GEMINI_API_KEY ?? "";
-const geminiModel = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+const aiKey = process.env.GEMINI_API_KEY ?? "";
+const aiModel = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
 type InvoiceDefaults = {
   invoiceNumber?: string;
@@ -333,16 +333,16 @@ export async function POST(request: Request) {
     });
   }
 
-  if (!geminiKey) {
+  if (!aiKey) {
     return NextResponse.json(
-      { error: "Gemini API key is required to generate invoices." },
+      { error: "AI API key is required to generate invoices." },
       { status: 400 },
     );
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(geminiKey);
-    const model = genAI.getGenerativeModel({ model: geminiModel });
+    const genAI = new GoogleGenerativeAI(aiKey);
+    const model = genAI.getGenerativeModel({ model: aiModel });
     const result = await model.generateContent({
       contents: [
         {
@@ -361,7 +361,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         invoice: normalizeInvoice({}, prompt, defaults),
         warning:
-          "Gemini returned an empty response. We generated a draft using defaults.",
+          "AI returned an empty response. We generated a draft using defaults.",
       });
     }
 
@@ -374,12 +374,12 @@ export async function POST(request: Request) {
       return NextResponse.json({
         invoice: normalizeInvoice({}, prompt, defaults),
         warning:
-          "Gemini returned an unreadable response. We generated a draft using defaults.",
+          "AI returned an unreadable response. We generated a draft using defaults.",
       });
     }
   } catch {
     return NextResponse.json(
-      { error: "Gemini could not generate the invoice." },
+      { error: "AI could not generate the invoice." },
       { status: 502 },
     );
   }
