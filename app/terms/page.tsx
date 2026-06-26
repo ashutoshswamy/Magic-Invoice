@@ -1,7 +1,11 @@
-"use client";
-
+import type { Metadata } from "next";
 import TopNav from "../components/TopNav";
 import Footer from "../components/Footer";
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "Read the Terms of Service for Magic Invoice regarding account usage, AI generated invoices, payment tracking, and liability disclaimers.",
+};
 
 const sections = [
   {

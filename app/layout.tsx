@@ -25,28 +25,45 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://magicinvoice.in"),
   title: {
-    default: "Magic Invoice",
+    default: "Magic Invoice | AI-Powered Invoicing Workspace",
     template: "%s | Magic Invoice",
   },
   description:
-    "Turn natural language into professional invoices with AI-assisted parsing.",
+    "Turn natural language descriptions into professional, GST-compliant invoices instantly. The ultimate AI-assisted invoicing tool for freelancers and small businesses.",
   applicationName: "Magic Invoice",
   keywords: [
     "Magic Invoice",
-    "AI invoice",
-    "invoice generator",
-    "freelancer invoices",
-    "small business invoicing",
-    "client-ready invoices",
+    "AI invoice generator",
+    "natural language invoicing",
+    "GST invoice builder India",
+    "freelancer billing workspace",
+    "automated invoice parser",
+    "free invoicing software",
+    "revenue tracking dashboard",
   ],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: "https://magicinvoice.in/",
-    title: "Magic Invoice",
+    title: "Magic Invoice | AI-Powered Invoicing Workspace",
     description:
-      "Turn natural language into professional invoices with AI-assisted parsing.",
+      "Turn natural language descriptions into professional, GST-compliant invoices instantly. The ultimate AI-assisted invoicing tool for freelancers and small businesses.",
     siteName: "Magic Invoice",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Magic Invoice - AI Invoicing Workspace",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Magic Invoice | AI-Powered Invoicing Workspace",
+    description:
+      "Turn natural language descriptions into professional, GST-compliant invoices instantly. The ultimate AI-assisted invoicing tool for freelancers and small businesses.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -62,6 +79,30 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Magic Invoice",
+  "url": "https://magicinvoice.in",
+  "description": "Turn natural language descriptions into professional, GST-compliant invoices instantly. The ultimate AI-assisted invoicing tool for freelancers and small businesses.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "featureList": [
+    "AI-Powered Invoice Generation from Natural Language",
+    "GST/CGST/SGST/IGST Automatic Calculation",
+    "HSN/SAC Code Auto-completion",
+    "Client and Service Directory Management",
+    "Live Revenue Analytics & Reports",
+    "Razorpay payment links integration"
+  ]
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -71,6 +112,10 @@ export default function RootLayout({
         <body
           className={`${playfair.variable} ${dmSans.variable} ${ibmPlexMono.variable} antialiased`}
         >
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-0EKX8DX76G"
             strategy="afterInteractive"

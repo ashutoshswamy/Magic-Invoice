@@ -1,7 +1,11 @@
-"use client";
-
+import type { Metadata } from "next";
 import TopNav from "../components/TopNav";
 import Footer from "../components/Footer";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "Read the Privacy Policy for Magic Invoice to learn how we protect and handle your billing, invoicing, and personal data.",
+};
 
 const sections = [
   {
