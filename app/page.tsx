@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import Footer from "./components/Footer";
@@ -9,6 +10,13 @@ import {
   PricingTable,
   MAGIC_INVOICE_PLANS,
 } from "./components/ui/pricing-table";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const steps = [
   {
@@ -40,9 +48,49 @@ const securityPoints = [
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useAuth();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    // How it works stagger reveal
+    gsap.fromTo(
+      ".step-card",
+      { opacity: 0, y: 35, scale: 0.98 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        stagger: 0.15,
+        duration: 0.8,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: containerRef.current?.querySelector(".steps-grid"),
+          start: "top 80%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // Security stagger reveal
+    gsap.fromTo(
+      ".security-card",
+      { opacity: 0, y: 25 },
+      {
+        opacity: 1,
+        y: 0,
+        stagger: 0.1,
+        duration: 0.7,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: containerRef.current?.querySelector(".security-grid"),
+          start: "top 85%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+  }, { scope: containerRef });
 
   return (
-    <div style={{ background: "var(--ink)", minHeight: "100vh" }}>
+    <div ref={containerRef} style={{ background: "var(--ink)", minHeight: "100vh" }}>
       <HeroSection />
       <main>
         {/* ── Features ─────────────────────────────────────────────────────── */}
@@ -71,6 +119,7 @@ export default function Home() {
             </h2>
           </div>
           <div
+            className="steps-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
@@ -80,13 +129,12 @@ export default function Home() {
             {steps.map((step, index) => (
               <div
                 key={step.num}
+                className="step-card glass-panel"
                 style={{
                   padding: "36px",
                   borderTop: "2px solid var(--border-bright)",
-                  background: "var(--ink-soft)",
-                  borderRadius: 2,
+                  opacity: 0,
                 }}
-                className={`anim-fade-up delay-${index + 1}`}
               >
                 <p
                   style={{
@@ -215,6 +263,7 @@ export default function Home() {
             </h2>
           </div>
           <div
+            className="security-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
@@ -224,13 +273,11 @@ export default function Home() {
             {securityPoints.map((point, index) => (
               <div
                 key={index}
+                className="security-card glass-panel"
                 style={{
                   padding: "28px 32px",
-                  background: "var(--ink-soft)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 2,
+                  opacity: 0,
                 }}
-                className={`anim-fade-up delay-${index + 1}`}
               >
                 <p
                   style={{

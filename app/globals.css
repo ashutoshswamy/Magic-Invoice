@@ -2,21 +2,27 @@
 
 /* ── Design tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --ink:           #0C0A06;
-  --ink-soft:      #161310;
-  --ink-muted:     #221E18;
-  --ink-surface:   #2A2520;
-  --ink-raised:    #332D26;
-  --gold:          #D97706;
-  --gold-bright:   #F59E0B;
-  --gold-dim:      #92400E;
-  --cream:         #FEF3C7;
-  --cream-soft:    #FDE68A;
-  --text-primary:  #F5EDD6;
-  --text-secondary:#A89272;
-  --text-muted:    #6B5B4A;
-  --border:        rgba(215, 183, 120, 0.13);
-  --border-bright: rgba(215, 183, 120, 0.30);
+  --ink:           #090705;
+  --ink-soft:      #13100d;
+  --ink-muted:     #1e1a16;
+  --ink-surface:   #26211c;
+  --ink-raised:    #302a24;
+  --gold:          #d97706;
+  --gold-bright:   #f59e0b;
+  --gold-dim:      #92400e;
+  --cream:         #fef3c7;
+  --cream-soft:    #fde68a;
+  --text-primary:  #f5edd6;
+  --text-secondary:#c0af97;
+  --text-muted:    #82715e;
+  --border:        rgba(215, 183, 120, 0.10);
+  --border-bright: rgba(215, 183, 120, 0.22);
+  
+  --magic-glow: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, rgba(139, 92, 246, 0.02) 70%, transparent 100%);
+  --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 60%, #92400e 100%);
+  --glass-bg: rgba(19, 16, 13, 0.75);
+  --glass-border: rgba(215, 183, 120, 0.12);
+  --glow-strength: 0 0 50px rgba(217, 119, 6, 0.12);
 }
 
 @theme inline {
@@ -89,27 +95,59 @@ img, video { max-width: 100%; height: auto; }
 .field-line:focus { border-bottom-color: var(--gold); }
 .field-line::placeholder { color: var(--text-muted); }
 
-/* ── Buttons ────────────────────────────────────────────────────────────────── */
 .btn-gold {
-  background: var(--gold);
+  background: var(--gold-gradient);
   color: var(--ink);
   font-family: var(--font-mono), monospace;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 10px 22px;
+  padding: 11px 24px;
   border: none;
-  border-radius: 2px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 0.15s, box-shadow 0.15s;
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  position: relative;
+  overflow: hidden;
 }
-.btn-gold:hover { background: var(--gold-bright); }
-.btn-gold:active { transform: translateY(1px); }
-.btn-gold:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.btn-gold::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -50%; width: 200%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+  transform: skewX(-25deg);
+  transition: 0.75s;
+}
+
+.btn-gold:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(217, 119, 6, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-gold:hover::after {
+  left: 125%;
+}
+
+.btn-gold:active {
+  transform: translateY(1px);
+}
+
+.btn-gold:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-gold:disabled::after {
+  display: none;
+}
 
 .btn-ghost {
   background: transparent;
@@ -328,3 +366,42 @@ img, video { max-width: 100%; height: auto; }
     linear-gradient(90deg, rgba(215,183,120,0.03) 1px, transparent 1px);
   background-size: 48px 48px;
 }
+
+/* ── Redesign Premium Utilities ──────────────────────────────────────────────── */
+.glass-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 4px;
+  box-shadow: var(--glow-strength);
+}
+
+.text-gold-gradient {
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.input-premium {
+  background: rgba(19, 16, 13, 0.5);
+  border: 1px solid var(--border-bright);
+  border-radius: 4px;
+  color: var(--text-primary);
+  padding: 12px 16px;
+  font-family: var(--font-sans), sans-serif;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  outline: none;
+}
+
+.input-premium:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(217, 119, 6, 0.15);
+  background: rgba(19, 16, 13, 0.85);
+}
+
+.border-glow-active {
+  border-color: var(--gold);
+  box-shadow: 0 0 25px rgba(217, 119, 6, 0.2);
+}
+

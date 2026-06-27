@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Menu, X, Sparkles } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 /* ── Nav items ──────────────────────────────────────────────────────────────── */
 
@@ -248,6 +250,7 @@ export const HeroSection = () => {
   const { isSignedIn, isLoaded } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -255,23 +258,21 @@ export const HeroSection = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useGSAP(() => {
+    const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+    tl.fromTo(".hi-pill", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.8, delay: 0.1 })
+      .fromTo(".hi-h1", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.9 }, "-=0.6")
+      .fromTo(".hi-sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.6")
+      .fromTo(".hi-cta", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.6")
+      .fromTo(".hi-mockup", { opacity: 0, x: 50, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 1.1, ease: "back.out(1.15)" }, "-=0.7")
+      .fromTo(".trust-item", { opacity: 0, y: 15 }, { opacity: 1, y: 0, stagger: 0.05, duration: 0.6 }, "-=0.5");
+  }, { scope: containerRef });
+
   return (
-    <div>
+    <div ref={containerRef}>
       <style>{`
         @keyframes hero-blink { 0%,100%{opacity:1} 50%{opacity:0} }
-        @keyframes hi-fade-up {
-          from { opacity: 0; transform: translateY(18px); }
-          to   { opacity: 1; transform: translateY(0);    }
-        }
-        @keyframes hi-fade-in-right {
-          from { opacity: 0; transform: translateX(24px); }
-          to   { opacity: 1; transform: translateX(0);    }
-        }
-        .hi-pill   { animation: hi-fade-up 0.55s ease both; animation-delay: 0.05s; }
-        .hi-h1     { animation: hi-fade-up 0.55s ease both; animation-delay: 0.18s; }
-        .hi-sub    { animation: hi-fade-up 0.55s ease both; animation-delay: 0.30s; }
-        .hi-cta    { animation: hi-fade-up 0.55s ease both; animation-delay: 0.40s; }
-        .hi-mockup { animation: hi-fade-in-right 0.65s ease both; animation-delay: 0.20s; }
+        .hi-pill, .hi-h1, .hi-sub, .hi-cta, .hi-mockup, .trust-item { opacity: 0; }
 
         .hi-nav-link {
           font-family: var(--font-mono), monospace;
@@ -747,6 +748,7 @@ export const HeroSection = () => {
             {trustItems.map((item) => (
               <span
                 key={item}
+                className="trust-item"
                 style={{
                   fontFamily: "var(--font-mono), monospace",
                   fontSize: 10,

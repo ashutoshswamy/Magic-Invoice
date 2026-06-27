@@ -1,6 +1,14 @@
 "use client"
 
+import { useRef } from 'react'
 import { Brain, CreditCard, Download, Shield, Sparkles } from 'lucide-react'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 const hsn = [
   { desc: 'Logo design',    code: '998312' },
@@ -21,24 +29,66 @@ const parsedFields = [
 const bars = [35, 58, 42, 71, 55, 88, 62, 45, 79, 53, 91, 68]
 
 export function Features() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    gsap.fromTo(
+      ".features-header",
+      { opacity: 0, y: 30 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: containerRef.current?.querySelector(".features-header"),
+          start: "top 85%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    gsap.fromTo(
+      ".bento-card",
+      { opacity: 0, y: 40, scale: 0.98 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        stagger: 0.1,
+        duration: 0.8,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: containerRef.current?.querySelector(".bento-grid"),
+          start: "top 80%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+  }, { scope: containerRef });
+
   return (
-    <section style={{
-      background: 'var(--ink)',
-      borderTop: '1px solid var(--border)',
-      borderBottom: '1px solid var(--border)',
-      padding: '96px 0',
-    }}>
+    <section
+      ref={containerRef}
+      style={{
+        background: 'var(--ink)',
+        borderTop: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
+        padding: '96px 0',
+      }}
+    >
 
       {/* blink keyframe */}
       <style>{`
         @keyframes mi-blink { 0%,100%{opacity:1} 50%{opacity:0} }
         .mi-cursor { display:inline-block; width:7px; height:13px; background:var(--gold); margin-left:3px; vertical-align:middle; animation:mi-blink 1.1s step-end infinite; border-radius:1px; }
+        .features-header, .bento-card { opacity: 0; }
       `}</style>
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
 
         {/* ── Section header ── */}
-        <div style={{ marginBottom: 52 }}>
+        <div className="features-header" style={{ marginBottom: 52 }}>
           <p className="section-label" style={{ marginBottom: 16 }}>Why Magic Invoice</p>
           <h2 style={{
             fontFamily: 'var(--font-playfair), serif',
@@ -54,15 +104,12 @@ export function Features() {
         </div>
 
         {/* ── Bento grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <div className="bento-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
 
           {/* ── Card 1: Speed stat ── */}
           <div
-            className="col-span-1 sm:col-span-2 lg:col-span-2"
+            className="bento-card glass-panel col-span-1 sm:col-span-2 lg:col-span-2"
             style={{
-              background: 'var(--ink-soft)',
-              border: '1px solid var(--border-bright)',
-              borderRadius: 2,
               padding: '40px 36px',
               display: 'flex',
               flexDirection: 'column',
@@ -126,11 +173,8 @@ export function Features() {
 
           {/* ── Card 2: GST Detection ── */}
           <div
-            className="col-span-1 lg:col-span-2"
+            className="bento-card glass-panel col-span-1 lg:col-span-2"
             style={{
-              background: 'var(--ink-soft)',
-              border: '1px solid var(--border)',
-              borderRadius: 2,
               padding: '32px',
               overflow: 'hidden',
             }}
@@ -188,11 +232,8 @@ export function Features() {
 
           {/* ── Card 3: HSN/SAC Lookup ── */}
           <div
-            className="col-span-1 lg:col-span-2"
+            className="bento-card glass-panel col-span-1 lg:col-span-2"
             style={{
-              background: 'var(--ink-soft)',
-              border: '1px solid var(--border)',
-              borderRadius: 2,
               padding: '32px',
               overflow: 'hidden',
             }}
@@ -240,11 +281,8 @@ export function Features() {
 
           {/* ── Card 4: Natural Language Parser ── */}
           <div
-            className="col-span-1 sm:col-span-2 lg:col-span-3"
+            className="bento-card glass-panel col-span-1 sm:col-span-2 lg:col-span-3"
             style={{
-              background: 'var(--ink-soft)',
-              border: '1px solid var(--border-bright)',
-              borderRadius: 2,
               padding: '36px',
               overflow: 'hidden',
             }}
@@ -317,11 +355,8 @@ export function Features() {
 
           {/* ── Card 5: GSTR + Razorpay ── */}
           <div
-            className="col-span-1 sm:col-span-2 lg:col-span-3"
+            className="bento-card glass-panel col-span-1 sm:col-span-2 lg:col-span-3"
             style={{
-              background: 'var(--ink-soft)',
-              border: '1px solid var(--border)',
-              borderRadius: 2,
               padding: '36px',
               overflow: 'hidden',
             }}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { useAuth } from "@clerk/nextjs";
 import {
   ArrowUpRight,
@@ -247,6 +248,50 @@ export default function DashboardPage() {
 
     loadClients();
   }, [isAuthReady, userId, supabase]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useGSAP(() => {
+    if (!isClient) return;
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    tl.fromTo(
+      [".ai-composer-card", ".invoice-editor-card", ".dashboard-stat-card", ".dashboard-tip-card"],
+      { opacity: 0, y: 30 },
+      {
+        opacity: 1,
+        y: 0,
+        stagger: 0.08,
+        duration: 0.7,
+        delay: 0.15,
+      }
+    );
+    tl.fromTo(
+      ".invoice-preview-container",
+      { opacity: 0, scale: 0.98, x: 15 },
+      {
+        opacity: 1,
+        scale: 1,
+        x: 0,
+        duration: 0.9,
+        ease: "back.out(1.05)",
+      },
+      "-=0.55"
+    );
+  }, [isClient]);
+
+  useEffect(() => {
+    if (!isClient) return;
+    gsap.fromTo(
+      ".tab-content",
+      { opacity: 0, y: 8 },
+      { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" }
+    );
+  }, [editorTab, isClient]);
 
   const handleParse = async () => {
     setIsParsing(true);
@@ -666,7 +711,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div ref={containerRef} style={{ minHeight: "100vh", background: "var(--ink)" }}>
       <div className="no-print">
         <TopNav />
       </div>
@@ -680,11 +725,9 @@ export default function DashboardPage() {
           className="no-print"
         >
           {/* AI Composer */}
-          <motion.div
-            className="card"
-            style={{ padding: 28 }}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
+            className="ai-composer-card glass-panel"
+            style={{ padding: 28, opacity: 0 }}
           >
             <div
               style={{
@@ -855,14 +898,12 @@ export default function DashboardPage() {
                 </span>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {/* Invoice editor */}
-          <motion.div
-            className="card"
-            style={{ padding: 28 }}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
+            className="invoice-editor-card glass-panel"
+            style={{ padding: 28, opacity: 0 }}
           >
             <div
               style={{
@@ -949,7 +990,7 @@ export default function DashboardPage() {
             </div>
 
             {editorTab === "details" && (
-              <>
+              <div className="tab-content">
                 <div
                   style={{
                     display: "grid",
@@ -1051,11 +1092,12 @@ export default function DashboardPage() {
                     }
                   />
                 </div>
-              </>
+              </div>
             )}
 
             {editorTab === "parties" && (
               <div
+                className="tab-content"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
@@ -1154,7 +1196,7 @@ export default function DashboardPage() {
             )}
 
             {editorTab === "charges" && (
-              <div>
+              <div className="tab-content">
                 <div
                   style={{
                     display: "flex",
@@ -1309,6 +1351,7 @@ export default function DashboardPage() {
 
             {editorTab === "lines" && (
               <div
+                className="tab-content"
                 style={{ display: "flex", flexDirection: "column", gap: 10 }}
               >
                 {catalogueLoaded && catalogueItems.length > 0 && (
@@ -1474,7 +1517,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
-          </motion.div>
+          </div>
 
           <style jsx>{`
             @media (max-width: 640px) {
@@ -1545,8 +1588,8 @@ export default function DashboardPage() {
               return (
                 <div
                   key={stat.label}
-                  className="card"
-                  style={{ padding: "18px 20px" }}
+                  className="dashboard-stat-card glass-panel"
+                  style={{ padding: "18px 20px", opacity: 0 }}
                 >
                   <div
                     style={{
@@ -1586,10 +1629,11 @@ export default function DashboardPage() {
 
           {/* Tip */}
           <div
-            className="card"
+            className="dashboard-tip-card glass-panel"
             style={{
               padding: "20px 24px",
               borderLeft: "2px solid var(--gold)",
+              opacity: 0,
             }}
           >
             <p className="section-label" style={{ marginBottom: 8 }}>
@@ -1610,8 +1654,8 @@ export default function DashboardPage() {
 
         {/* Right: preview column */}
         <div
-          className="print-container preview-sticky"
-          style={{ minWidth: 0, width: "100%" }}
+          className="print-container preview-sticky invoice-preview-container"
+          style={{ minWidth: 0, width: "100%", opacity: 0 }}
         >
           <div className="print-area">
             <InvoicePreview

@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Check, Minus } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 /* ── Types ──────────────────────────────────────────────────────────────────── */
 
@@ -160,11 +161,35 @@ const PlanCard: React.FC<{
   const price =
     plan.price === 0 ? 0 : isAnnual ? Math.round(plan.price * 0.8) : plan.price;
   const isHighlighted = plan.isRecommended || isActive;
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const { contextSafe } = useGSAP({ scope: cardRef });
+
+  const onMouseEnter = contextSafe(() => {
+    gsap.to(cardRef.current, {
+      y: -8,
+      boxShadow: "0 40px 80px -20px rgba(217, 119, 6, 0.25)",
+      borderColor: "var(--gold)",
+      duration: 0.4,
+      ease: "power2.out",
+    });
+  });
+
+  const onMouseLeave = contextSafe(() => {
+    gsap.to(cardRef.current, {
+      y: 0,
+      boxShadow: isHighlighted ? "0 24px 48px -12px rgba(217, 119, 6, 0.12)" : "none",
+      borderColor: isHighlighted ? "var(--gold-dim)" : "var(--border)",
+      duration: 0.4,
+      ease: "power2.out",
+    });
+  });
 
   return (
-      <motion.div
-      whileHover={{ y: -8, boxShadow: "0 40px 80px -20px rgba(217, 119, 6, 0.2)" }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    <div
+      ref={cardRef}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       className="pricing-card"
       style={{
         background: isHighlighted 
@@ -491,7 +516,7 @@ const PlanCard: React.FC<{
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
