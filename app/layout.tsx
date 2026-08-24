@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Playfair_Display, DM_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     siteName: "Magic Invoice",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Magic Invoice - AI Invoicing Workspace",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     title: "Magic Invoice | AI-Powered Invoicing Workspace",
     description:
       "Turn natural language descriptions into professional, GST-compliant invoices instantly. The ultimate AI-assisted invoicing tool for freelancers and small businesses.",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
@@ -76,6 +76,10 @@ export const metadata: Metadata = {
     },
   },
   manifest: "/site.webmanifest",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#090705",
 };
 
 const jsonLd = {

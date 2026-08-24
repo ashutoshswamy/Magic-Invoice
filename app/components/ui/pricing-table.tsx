@@ -611,7 +611,7 @@ const ExamplePricingTable = () => {
         >
           Pricing
         </p>
-        <h1
+        <h2
           style={{
             fontFamily: "var(--font-playfair), serif",
             fontWeight: 600,
@@ -626,7 +626,7 @@ const ExamplePricingTable = () => {
           <em style={{ color: "var(--gold)", fontStyle: "italic" }}>
             pricing.
           </em>
-        </h1>
+        </h2>
         <PricingTable
           plans={MAGIC_INVOICE_PLANS}
           billingCycle={cycle}

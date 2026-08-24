@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 export const metadata: Metadata = {
   title: "Cookie Policy",
   description: "Read the Cookie Policy for Magic Invoice to learn about cookies, local storage, and session tracking features we use.",
+  alternates: { canonical: "/cookies" },
 };
 
 const sections = [
