@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "../../lib/requireAuth";
 import { checkRateLimit, getClientIp } from "../../lib/rateLimit";
 import { parseInvoiceRequestSchema } from "../../schemas";
 
@@ -59,7 +59,7 @@ const parseLines = (prompt: string) => {
 };
 
 const aiKey = process.env.GEMINI_API_KEY ?? "";
-const aiModel = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+const aiModel = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
 
 type InvoiceDefaults = {
   invoiceNumber?: string;
@@ -277,7 +277,7 @@ const inferGstType = (
 };
 
 export async function POST(request: Request) {
-  const { userId } = await auth();
+  const userId = await requireAuth(request);
   if (!userId) {
     return NextResponse.json(
       { error: "Unauthorized. Authentication required." },

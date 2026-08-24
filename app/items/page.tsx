@@ -2,11 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 import { Plus, Trash2 } from "lucide-react";
 import TopNav from "../components/TopNav";
-import { isSupabaseConfigured } from "../lib/supabaseClient";
-import { useSupabase } from "../lib/useSupabase";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db, auth } from "../lib/firebaseClient";
 
 type Item = {
   id: string;
@@ -35,7 +45,6 @@ const GST_RATES = [0, 5, 12, 18, 28];
 
 export default function ItemsPage() {
   const { userId, isLoaded } = useAuth();
-  const supabase = useSupabase();
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -46,28 +55,31 @@ export default function ItemsPage() {
 
   useEffect(() => {
     const load = async () => {
-      if (!isSupabaseConfigured || !isLoaded || !userId) return;
+      if (!isLoaded || !userId) return;
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from("items")
-        .select(
-          "id, name, hsn_sac_code, type, default_rate, gst_rate, unit, description",
-        )
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
-      setIsLoading(false);
-      if (error) {
+      try {
+        const snap = await getDocs(
+          query(
+            collection(db, "items"),
+            where("user_id", "==", userId),
+            orderBy("created_at", "desc"),
+          ),
+        );
+        setItems(
+          snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Item),
+        );
+      } catch {
         setStatus("Unable to load items.");
-        return;
+      } finally {
+        setIsLoading(false);
       }
-      setItems((data ?? []) as Item[]);
     };
     load();
-  }, [isLoaded, userId, supabase]);
+  }, [isLoaded, userId]);
 
   const handleSave = async () => {
-    if (!isSupabaseConfigured || !userId) {
-      setStatus("Connect Supabase to save items.");
+    if (!userId) {
+      setStatus("Log in to save items.");
       return;
     }
     if (!draft.name.trim()) {
@@ -77,13 +89,12 @@ export default function ItemsPage() {
     setIsSaving(true);
     setStatus(null);
     try {
-      const { data, error } = await supabase
-        .from("items")
-        .insert({ ...draft, user_id: userId })
-        .select()
-        .single();
-      if (error) throw error;
-      setItems((prev) => [data as Item, ...prev]);
+      const ref = await addDoc(collection(db, "items"), {
+        ...draft,
+        user_id: userId,
+        created_at: serverTimestamp(),
+      });
+      setItems((prev) => [{ ...draft, id: ref.id }, ...prev]);
       setDraft(emptyDraft());
       setStatus("Item saved.");
     } catch {
@@ -94,17 +105,17 @@ export default function ItemsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!isSupabaseConfigured) return;
     if (!window.confirm("Delete this item?")) return;
     setDeletingId(id);
-    const { error } = await supabase.from("items").delete().eq("id", id);
-    setDeletingId(null);
-    if (error) {
+    try {
+      await deleteDoc(doc(db, "items", id));
+      setItems((prev) => prev.filter((i) => i.id !== id));
+      setStatus("Item deleted.");
+    } catch {
       setStatus("Unable to delete item.");
-      return;
+    } finally {
+      setDeletingId(null);
     }
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    setStatus("Item deleted.");
   };
 
   const lookupHsn = async () => {
@@ -121,9 +132,13 @@ export default function ItemsPage() {
     setIsHsnLooking(true);
     setStatus(null);
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const res = await fetch("/api/parse", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify({
           prompt: `Single line item: "${draft.name}" — 1 unit at ₹${draft.default_rate || 1000}. Suggest HSN/SAC code and GST rate.`,
           defaults: { currency: "INR" },

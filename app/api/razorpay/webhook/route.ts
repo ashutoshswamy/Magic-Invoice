@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { supabaseAdmin } from "../../../lib/supabaseServer";
+import { adminDb } from "../../../lib/firebaseAdmin";
 
 export async function POST(request: Request) {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET ?? "";
@@ -18,8 +18,7 @@ export async function POST(request: Request) {
   if (event.event === "payment_link.paid") {
     const invoiceId = event.payload?.payment_link?.entity?.notes?.invoice_id;
     if (invoiceId) {
-      const db = supabaseAdmin();
-      await db.from("invoices").update({ paid: true, status: "paid" }).eq("id", invoiceId);
+      await adminDb.collection("invoices").doc(invoiceId).update({ paid: true, status: "paid" });
     }
   }
 

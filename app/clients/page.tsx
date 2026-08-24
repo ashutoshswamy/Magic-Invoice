@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 import {
   Building2,
   Mail,
@@ -16,8 +16,19 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import TopNav from "../components/TopNav";
-import { isSupabaseConfigured } from "../lib/supabaseClient";
-import { useSupabase } from "../lib/useSupabase";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
+  writeBatch,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../lib/firebaseClient";
 import { formatDisplayDate } from "../lib/formatDate";
 
 type Client = {
@@ -61,7 +72,6 @@ type InvoiceSummary = {
 
 export default function ClientsPage() {
   const { userId, isLoaded } = useAuth();
-  const supabase = useSupabase();
   const [clients, setClients] = useState<Client[]>([]);
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [status, setStatus] = useState<string | null>(null);
@@ -72,29 +82,33 @@ export default function ClientsPage() {
 
   useEffect(() => {
     const loadClients = async () => {
-      if (!isSupabaseConfigured || !isLoaded || !userId) return;
+      if (!isLoaded || !userId) return;
       setIsLoading(true);
       setStatus(null);
       try {
-        const { data, error } = await supabase
-          .from("clients")
-          .select(
-            "id, name, company, email, phone, address_line1, address_line2, city, state, postal_code, country, created_at",
-          )
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        setClients((data ?? []) as Client[]);
+        const clientsSnap = await getDocs(
+          query(
+            collection(db, "clients"),
+            where("user_id", "==", userId),
+            orderBy("created_at", "desc"),
+          ),
+        );
+        setClients(
+          clientsSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as Client),
+        );
 
-        const { data: invoiceRows, error: invoiceError } = await supabase
-          .from("invoices")
-          .select(
-            "id, invoice_number, issued_on, due_date, paid, to_name, to_company, to_email",
-          )
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false });
-        if (invoiceError) throw invoiceError;
-        setInvoices((invoiceRows ?? []) as InvoiceSummary[]);
+        const invoicesSnap = await getDocs(
+          query(
+            collection(db, "invoices"),
+            where("user_id", "==", userId),
+            orderBy("created_at", "desc"),
+          ),
+        );
+        setInvoices(
+          invoicesSnap.docs.map(
+            (d) => ({ id: d.id, ...d.data() }) as InvoiceSummary,
+          ),
+        );
       } catch {
         setStatus("Unable to load clients.");
       } finally {
@@ -102,14 +116,9 @@ export default function ClientsPage() {
       }
     };
     loadClients();
-  }, [isLoaded, userId, supabase]);
+  }, [isLoaded, userId]);
 
   const handleDelete = async (clientId: string) => {
-    if (!isSupabaseConfigured) {
-      setStatus("Connect your workspace to delete clients.");
-      return;
-    }
-
     const client = clients.find((c) => c.id === clientId);
     if (!client) return;
 
@@ -133,19 +142,15 @@ export default function ClientsPage() {
     try {
       if (invoiceCount > 0) {
         const invoiceIds = linkedInvoices.map((inv) => inv.id);
-        const { error: invoiceError } = await supabase
-          .from("invoices")
-          .update({ deleted_at: new Date().toISOString() })
-          .in("id", invoiceIds);
-        if (invoiceError) throw invoiceError;
+        const batch = writeBatch(db);
+        for (const id of invoiceIds) {
+          batch.update(doc(db, "invoices", id), { deleted_at: serverTimestamp() });
+        }
+        await batch.commit();
         setInvoices((prev) => prev.filter((inv) => !invoiceIds.includes(inv.id)));
       }
 
-      const { error } = await supabase
-        .from("clients")
-        .delete()
-        .eq("id", clientId);
-      if (error) throw error;
+      await deleteDoc(doc(db, "clients", clientId));
 
       setClients((prev) => prev.filter((c) => c.id !== clientId));
       setStatus(
@@ -203,10 +208,6 @@ export default function ClientsPage() {
   };
 
   const saveEdit = async (clientId: string) => {
-    if (!isSupabaseConfigured) {
-      setStatus("Connect your workspace to update clients.");
-      return;
-    }
     const draft = drafts[clientId];
     if (!draft?.name?.trim()) {
       setStatus("Client name is required.");
@@ -214,22 +215,18 @@ export default function ClientsPage() {
     }
     setStatus(null);
     try {
-      const { error } = await supabase
-        .from("clients")
-        .update({
-          name: draft.name,
-          company: draft.company || null,
-          email: draft.email || null,
-          phone: draft.phone || null,
-          address_line1: draft.address_line1 || null,
-          address_line2: draft.address_line2 || null,
-          city: draft.city || null,
-          state: draft.state || null,
-          postal_code: draft.postal_code || null,
-          country: draft.country || null,
-        })
-        .eq("id", clientId);
-      if (error) throw error;
+      await updateDoc(doc(db, "clients", clientId), {
+        name: draft.name,
+        company: draft.company || null,
+        email: draft.email || null,
+        phone: draft.phone || null,
+        address_line1: draft.address_line1 || null,
+        address_line2: draft.address_line2 || null,
+        city: draft.city || null,
+        state: draft.state || null,
+        postal_code: draft.postal_code || null,
+        country: draft.country || null,
+      });
       setClients((prev) =>
         prev.map((client) =>
           client.id === clientId

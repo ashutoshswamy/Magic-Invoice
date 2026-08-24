@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 import {
   Plus,
   Trash2,
@@ -14,6 +14,12 @@ import {
   Play,
 } from "lucide-react";
 import TopNav from "../components/TopNav";
+import { auth } from "../lib/firebaseClient";
+
+const authHeaders = async (): Promise<Record<string, string>> => {
+  const idToken = await auth.currentUser?.getIdToken();
+  return idToken ? { Authorization: `Bearer ${idToken}` } : {};
+};
 
 type InvoiceLine = {
   description: string;
@@ -147,7 +153,7 @@ export default function RecurringPage() {
       return;
     }
     try {
-      const res = await fetch("/api/recurring");
+      const res = await fetch("/api/recurring", { headers: await authHeaders() });
       const json = (await res.json()) as {
         data?: RecurringInvoice[];
         error?: string;
@@ -178,7 +184,7 @@ export default function RecurringPage() {
     setSaving(true);
     const res = await fetch("/api/recurring", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await authHeaders()) },
       body: JSON.stringify({ ...draft, active: true }),
     });
     const json = (await res.json()) as {
@@ -199,7 +205,7 @@ export default function RecurringPage() {
   const toggleActive = async (item: RecurringInvoice) => {
     const res = await fetch("/api/recurring", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await authHeaders()) },
       body: JSON.stringify({ id: item.id, active: !item.active }),
     });
     const json = (await res.json()) as {
@@ -221,7 +227,10 @@ export default function RecurringPage() {
     )
       return;
     setDeletingId(id);
-    const res = await fetch(`/api/recurring?id=${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/recurring?id=${id}`, {
+      method: "DELETE",
+      headers: await authHeaders(),
+    });
     setDeletingId(null);
     if (!res.ok) {
       notify("Failed to delete", false);
@@ -233,7 +242,10 @@ export default function RecurringPage() {
 
   const handleRunNow = async () => {
     setRunningAll(true);
-    const res = await fetch("/api/recurring/run", { method: "POST" });
+    const res = await fetch("/api/recurring/run", {
+      method: "POST",
+      headers: await authHeaders(),
+    });
     const json = (await res.json()) as { generated?: number; error?: string };
     setRunningAll(false);
     if (!res.ok) {

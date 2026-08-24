@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { supabaseAdmin } from "../../../lib/supabaseServer";
+import { requireAuth } from "../../../lib/requireAuth";
+import { adminDb } from "../../../lib/firebaseAdmin";
+import { FieldValue } from "firebase-admin/firestore";
 
 const buildInvoiceNumber = () => {
   const now = new Date();
@@ -29,41 +30,36 @@ const nextRunDate = (current: Date, frequency: string): string => {
 };
 
 // POST /api/recurring/run
-// Called manually (per-user) or by a scheduled job.
-// If called with userId param from a trusted cron token, processes that user.
-// If called by a signed-in user, processes only their own due templates.
-export async function POST() {
-  const { userId } = await auth();
+// Processes only the signed-in user's own due templates.
+export async function POST(request: Request) {
+  const userId = await requireAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const db = supabaseAdmin();
   const today = new Date().toISOString().slice(0, 10);
 
-  // Fetch due + active recurring templates for this user
-  const { data: templates, error: fetchErr } = await db
-    .from("recurring_invoices")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("active", true)
-    .lte("next_run_date", today);
+  const templatesSnap = await adminDb
+    .collection("recurring_invoices")
+    .where("user_id", "==", userId)
+    .where("active", "==", true)
+    .where("next_run_date", "<=", today)
+    .get();
 
-  if (fetchErr) {
-    return NextResponse.json({ error: fetchErr.message }, { status: 500 });
-  }
-
-  if (!templates || templates.length === 0) {
+  if (templatesSnap.empty) {
     return NextResponse.json({ generated: 0 });
   }
 
   const generated: string[] = [];
 
-  for (const t of templates) {
+  for (const templateDoc of templatesSnap.docs) {
+    const t = templateDoc.data();
     const issuedOn = today;
     const dueDate = addDays(new Date(today), t.due_date_days ?? 14);
 
-    const invoiceRow = {
+    const invoiceRef = adminDb.collection("invoices").doc();
+    const batch = adminDb.batch();
+    batch.set(invoiceRef, {
       user_id: userId,
       invoice_number: buildInvoiceNumber(),
       issued_on: issuedOn,
@@ -95,39 +91,34 @@ export async function POST() {
       custom_charges: t.custom_charges,
       status: "draft",
       paid: false,
-    };
+      deleted_at: null,
+      created_at: FieldValue.serverTimestamp(),
+      updated_at: FieldValue.serverTimestamp(),
+    });
 
-    const { data: inv, error: invErr } = await db
-      .from("invoices")
-      .insert(invoiceRow)
-      .select("id")
-      .single();
-
-    if (invErr) continue;
-
-    // Insert line items into invoice_lines
     type LineRecord = { description: string; quantity: number; rate: number; hsnSacCode?: string };
     const lines: LineRecord[] = Array.isArray(t.lines) ? t.lines as LineRecord[] : [];
-    if (lines.length > 0) {
-      const lineRows = lines.map((l: LineRecord, idx: number) => ({
-        invoice_id: inv.id,
+    lines.forEach((l, idx) => {
+      const lineRef = invoiceRef.collection("lines").doc();
+      batch.set(lineRef, {
+        invoice_id: invoiceRef.id,
+        user_id: userId,
         description: l.description || "Service",
         quantity: Number(l.quantity) || 1,
         rate: Number(l.rate) || 0,
         hsn_sac_code: l.hsnSacCode || "",
         sort_order: idx,
-      }));
-      await db.from("invoice_lines").insert(lineRows);
-    }
+      });
+    });
 
-    // Advance next_run_date
     const newNextRun = nextRunDate(new Date(t.next_run_date), t.frequency);
-    await db
-      .from("recurring_invoices")
-      .update({ next_run_date: newNextRun, last_run_date: today })
-      .eq("id", t.id);
+    batch.update(templateDoc.ref, {
+      next_run_date: newNextRun,
+      last_run_date: today,
+    });
 
-    generated.push(inv.id);
+    await batch.commit();
+    generated.push(invoiceRef.id);
   }
 
   return NextResponse.json({ generated: generated.length, ids: generated });

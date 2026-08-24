@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import Razorpay from "razorpay";
-import { supabaseAdmin } from "../../../lib/supabaseServer";
+import { requireAuth } from "../../../lib/requireAuth";
+import { adminDb } from "../../../lib/firebaseAdmin";
 import { createRazorpayLinkRequestSchema } from "../../../schemas";
 
 export async function POST(request: Request) {
-  const { userId } = await auth();
+  const userId = await requireAuth(request);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -40,41 +40,20 @@ export async function POST(request: Request) {
   if (!invoiceId)
     return NextResponse.json({ error: "invoiceId required" }, { status: 400 });
 
-  const db = supabaseAdmin();
-  const { data: inv, error: fetchError } = await db
-    .from("invoices")
-    .select("invoice_number, currency, to_name, to_email, notes")
-    .eq("id", invoiceId)
-    .eq("user_id", userId)
-    .single<{
-      invoice_number: string;
-      currency: string;
-      to_name: string;
-      to_email: string;
-      notes: string;
-    }>();
-
-  if (fetchError || !inv)
+  const invoiceRef = adminDb.collection("invoices").doc(invoiceId);
+  const invoiceSnap = await invoiceRef.get();
+  const inv = invoiceSnap.data();
+  if (!invoiceSnap.exists || !inv || inv.user_id !== userId)
     return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
-  const { data: lines } = await db
-    .from("invoice_lines")
-    .select("quantity, rate")
-    .eq("invoice_id", invoiceId);
-
-  const { data: invoiceRow } = await db
-    .from("invoices")
-    .select("tax_rate, custom_charges")
-    .eq("id", invoiceId)
-    .single<{ tax_rate: number; custom_charges: Array<{ amount: number }> }>();
-
-  const subtotal = (lines ?? []).reduce(
-    (s, l) => s + Number(l.quantity) * Number(l.rate),
+  const linesSnap = await invoiceRef.collection("lines").get();
+  const subtotal = linesSnap.docs.reduce(
+    (s, d) => s + Number(d.data().quantity) * Number(d.data().rate),
     0,
   );
-  const taxRate = Number(invoiceRow?.tax_rate ?? 18);
-  const customTotal = (invoiceRow?.custom_charges ?? []).reduce(
-    (s, c) => s + Number(c.amount ?? 0),
+  const taxRate = Number(inv.tax_rate ?? 18);
+  const customTotal = (inv.custom_charges ?? []).reduce(
+    (s: number, c: { amount?: number }) => s + Number(c.amount ?? 0),
     0,
   );
   const total = subtotal + (subtotal * taxRate) / 100 + customTotal;
@@ -97,14 +76,10 @@ export async function POST(request: Request) {
     callback_method: "get",
   });
 
-  await db
-    .from("invoices")
-    .update({
-      razorpay_payment_link_id: link.id,
-      razorpay_payment_link_url: link.short_url,
-    })
-    .eq("id", invoiceId)
-    .eq("user_id", userId);
+  await invoiceRef.update({
+    razorpay_payment_link_id: link.id,
+    razorpay_payment_link_url: link.short_url,
+  });
 
   return NextResponse.json({
     paymentLinkUrl: link.short_url,

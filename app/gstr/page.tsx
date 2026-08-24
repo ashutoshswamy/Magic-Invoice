@@ -2,11 +2,18 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 import { Download, RefreshCw } from "lucide-react";
 import TopNav from "../components/TopNav";
-import { isSupabaseConfigured } from "../lib/supabaseClient";
-import { useSupabase } from "../lib/useSupabase";
+import {
+  collection,
+  collectionGroup,
+  query,
+  where,
+  orderBy,
+  getDocs,
+} from "firebase/firestore";
+import { db } from "../lib/firebaseClient";
 
 type InvoiceRow = {
   id: string;
@@ -72,7 +79,6 @@ function getCurrentFY() {
 
 export default function GSTRPage() {
   const { userId, isLoaded } = useAuth();
-  const supabase = useSupabase();
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -82,33 +88,34 @@ export default function GSTRPage() {
   const fy = getCurrentFY();
 
   const load = useCallback(async () => {
-    if (!isSupabaseConfigured || !isLoaded || !userId) return;
+    if (!isLoaded || !userId) return;
     setIsLoading(true);
     setStatus(null);
     try {
-      const { data: rows, error } = await supabase
-        .from("invoices")
-        .select(
-          "id, invoice_number, issued_on, due_date, paid, status, currency, tax_rate, gst_type, from_gstin, from_state_code, to_name, to_company, to_gstin, to_state_code",
-        )
-        .eq("user_id", userId)
-        .is("deleted_at", null)
-        .order("issued_on", { ascending: true });
-      if (error) throw error;
+      const invoicesSnap = await getDocs(
+        query(
+          collection(db, "invoices"),
+          where("user_id", "==", userId),
+          where("deleted_at", "==", null),
+          orderBy("issued_on", "asc"),
+        ),
+      );
+      const rows = invoicesSnap.docs.map(
+        (d) => ({ id: d.id, ...d.data() }) as InvoiceRow,
+      );
 
-      const ids = (rows ?? []).map((r) => r.id);
-      const { data: lines } = await supabase
-        .from("invoice_lines")
-        .select("invoice_id, quantity, rate, hsn_sac_code")
-        .in("invoice_id", ids);
+      const linesSnap = await getDocs(
+        query(collectionGroup(db, "lines"), where("user_id", "==", userId)),
+      );
+      const lines = linesSnap.docs.map((d) => d.data() as LineRow);
 
       const lineMap = new Map<string, LineRow[]>();
-      (lines ?? []).forEach((l) => {
+      lines.forEach((l) => {
         if (!lineMap.has(l.invoice_id)) lineMap.set(l.invoice_id, []);
-        lineMap.get(l.invoice_id)!.push(l as LineRow);
+        lineMap.get(l.invoice_id)!.push(l);
       });
 
-      const summaries: InvoiceSummary[] = (rows ?? []).map((row) => {
+      const summaries: InvoiceSummary[] = rows.map((row) => {
         const invLines = lineMap.get(row.id) ?? [];
         const subtotal = invLines.reduce(
           (s, l) => s + Number(l.quantity) * Number(l.rate),
@@ -121,7 +128,7 @@ export default function GSTRPage() {
         const sgst = isIGST ? 0 : Number((taxAmount / 2).toFixed(2));
         const igst = isIGST ? taxAmount : 0;
         return {
-          ...(row as InvoiceRow),
+          ...row,
           subtotal,
           taxAmount,
           cgst,
@@ -137,7 +144,7 @@ export default function GSTRPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoaded, userId, supabase]);
+  }, [isLoaded, userId]);
 
   useEffect(() => {
     if (isLoaded && userId) load();

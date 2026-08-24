@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useAuth, UserButton } from "@clerk/nextjs";
-import { Menu, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { auth } from "../lib/firebaseClient";
+import { useAuth } from "../lib/useAuth";
+import { Menu, X, LogOut } from "lucide-react";
 
 const appNav = [
   { href: "/dashboard", label: "Dashboard" },
@@ -25,7 +27,14 @@ const marketingNav = [
 
 export default function TopNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isSignedIn, isLoaded } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/");
+  };
   const isMarketing =
     pathname === "/" ||
     pathname.startsWith("/login") ||
@@ -231,7 +240,22 @@ export default function TopNav() {
               >
                 Settings
               </Link>
-              <UserButton />
+              <button
+                onClick={handleSignOut}
+                className="desktop-only"
+                style={{
+                  background: "none",
+                  border: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                  padding: 4,
+                }}
+                title="Sign out"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
           )}
 
@@ -309,6 +333,23 @@ export default function TopNav() {
                 >
                   Settings
                 </Link>
+                <button
+                  onClick={handleSignOut}
+                  style={{
+                    marginTop: 16,
+                    background: "none",
+                    border: "none",
+                    fontFamily: "var(--font-mono), monospace",
+                    fontSize: 14,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    color: "var(--text-secondary)",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  Sign out
+                </button>
              </div>
           )}
 

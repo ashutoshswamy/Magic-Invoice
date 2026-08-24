@@ -1,15 +1,35 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "../../lib/requireAuth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { supabaseAdmin } from "../../lib/supabaseServer";
+import { adminDb } from "../../lib/firebaseAdmin";
 import { checkRateLimit, getClientIp } from "../../lib/rateLimit";
 import { aiInsightsRequestSchema } from "../../schemas";
 
 const aiKey = process.env.GEMINI_API_KEY ?? "";
-const aiModel = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+const aiModel = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
+
+type InvoiceDoc = {
+  id: string;
+  invoice_number?: string;
+  to_name?: string;
+  to_company?: string;
+  paid?: boolean;
+  status?: string;
+  due_date?: string;
+  [key: string]: unknown;
+};
+
+type LineDoc = {
+  invoice_id?: string;
+  quantity?: number;
+  rate?: number;
+  [key: string]: unknown;
+};
+
+type InvoiceSummary = InvoiceDoc & { total: number };
 
 export async function POST(request: Request) {
-  const { userId } = await auth();
+  const userId = await requireAuth(request);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -45,28 +65,26 @@ export async function POST(request: Request) {
       { status: 400 },
     );
 
-  const db = supabaseAdmin();
+  const invoicesSnap = await adminDb
+    .collection("invoices")
+    .where("user_id", "==", userId)
+    .where("deleted_at", "==", null)
+    .orderBy("created_at", "desc")
+    .limit(50)
+    .get();
+  const invoices: InvoiceDoc[] = invoicesSnap.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
+  }));
 
-  const { data: invoices } = await db
-    .from("invoices")
-    .select(
-      "id, invoice_number, issued_on, due_date, paid, status, currency, to_name, to_company, created_at",
-    )
-    .eq("user_id", userId)
-    .is("deleted_at", null)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const linesSnap = await adminDb
+    .collectionGroup("lines")
+    .where("user_id", "==", userId)
+    .get();
+  const lines: LineDoc[] = linesSnap.docs.map((d) => d.data());
 
-  const { data: lines } = await db
-    .from("invoice_lines")
-    .select("invoice_id, quantity, rate")
-    .in(
-      "invoice_id",
-      (invoices ?? []).map((i) => i.id),
-    );
-
-  const invoiceSummaries = (invoices ?? []).map((inv) => {
-    const invLines = (lines ?? []).filter((l) => l.invoice_id === inv.id);
+  const invoiceSummaries: InvoiceSummary[] = invoices.map((inv) => {
+    const invLines = lines.filter((l) => l.invoice_id === inv.id);
     const total = invLines.reduce(
       (s, l) => s + Number(l.quantity) * Number(l.rate),
       0,

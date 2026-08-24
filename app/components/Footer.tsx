@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 
 export default function Footer() {
   const { isSignedIn } = useAuth();

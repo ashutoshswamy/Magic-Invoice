@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 import { FileText, Save } from "lucide-react";
 import TopNav from "../components/TopNav";
-import { isSupabaseConfigured } from "../lib/supabaseClient";
-import { useSupabase } from "../lib/useSupabase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../lib/firebaseClient";
 
 export default function SettingsPage() {
   const { userId, isLoaded } = useAuth();
-  const supabase = useSupabase();
   const [invoiceCurrency, setInvoiceCurrency] = useState("INR");
   const [fromName, setFromName] = useState("");
   const [fromCompany, setFromCompany] = useState("");
@@ -28,12 +27,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const loadSettings = async () => {
-      if (!isSupabaseConfigured || !userId) return;
-      const { data } = await supabase
-        .from("user_settings")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
+      if (!userId) return;
+      const snap = await getDoc(doc(db, "user_settings", userId));
+      const data = snap.data();
       if (data) {
         setInvoiceCurrency(data.currency ?? "INR");
         setFromName(data.from_name ?? "");
@@ -50,17 +46,18 @@ export default function SettingsPage() {
       }
     };
     if (isLoaded) loadSettings();
-  }, [isLoaded, userId, supabase]);
+  }, [isLoaded, userId]);
 
   const handleSave = async () => {
-    if (!isSupabaseConfigured || !userId) {
+    if (!userId) {
       setStatus("Log in to save settings.");
       return;
     }
     setIsSaving(true);
     setStatus(null);
     try {
-      const { error } = await supabase.from("user_settings").upsert(
+      await setDoc(
+        doc(db, "user_settings", userId),
         {
           user_id: userId,
           currency: invoiceCurrency,
@@ -75,11 +72,10 @@ export default function SettingsPage() {
           from_state: fromState,
           from_postal_code: fromPostalCode,
           from_country: fromCountry,
-          updated_at: new Date().toISOString(),
+          updated_at: serverTimestamp(),
         },
-        { onConflict: "user_id" },
+        { merge: true },
       );
-      if (error) throw error;
       setStatus("Settings saved.");
     } catch {
       setStatus("Unable to save settings.");

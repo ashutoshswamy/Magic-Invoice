@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "./useAuth";
 
 export const FREE_LIMITS = {
   invoicesPerMonth: Infinity,

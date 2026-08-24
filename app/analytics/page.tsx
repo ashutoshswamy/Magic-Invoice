@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 import {
   BarChart2,
   DollarSign,
@@ -14,8 +14,17 @@ import {
   Users,
 } from "lucide-react";
 import TopNav from "../components/TopNav";
-import { isSupabaseConfigured } from "../lib/supabaseClient";
-import { useSupabase } from "../lib/useSupabase";
+import {
+  collection,
+  collectionGroup,
+  query,
+  where,
+  getDocs,
+  getDoc,
+  getCountFromServer,
+  doc,
+} from "firebase/firestore";
+import { db, auth } from "../lib/firebaseClient";
 
 type InvoiceRow = {
   id: string;
@@ -30,7 +39,6 @@ type LineRow = {
 
 export default function AnalyticsPage() {
   const { userId, isLoaded } = useAuth();
-  const supabase = useSupabase();
   const [status, setStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [invoiceCount, setInvoiceCount] = useState(0);
@@ -49,23 +57,20 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     const load = async () => {
-      if (!isSupabaseConfigured || !isLoaded || !userId) return;
+      if (!isLoaded || !userId) return;
       setIsLoading(true);
       setStatus(null);
       try {
-        const { data: settings } = await supabase
-          .from("user_settings")
-          .select("currency")
-          .eq("user_id", userId)
-          .maybeSingle();
+        const settingsSnap = await getDoc(doc(db, "user_settings", userId));
+        const settings = settingsSnap.data();
         if (settings?.currency) setCurrency(settings.currency);
 
-        const { data: invoiceRows, error } = await supabase
-          .from("invoices")
-          .select("id, paid")
-          .eq("user_id", userId);
-        if (error) throw error;
-        const rows = (invoiceRows ?? []) as InvoiceRow[];
+        const invoicesSnap = await getDocs(
+          query(collection(db, "invoices"), where("user_id", "==", userId)),
+        );
+        const rows = invoicesSnap.docs.map(
+          (d) => ({ id: d.id, ...d.data() }) as InvoiceRow,
+        );
         const paid = rows.filter((row) => row.paid).length;
         const unpaid = rows.length - paid;
 
@@ -73,14 +78,14 @@ export default function AnalyticsPage() {
         setPaidCount(paid);
         setUnpaidCount(unpaid);
 
-        const invoiceIds = rows.map((row) => row.id);
-        if (invoiceIds.length) {
-          const { data: lines, error: linesError } = await supabase
-            .from("invoice_lines")
-            .select("invoice_id, quantity, rate")
-            .in("invoice_id", invoiceIds);
-          if (linesError) throw linesError;
-          const lineRows = (lines ?? []) as LineRow[];
+        if (rows.length) {
+          const linesSnap = await getDocs(
+            query(
+              collectionGroup(db, "lines"),
+              where("user_id", "==", userId),
+            ),
+          );
+          const lineRows = linesSnap.docs.map((d) => d.data() as LineRow);
           const total = lineRows.reduce(
             (sum, line) =>
               sum + Number(line.quantity ?? 0) * Number(line.rate ?? 0),
@@ -91,12 +96,10 @@ export default function AnalyticsPage() {
           setTotalRevenue(0);
         }
 
-        const { count: clientsCount, error: clientError } = await supabase
-          .from("clients")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId);
-        if (clientError) throw clientError;
-        setClientCount(clientsCount ?? 0);
+        const clientsCountSnap = await getCountFromServer(
+          query(collection(db, "clients"), where("user_id", "==", userId)),
+        );
+        setClientCount(clientsCountSnap.data().count ?? 0);
       } catch {
         setStatus("Unable to load analytics.");
       } finally {
@@ -105,14 +108,18 @@ export default function AnalyticsPage() {
     };
 
     load();
-  }, [isLoaded, userId, supabase]);
+  }, [isLoaded, userId]);
 
   const fetchCashFlow = async () => {
     setIsLoadingInsight(true);
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const res = await fetch("/api/ai-insights", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify({ type: "cash_flow" }),
       });
       const data = (await res.json()) as { insight?: string; error?: string };
@@ -127,9 +134,13 @@ export default function AnalyticsPage() {
   const fetchPrediction = async () => {
     setIsLoadingPrediction(true);
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const res = await fetch("/api/ai-insights", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify({ type: "payment_prediction" }),
       });
       const data = (await res.json()) as { insight?: string; error?: string };
@@ -148,9 +159,13 @@ export default function AnalyticsPage() {
     setIsAskingAi(true);
     setAiAnswer(null);
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const res = await fetch("/api/ai-insights", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify({ type: "question", question: aiQuestion }),
       });
       const data = (await res.json()) as { insight?: string; error?: string };

@@ -2,14 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../../lib/useAuth";
 import { ArrowLeft, Link2, Printer } from "lucide-react";
 import Link from "next/link";
 import TopNav from "../../components/TopNav";
 import InvoicePreview from "../../components/InvoicePreview";
 import { InvoiceData } from "../../types";
-import { isSupabaseConfigured } from "../../lib/supabaseClient";
-import { useSupabase } from "../../lib/useSupabase";
+import {
+  collection,
+  query,
+  orderBy,
+  getDoc,
+  getDocs,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
+import { db, auth } from "../../lib/firebaseClient";
 
 type InvoiceRow = {
   id: string;
@@ -106,7 +114,6 @@ const buildInvoice = (invoiceRow: InvoiceRow, lineRows: LineRow[]): InvoiceData 
 export default function InvoiceDetailPage() {
   const params = useParams<{ id: string }>();
   const { userId, isLoaded } = useAuth();
-  const supabase = useSupabase();
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -116,24 +123,24 @@ export default function InvoiceDetailPage() {
 
   useEffect(() => {
     const loadInvoice = async () => {
-      if (!isSupabaseConfigured || !isLoaded) { setIsLoading(false); return; }
+      if (!isLoaded) { setIsLoading(false); return; }
       if (!userId) { setStatus("Log in to view invoices."); setIsLoading(false); return; }
       const invoiceId = params?.id;
       if (!invoiceId) { setStatus("Missing invoice id."); setIsLoading(false); return; }
       try {
-        const { data: invoiceRow, error: invoiceError } = await supabase
-          .from("invoices")
-          .select("id, invoice_number, issued_on, due_date, paid, currency, notes, tax_rate, custom_charges, from_name, from_company, from_email, from_address_line1, from_address_line2, from_city, from_state, from_postal_code, from_country, to_name, to_company, to_email, to_address_line1, to_address_line2, to_city, to_state, to_postal_code, to_country")
-          .eq("id", invoiceId)
-          .single<InvoiceRow>();
-        if (invoiceError || !invoiceRow) throw invoiceError ?? new Error("Invoice not found.");
-        const { data: lineRows, error: linesError } = await supabase
-          .from("invoice_lines")
-          .select("id, description, quantity, rate")
-          .eq("invoice_id", invoiceId)
-          .order("created_at", { ascending: true });
-        if (linesError) throw linesError;
-        setInvoice(buildInvoice(invoiceRow, (lineRows ?? []) as LineRow[]));
+        const invoiceSnap = await getDoc(doc(db, "invoices", invoiceId));
+        if (!invoiceSnap.exists()) throw new Error("Invoice not found.");
+        const invoiceRow = { id: invoiceSnap.id, ...invoiceSnap.data() } as InvoiceRow;
+        const linesSnap = await getDocs(
+          query(
+            collection(db, "invoices", invoiceId, "lines"),
+            orderBy("sort_order", "asc"),
+          ),
+        );
+        const lineRows = linesSnap.docs.map(
+          (d) => ({ id: d.id, ...d.data() }) as LineRow,
+        );
+        setInvoice(buildInvoice(invoiceRow, lineRows));
         setStatus(null);
       } catch {
         setStatus("Unable to load invoice.");
@@ -142,17 +149,15 @@ export default function InvoiceDetailPage() {
       }
     };
     loadInvoice();
-  }, [params?.id, isLoaded, userId, supabase]);
+  }, [params?.id, isLoaded, userId]);
 
   const handleTogglePaid = async () => {
-    if (!invoice) return;
-    if (!isSupabaseConfigured) { setStatus("Connect your workspace to update invoices."); return; }
+    if (!invoice || !params?.id) return;
     setIsUpdatingStatus(true);
     setStatus(null);
     try {
       const nextPaid = !invoice.paid;
-      const { error } = await supabase.from("invoices").update({ paid: nextPaid }).eq("id", params?.id);
-      if (error) throw error;
+      await updateDoc(doc(db, "invoices", params.id), { paid: nextPaid });
       setInvoice((prev) => (prev ? { ...prev, paid: nextPaid } : prev));
       setStatus(nextPaid ? "Invoice marked as paid." : "Invoice marked as unpaid.");
     } catch {
@@ -168,9 +173,13 @@ export default function InvoiceDetailPage() {
     setIsCreatingLink(true);
     setStatus(null);
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const res = await fetch("/api/razorpay/create-link", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify({ invoiceId: params?.id }),
       });
       const data = await res.json() as { paymentLinkUrl?: string; error?: string };

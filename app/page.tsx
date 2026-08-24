@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "./lib/useAuth";
 import Footer from "./components/Footer";
 import { HeroSection } from "./components/blocks/hero-section-9";
 import { Features } from "./components/blocks/features-8";
@@ -40,8 +40,8 @@ const steps = [
 ];
 
 const securityPoints = [
-  "Row-level security — your data never mingles with another user's",
-  "Clerk authentication with MFA support",
+  "Firestore security rules — your data never mingles with another user's",
+  "Firebase authentication with Google sign-in",
   "Immutable financial records with soft-delete audit trail",
   "GST amounts stored at creation — not recomputed from historical rates",
 ];

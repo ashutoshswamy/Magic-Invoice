@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 import { FileText, RefreshCw, Trash2, UploadCloud } from "lucide-react";
 import TopNav from "../components/TopNav";
-import { isSupabaseConfigured } from "../lib/supabaseClient";
-import { useSupabase } from "../lib/useSupabase";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  limit as fsLimit,
+  getDocs,
+  doc,
+  writeBatch,
+} from "firebase/firestore";
+import { db } from "../lib/firebaseClient";
 import { formatDisplayDate } from "../lib/formatDate";
 
 type StoredInvoice = {
@@ -21,33 +30,36 @@ type StoredInvoice = {
 
 export default function InvoicesPage() {
   const { userId, isLoaded } = useAuth();
-  const supabase = useSupabase();
   const [stored, setStored] = useState<StoredInvoice[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const loadFromSupabase = async () => {
-    if (!isSupabaseConfigured || !userId) return;
+  const loadInvoices = useCallback(async () => {
+    if (!userId) return;
     setIsLoading(true);
     setStatus(null);
     try {
-      const { data, error } = await supabase
-        .from("invoices")
-        .select("id, invoice_number, due_date, to_email, created_at, paid")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (error) throw error;
+      const snap = await getDocs(
+        query(
+          collection(db, "invoices"),
+          where("user_id", "==", userId),
+          orderBy("created_at", "desc"),
+          fsLimit(20),
+        ),
+      );
       setStored(
-        (data ?? []).map((item, index) => ({
-          id: item.id ?? `${index}`,
-          invoiceNumber: item.invoice_number ?? "Untitled invoice",
-          due_date: item.due_date ?? null,
-          to_email: item.to_email ?? null,
-          created_at: item.created_at ?? "",
-          paid: item.paid ?? false,
-        })),
+        snap.docs.map((d) => {
+          const item = d.data();
+          return {
+            id: d.id,
+            invoiceNumber: item.invoice_number ?? "Untitled invoice",
+            due_date: item.due_date ?? null,
+            to_email: item.to_email ?? null,
+            created_at: item.created_at ?? "",
+            paid: item.paid ?? false,
+          };
+        }),
       );
       setStatus("Synced from database.");
     } catch {
@@ -55,37 +67,13 @@ export default function InvoicesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
-    if (isLoaded && userId) {
-      setIsLoading(true);
-      supabase
-        .from("invoices")
-        .select("id, invoice_number, due_date, to_email, created_at, paid")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(20)
-        .then(({ data, error }) => {
-          if (error) { setStatus("Unable to fetch invoices."); return; }
-          setStored(
-            (data ?? []).map((item, index) => ({
-              id: item.id ?? `${index}`,
-              invoiceNumber: item.invoice_number ?? "Untitled invoice",
-              created_at: item.created_at ?? "",
-              paid: item.paid ?? false,
-            })),
-          );
-        })
-        .then(() => setIsLoading(false), () => setIsLoading(false));
-    }
-  }, [isLoaded, userId, supabase]);
+    if (isLoaded && userId) loadInvoices();
+  }, [isLoaded, userId, loadInvoices]);
 
   const handleDelete = async (invoiceId: string) => {
-    if (!isSupabaseConfigured) {
-      setStatus("Connect your workspace to delete invoices.");
-      return;
-    }
     const confirmed = window.confirm(
       "Delete this invoice? This action cannot be undone.",
     );
@@ -94,11 +82,13 @@ export default function InvoicesPage() {
     setDeletingId(invoiceId);
     setStatus(null);
     try {
-      const { error } = await supabase
-        .from("invoices")
-        .delete()
-        .eq("id", invoiceId);
-      if (error) throw error;
+      const linesSnap = await getDocs(
+        collection(db, "invoices", invoiceId, "lines"),
+      );
+      const batch = writeBatch(db);
+      linesSnap.docs.forEach((lineDoc) => batch.delete(lineDoc.ref));
+      batch.delete(doc(db, "invoices", invoiceId));
+      await batch.commit();
       setStored((prev) => prev.filter((invoice) => invoice.id !== invoiceId));
       setStatus("Invoice deleted.");
     } catch {
@@ -126,7 +116,7 @@ export default function InvoicesPage() {
             </h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Manage drafts and finalized invoices stored in your database.</p>
           </div>
-          <button onClick={loadFromSupabase} disabled={isLoading} className="btn-ghost">
+          <button onClick={loadInvoices} disabled={isLoading} className="btn-ghost">
             <RefreshCw size={13} />
             {isLoading ? "Syncing..." : "Sync database"}
           </button>

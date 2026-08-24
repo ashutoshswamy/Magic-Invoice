@@ -4,7 +4,7 @@ import * as React from "react";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Menu, X, Sparkles } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../../lib/useAuth";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -238,8 +238,8 @@ const trustItems = [
   "GSTR-1 Ready",
   "HSN / SAC Lookup",
   "Advanced AI Parser",
-  "Supabase RLS",
-  "Clerk Auth",
+  "Firestore Rules",
+  "Firebase Auth",
   "Resend Email",
   "Next.js 16",
 ];

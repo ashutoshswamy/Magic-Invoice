@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /user_settings/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /clients/{id} {
+      allow read, update, delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.user_id == request.auth.uid;
+    }
+
+    match /items/{id} {
+      allow read, update, delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.user_id == request.auth.uid;
+    }
+
+    match /expenses/{id} {
+      allow read, update, delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.user_id == request.auth.uid;
+    }
+
+    match /recurring_invoices/{id} {
+      allow read, update, delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.user_id == request.auth.uid;
+    }
+
+    match /invoices/{invoiceId} {
+      allow read, update, delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.user_id == request.auth.uid;
+
+      // Single-doc path access: always re-derive ownership from the parent
+      // invoice, never trust the line's own denormalized user_id field.
+      match /lines/{lineId} {
+        allow read, write: if isSignedIn()
+          && get(/databases/$(database)/documents/invoices/$(invoiceId)).data.user_id == request.auth.uid;
+      }
+    }
+
+    // collectionGroup("lines") queries (gstr/analytics/ai-insights fan-out reads).
+    // "list" rules run per-candidate-document, so this checks the denormalized
+    // user_id field directly instead of a get() per doc. This is a query filter
+    // only, not a trust boundary for writes -- the block above stays authoritative.
+    match /{path=**}/lines/{lineId} {
+      allow list: if isSignedIn() && resource.data.user_id == request.auth.uid;
+    }
+  }
+}

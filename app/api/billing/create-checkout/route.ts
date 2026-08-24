@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "../../../lib/requireAuth";
 
-export async function POST() {
-  const { userId } = await auth();
+export async function POST(request: Request) {
+  const userId = await requireAuth(request);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

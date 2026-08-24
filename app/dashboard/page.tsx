@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 import {
   ArrowUpRight,
   BookOpen,
@@ -19,8 +19,21 @@ import {
 import TopNav from "../components/TopNav";
 import InvoicePreview from "../components/InvoicePreview";
 import { InvoiceData } from "../types";
-import { isSupabaseConfigured } from "../lib/supabaseClient";
-import { useSupabase } from "../lib/useSupabase";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+  getDoc,
+  doc,
+  addDoc,
+  setDoc,
+  writeBatch,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db, auth } from "../lib/firebaseClient";
 import { usePlan } from "../lib/usePlan";
 
 const defaultInvoice: InvoiceData = {
@@ -114,7 +127,6 @@ type SavedClient = {
 export default function DashboardPage() {
   const router = useRouter();
   const { userId, isLoaded: isAuthReady } = useAuth();
-  const supabase = useSupabase();
   const planInfo = usePlan();
   const [prompt, setPrompt] = useState("");
   const [invoice, setInvoice] = useState<InvoiceData>(defaultInvoice);
@@ -173,15 +185,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const loadDefaults = async () => {
-      if (!isSupabaseConfigured || hasLoadedDefaults || !isAuthReady || !userId)
-        return;
+      if (hasLoadedDefaults || !isAuthReady || !userId) return;
       let defaults: Record<string, string> = {};
       try {
-        const { data: settings } = await supabase
-          .from("user_settings")
-          .select("*")
-          .eq("user_id", userId)
-          .maybeSingle();
+        const settingsSnap = await getDoc(doc(db, "user_settings", userId));
+        const settings = settingsSnap.data();
         if (settings) defaults = settings as Record<string, string>;
       } catch {
         // use empty defaults
@@ -189,13 +197,15 @@ export default function DashboardPage() {
 
       let nextInvoiceNumber = buildNextInvoiceNumber("");
       try {
-        const { data: lastInvoice } = await supabase
-          .from("invoices")
-          .select("invoice_number")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        const lastInvoiceSnap = await getDocs(
+          query(
+            collection(db, "invoices"),
+            where("user_id", "==", userId),
+            orderBy("created_at", "desc"),
+            limit(1),
+          ),
+        );
+        const lastInvoice = lastInvoiceSnap.docs[0]?.data();
         nextInvoiceNumber = buildNextInvoiceNumber(
           "",
           lastInvoice?.invoice_number ?? null,
@@ -225,20 +235,23 @@ export default function DashboardPage() {
       setHasLoadedDefaults(true);
     };
     loadDefaults();
-  }, [hasLoadedDefaults, isAuthReady, userId, supabase]);
+  }, [hasLoadedDefaults, isAuthReady, userId]);
 
   useEffect(() => {
     const loadClients = async () => {
-      if (!isSupabaseConfigured || !isAuthReady || !userId) return;
+      if (!isAuthReady || !userId) return;
       setIsLoadingClients(true);
       try {
-        const { data, error } = await supabase
-          .from("clients")
-          .select("id, name, company, email")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: true });
-        if (error) throw error;
-        setClients((data ?? []) as SavedClient[]);
+        const snap = await getDocs(
+          query(
+            collection(db, "clients"),
+            where("user_id", "==", userId),
+            orderBy("created_at", "asc"),
+          ),
+        );
+        setClients(
+          snap.docs.map((d) => ({ id: d.id, ...d.data() }) as SavedClient),
+        );
       } catch {
         setClientStatus("Unable to load clients.");
       } finally {
@@ -247,7 +260,7 @@ export default function DashboardPage() {
     };
 
     loadClients();
-  }, [isAuthReady, userId, supabase]);
+  }, [isAuthReady, userId]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isClient, setIsClient] = useState(false);
@@ -257,7 +270,7 @@ export default function DashboardPage() {
   }, []);
 
   useGSAP(() => {
-    if (!isClient) return;
+    if (!isClient || !userId) return;
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
     tl.fromTo(
       [".ai-composer-card", ".invoice-editor-card", ".dashboard-stat-card", ".dashboard-tip-card"],
@@ -282,7 +295,7 @@ export default function DashboardPage() {
       },
       "-=0.55"
     );
-  }, [isClient]);
+  }, [isClient, userId]);
 
   useEffect(() => {
     if (!isClient) return;
@@ -300,10 +313,12 @@ export default function DashboardPage() {
       const activeClient = clients.find(
         (client) => client.id === selectedClientId,
       );
+      const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/parse", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
         },
         body: JSON.stringify({
           prompt: activeClient
@@ -386,10 +401,6 @@ export default function DashboardPage() {
   };
 
   const handleSaveClient = async () => {
-    if (!isSupabaseConfigured) {
-      setClientStatus("Connect your workspace to save clients.");
-      return;
-    }
     if (!invoice.to.name.trim()) {
       setClientStatus("Add a client name before saving.");
       return;
@@ -401,19 +412,22 @@ export default function DashboardPage() {
         setClientStatus("Log in to save clients.");
         return;
       }
-      const { data, error } = await supabase
-        .from("clients")
-        .insert({
-          user_id: userId,
-          name: invoice.to.name,
-          company: invoice.to.company || null,
-          email: invoice.to.email || null,
-        })
-        .select("id, name, company, email")
-        .single();
-      if (error) throw error;
-      setClients((prev) => [...prev, data as SavedClient]);
-      setSelectedClientId(data.id);
+      const newClient: SavedClient = {
+        id: "",
+        name: invoice.to.name,
+        company: invoice.to.company || null,
+        email: invoice.to.email || null,
+      };
+      const ref = await addDoc(collection(db, "clients"), {
+        user_id: userId,
+        name: newClient.name,
+        company: newClient.company,
+        email: newClient.email,
+        created_at: serverTimestamp(),
+      });
+      newClient.id = ref.id;
+      setClients((prev) => [...prev, newClient]);
+      setSelectedClientId(ref.id);
       setClientStatus("Client saved.");
     } catch {
       setClientStatus("Unable to save client.");
@@ -423,74 +437,66 @@ export default function DashboardPage() {
   };
 
   const handleSave = async () => {
-    if (!isSupabaseConfigured) {
-      setStatus("Connect your workspace to save invoices.");
+    if (!userId) {
+      setStatus("Log in to save invoices.");
       return;
     }
     setIsSaving(true);
     setStatus(null);
     try {
-      if (!userId) {
-        setStatus("Log in to save invoices.");
-        return;
-      }
+      const invoiceRef = doc(collection(db, "invoices"));
+      await setDoc(invoiceRef, {
+        user_id: userId,
+        invoice_number: invoice.invoiceNumber,
+        issued_on: invoice.issuedOn,
+        due_date: invoice.dueDate,
+        paid: invoice.paid,
+        currency: invoice.currency,
+        notes: invoice.notes,
+        from_name: invoice.from.name,
+        from_company: invoice.from.company,
+        from_email: invoice.from.email,
+        from_address_line1: invoice.from.addressLine1,
+        from_address_line2: invoice.from.addressLine2,
+        from_city: invoice.from.city,
+        from_state: invoice.from.state,
+        from_postal_code: invoice.from.postalCode,
+        from_country: invoice.from.country,
+        to_name: invoice.to.name,
+        to_company: invoice.to.company,
+        to_email: invoice.to.email,
+        to_address_line1: invoice.to.addressLine1,
+        to_address_line2: invoice.to.addressLine2,
+        to_city: invoice.to.city,
+        to_state: invoice.to.state,
+        to_state_code: invoice.to.stateCode ?? "",
+        to_postal_code: invoice.to.postalCode,
+        to_country: invoice.to.country,
+        to_gstin: invoice.to.gstin ?? "",
+        from_state_code: invoice.from.stateCode ?? "",
+        from_gstin: invoice.from.gstin ?? "",
+        gst_type: invoice.gstType ?? "CGST_SGST",
+        tax_rate: invoice.taxRate ?? 0,
+        custom_charges: invoice.customCharges ?? [],
+        deleted_at: null,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp(),
+      });
 
-      const { data: invoiceData, error: invoiceError } = await supabase
-        .from("invoices")
-        .insert({
+      const linesBatch = writeBatch(db);
+      invoice.lines.forEach((line, index) => {
+        const lineRef = doc(collection(db, "invoices", invoiceRef.id, "lines"));
+        linesBatch.set(lineRef, {
+          invoice_id: invoiceRef.id,
           user_id: userId,
-          invoice_number: invoice.invoiceNumber,
-          issued_on: invoice.issuedOn,
-          due_date: invoice.dueDate,
-          paid: invoice.paid,
-          currency: invoice.currency,
-          notes: invoice.notes,
-          from_name: invoice.from.name,
-          from_company: invoice.from.company,
-          from_email: invoice.from.email,
-          from_address_line1: invoice.from.addressLine1,
-          from_address_line2: invoice.from.addressLine2,
-          from_city: invoice.from.city,
-          from_state: invoice.from.state,
-          from_postal_code: invoice.from.postalCode,
-          from_country: invoice.from.country,
-          to_name: invoice.to.name,
-          to_company: invoice.to.company,
-          to_email: invoice.to.email,
-          to_address_line1: invoice.to.addressLine1,
-          to_address_line2: invoice.to.addressLine2,
-          to_city: invoice.to.city,
-          to_state: invoice.to.state,
-          to_state_code: invoice.to.stateCode ?? "",
-          to_postal_code: invoice.to.postalCode,
-          to_country: invoice.to.country,
-          to_gstin: invoice.to.gstin ?? "",
-          from_state_code: invoice.from.stateCode ?? "",
-          from_gstin: invoice.from.gstin ?? "",
-          gst_type: invoice.gstType ?? "CGST_SGST",
-          tax_rate: invoice.taxRate ?? 0,
-          custom_charges: invoice.customCharges ?? [],
-        })
-        .select("id")
-        .single();
-
-      if (invoiceError) throw invoiceError;
-
-      const invoiceId = invoiceData?.id;
-      if (invoiceId) {
-        const { error: linesError } = await supabase
-          .from("invoice_lines")
-          .insert(
-            invoice.lines.map((line) => ({
-              invoice_id: invoiceId,
-              description: line.description,
-              quantity: line.quantity,
-              rate: line.rate,
-              hsn_sac_code: line.hsnSacCode ?? "",
-            })),
-          );
-        if (linesError) throw linesError;
-      }
+          description: line.description,
+          quantity: line.quantity,
+          rate: line.rate,
+          hsn_sac_code: line.hsnSacCode ?? "",
+          sort_order: index,
+        });
+      });
+      await linesBatch.commit();
 
       setStatus("Saved to database.");
     } catch {
@@ -589,13 +595,27 @@ export default function DashboardPage() {
   };
 
   const loadCatalogue = async () => {
-    if (catalogueLoaded || !isSupabaseConfigured || !userId) return;
-    const { data } = await supabase
-      .from("items")
-      .select("id, name, default_rate, gst_rate, hsn_sac_code, unit")
-      .eq("user_id", userId)
-      .order("name", { ascending: true });
-    setCatalogueItems(data ?? []);
+    if (catalogueLoaded || !userId) return;
+    const snap = await getDocs(
+      query(
+        collection(db, "items"),
+        where("user_id", "==", userId),
+        orderBy("name", "asc"),
+      ),
+    );
+    setCatalogueItems(
+      snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          name: data.name,
+          default_rate: data.default_rate,
+          gst_rate: data.gst_rate,
+          hsn_sac_code: data.hsn_sac_code,
+          unit: data.unit,
+        };
+      }),
+    );
     setCatalogueLoaded(true);
   };
 

@@ -1,29 +1,30 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { supabaseAdmin } from "../../lib/supabaseServer";
+import { requireAuth } from "../../lib/requireAuth";
+import { adminDb } from "../../lib/firebaseAdmin";
+import { FieldValue } from "firebase-admin/firestore";
 import {
   recurringInvoiceDraftSchema,
   recurringInvoicePatchSchema,
 } from "../../schemas";
 
-export async function GET() {
-  const { userId } = await auth();
+export async function GET(request: Request) {
+  const userId = await requireAuth(request);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data, error } = await supabaseAdmin()
-    .from("recurring_invoices")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+  const snap = await adminDb
+    .collection("recurring_invoices")
+    .where("user_id", "==", userId)
+    .orderBy("created_at", "desc")
+    .get();
 
-  if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data });
+  return NextResponse.json({
+    data: snap.docs.map((d) => ({ id: d.id, ...d.data() })),
+  });
 }
 
 export async function POST(request: Request) {
-  const { userId } = await auth();
+  const userId = await requireAuth(request);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -42,19 +43,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data, error } = await supabaseAdmin()
-    .from("recurring_invoices")
-    .insert({ ...parsedBody.data, user_id: userId })
-    .select()
-    .single();
-
-  if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data });
+  const doc = {
+    ...parsedBody.data,
+    user_id: userId,
+    created_at: FieldValue.serverTimestamp(),
+  };
+  const ref = await adminDb.collection("recurring_invoices").add(doc);
+  const saved = await ref.get();
+  return NextResponse.json({ data: { id: ref.id, ...saved.data() } });
 }
 
 export async function PATCH(request: Request) {
-  const { userId } = await auth();
+  const userId = await requireAuth(request);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -74,22 +74,19 @@ export async function PATCH(request: Request) {
   }
 
   const { id, ...updates } = parsedBody.data;
+  const ref = adminDb.collection("recurring_invoices").doc(id);
+  const existing = await ref.get();
+  if (!existing.exists || existing.data()?.user_id !== userId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
-  const { data, error } = await supabaseAdmin()
-    .from("recurring_invoices")
-    .update(updates)
-    .eq("id", id)
-    .eq("user_id", userId)
-    .select()
-    .single();
-
-  if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data });
+  await ref.update(updates);
+  const updated = await ref.get();
+  return NextResponse.json({ data: { id: ref.id, ...updated.data() } });
 }
 
 export async function DELETE(request: Request) {
-  const { userId } = await auth();
+  const userId = await requireAuth(request);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -97,13 +94,12 @@ export async function DELETE(request: Request) {
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
-  const { error } = await supabaseAdmin()
-    .from("recurring_invoices")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", userId);
+  const ref = adminDb.collection("recurring_invoices").doc(id);
+  const existing = await ref.get();
+  if (!existing.exists || existing.data()?.user_id !== userId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
-  if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  await ref.delete();
   return NextResponse.json({ ok: true });
 }

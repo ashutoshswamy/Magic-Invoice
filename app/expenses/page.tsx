@@ -2,11 +2,20 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "../lib/useAuth";
 import { Plus, Trash2 } from "lucide-react";
 import TopNav from "../components/TopNav";
-import { isSupabaseConfigured } from "../lib/supabaseClient";
-import { useSupabase } from "../lib/useSupabase";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "../lib/firebaseClient";
 
 type Expense = {
   id: string;
@@ -51,7 +60,6 @@ const formatINR = (n: number) =>
 
 export default function ExpensesPage() {
   const { userId, isLoaded } = useAuth();
-  const supabase = useSupabase();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -60,30 +68,33 @@ export default function ExpensesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!isSupabaseConfigured || !isLoaded || !userId) return;
+    if (!isLoaded || !userId) return;
     setIsLoading(true);
-    const { data, error } = await supabase
-      .from("expenses")
-      .select(
-        "id, vendor, description, amount, gst_paid, category, expense_date, itc_eligible, receipt_url",
-      )
-      .eq("user_id", userId)
-      .order("expense_date", { ascending: false });
-    setIsLoading(false);
-    if (error) {
+    try {
+      const snap = await getDocs(
+        query(
+          collection(db, "expenses"),
+          where("user_id", "==", userId),
+          orderBy("expense_date", "desc"),
+        ),
+      );
+      setExpenses(
+        snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Expense),
+      );
+    } catch {
       setStatus("Unable to load expenses.");
-      return;
+    } finally {
+      setIsLoading(false);
     }
-    setExpenses((data ?? []) as Expense[]);
-  }, [isLoaded, userId, supabase]);
+  }, [isLoaded, userId]);
 
   useEffect(() => {
     if (isLoaded && userId) load();
   }, [isLoaded, userId, load]);
 
   const handleSave = async () => {
-    if (!isSupabaseConfigured || !userId) {
-      setStatus("Connect Supabase to save expenses.");
+    if (!userId) {
+      setStatus("Log in to save expenses.");
       return;
     }
     if (!draft.vendor.trim()) {
@@ -97,13 +108,11 @@ export default function ExpensesPage() {
     setIsSaving(true);
     setStatus(null);
     try {
-      const { data, error } = await supabase
-        .from("expenses")
-        .insert({ ...draft, user_id: userId })
-        .select()
-        .single();
-      if (error) throw error;
-      setExpenses((prev) => [data as Expense, ...prev]);
+      const ref = await addDoc(collection(db, "expenses"), {
+        ...draft,
+        user_id: userId,
+      });
+      setExpenses((prev) => [{ ...draft, id: ref.id }, ...prev]);
       setDraft(emptyDraft());
       setStatus("Expense saved.");
     } catch {
@@ -114,17 +123,17 @@ export default function ExpensesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!isSupabaseConfigured) return;
     if (!window.confirm("Delete this expense?")) return;
     setDeletingId(id);
-    const { error } = await supabase.from("expenses").delete().eq("id", id);
-    setDeletingId(null);
-    if (error) {
+    try {
+      await deleteDoc(doc(db, "expenses", id));
+      setExpenses((prev) => prev.filter((e) => e.id !== id));
+      setStatus("Expense deleted.");
+    } catch {
       setStatus("Unable to delete expense.");
-      return;
+    } finally {
+      setDeletingId(null);
     }
-    setExpenses((prev) => prev.filter((e) => e.id !== id));
-    setStatus("Expense deleted.");
   };
 
   const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount), 0);
