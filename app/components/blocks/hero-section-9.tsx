@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "../../lib/useAuth";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -231,19 +231,6 @@ const InvoiceMockup = () => (
   </div>
 );
 
-/* ── Trust items ─────────────────────────────────────────────────────────────── */
-
-const trustItems = [
-  "CGST / SGST / IGST",
-  "GSTR-1 Ready",
-  "HSN / SAC Lookup",
-  "Advanced AI Parser",
-  "Firestore Rules",
-  "Firebase Auth",
-  "Resend Email",
-  "Next.js 16",
-];
-
 /* ── HeroSection (main export) ───────────────────────────────────────────────── */
 
 export const HeroSection = () => {
@@ -260,19 +247,17 @@ export const HeroSection = () => {
 
   useGSAP(() => {
     const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-    tl.fromTo(".hi-pill", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.8, delay: 0.1 })
-      .fromTo(".hi-h1", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.9 }, "-=0.6")
+    tl.fromTo(".hi-h1", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.9, delay: 0.1 })
       .fromTo(".hi-sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.6")
       .fromTo(".hi-cta", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.6")
-      .fromTo(".hi-mockup", { opacity: 0, x: 50, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 1.1, ease: "back.out(1.15)" }, "-=0.7")
-      .fromTo(".trust-item", { opacity: 0, y: 15 }, { opacity: 1, y: 0, stagger: 0.05, duration: 0.6 }, "-=0.5");
+      .fromTo(".hi-mockup", { opacity: 0, x: 50, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 1.1, ease: "back.out(1.15)" }, "-=0.7");
   }, { scope: containerRef });
 
   return (
     <div ref={containerRef}>
       <style>{`
         @keyframes hero-blink { 0%,100%{opacity:1} 50%{opacity:0} }
-        .hi-pill, .hi-h1, .hi-sub, .hi-cta, .hi-mockup, .trust-item { opacity: 0; }
+        .hi-h1, .hi-sub, .hi-cta, .hi-mockup { opacity: 0; }
 
         .hi-nav-link {
           font-family: var(--font-mono), monospace;
@@ -537,28 +522,6 @@ export const HeroSection = () => {
             className="hi-copy-col"
             style={{ flex: "0 0 auto", maxWidth: 500 }}
           >
-            {/* Pill badge */}
-            <div className="hi-pill" style={{ marginBottom: 28 }}>
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 7,
-                  fontFamily: "var(--font-mono), monospace",
-                  fontSize: 9,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: "var(--gold)",
-                  border: "1px solid var(--border-bright)",
-                  padding: "5px 14px",
-                  borderRadius: 1,
-                }}
-              >
-                <Sparkles size={11} />
-                India-first AI invoicing · Built for GST
-              </span>
-            </div>
-
             {/* H1 */}
             <h1
               className="hi-h1"
@@ -707,62 +670,6 @@ export const HeroSection = () => {
             >
               <InvoiceMockup />
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Trust bar ── */}
-      <section
-        style={{
-          background: "var(--ink-soft)",
-          borderTop: "1px solid var(--border)",
-          borderBottom: "1px solid var(--border)",
-          padding: "32px 24px",
-          position: "relative",
-          zIndex: 2,
-        }}
-      >
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <p
-            style={{
-              fontFamily: "var(--font-mono), monospace",
-              fontSize: 9,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "var(--text-muted)",
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
-            Built on trusted infrastructure · India GST compliant
-          </p>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px 16px",
-            }}
-          >
-            {trustItems.map((item) => (
-              <span
-                key={item}
-                className="trust-item"
-                style={{
-                  fontFamily: "var(--font-mono), monospace",
-                  fontSize: 10,
-                  letterSpacing: "0.1em",
-                  color: "var(--text-muted)",
-                  padding: "4px 12px",
-                  border: "1px solid var(--border)",
-                  borderRadius: 1,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {item}
-              </span>
-            ))}
           </div>
         </div>
       </section>

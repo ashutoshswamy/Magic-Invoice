@@ -23,14 +23,18 @@
   --glass-bg: rgba(19, 16, 13, 0.75);
   --glass-border: rgba(215, 183, 120, 0.12);
   --glow-strength: 0 0 50px rgba(217, 119, 6, 0.12);
+
+  /* One typeface everywhere — legacy var names aliased to DM Sans */
+  --font-playfair: var(--font-dm-sans);
+  --font-mono: var(--font-dm-sans);
 }
 
 @theme inline {
   --color-background: var(--ink);
   --color-foreground: var(--text-primary);
   --font-sans: var(--font-dm-sans);
-  --font-display: var(--font-playfair);
-  --font-mono: var(--font-mono);
+  --font-display: var(--font-dm-sans);
+  --font-mono: var(--font-dm-sans);
 }
 
 /* ── Base ───────────────────────────────────────────────────────────────────── */
