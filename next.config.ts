@@ -2,9 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  // firebase-admin pulls jwks-rsa -> require('jose'), jose v5 is ESM-only.
-  // Keep it external so Node loads it instead of the bundler.
-  serverExternalPackages: ["firebase-admin"],
   headers: async () => [
     {
       source: "/(.*)",
