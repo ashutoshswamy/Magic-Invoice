@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
@@ -8,6 +8,7 @@ import {
   GoogleAuthProvider,
 } from "firebase/auth";
 import { auth } from "../lib/firebaseClient";
+import { useAuth } from "../lib/useAuth";
 import TopNav from "../components/TopNav";
 
 const fieldBox = { background: "var(--ink-soft)", border: "1px solid var(--border)", borderRadius: 2, padding: "12px 16px", display: "flex", flexDirection: "column" as const, gap: 6, width: "100%" };
@@ -16,18 +17,29 @@ const fieldInput = { background: "transparent", border: "none", outline: "none",
 
 export default function SignupPage() {
   const router = useRouter();
+  const { isSignedIn, isLoaded } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (isLoaded && isSignedIn) router.replace("/dashboard");
+  }, [isLoaded, isSignedIn, router]);
+
   const establishSession = async (idToken: string) => {
-    await fetch("/api/auth/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken }),
-    });
-    router.push("/dashboard");
+    // Session cookie is best-effort; client auth state already gates the app.
+    try {
+      await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+    } catch {
+      // ignore — redirect regardless
+    }
+    router.replace("/dashboard");
+    router.refresh();
   };
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
