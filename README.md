@@ -1,35 +1,26 @@
 # Magic Invoice
 
-Magic Invoice is a high-performance, AI-powered invoicing workspace built with **Next.js 16**, **React 19**, and **Tailwind CSS 4**. It transforms natural language prompts into structured invoice drafts, providing a seamless experience for managing clients, tracking revenue, and generating professional documents.
+![Magic Invoice](public/og-image.jpg)
 
-## Key Features
+A high-performance, AI-powered invoicing workspace built with Next.js 16, React 19, and Tailwind CSS 4. Transforms natural language prompts into structured invoice drafts, providing a seamless experience for managing clients, tracking revenue, and generating professional documents.
 
-- **AI-Powered Drafts**: Generate full invoices from simple sentences using advanced AI models.
-- **Client Management**: Maintain a reusable directory of clients for lightning-fast invoicing.
-- **Live Analytics**: Visual revenue tracking and payment status insights.
-- **Secure Storage**: Robust data isolation and persistence powered by Firebase (Firestore + Auth).
-- **Modern UI**: Smooth transitions with Framer Motion, GSAP, and a premium design aesthetic.
+## Features
 
-## Tech Stack
+- AI-powered drafts — generate full invoices from simple sentences using advanced AI models
+- Client management — reusable directory of clients for lightning-fast invoicing
+- Live analytics — visual revenue tracking and payment status insights
+- Secure storage — robust data isolation and persistence powered by Firebase (Firestore + Auth)
+- Modern UI — smooth transitions with Framer Motion, GSAP, and a premium design aesthetic
 
-- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
-- **UI & Styling**: [React 19](https://react.dev/), [Tailwind CSS 4](https://tailwindcss.com/)
-- **State & Animations**: [Framer Motion](https://www.framer.com/motion/), [GSAP](https://gsap.com/)
-- **Backend & Auth**: [Firebase](https://firebase.google.com/) (Firestore, Firebase Auth, Admin SDK)
-- **AI Engine**: [Google Generative AI](https://ai.google.dev/)
-- **Payments**: [Razorpay](https://razorpay.com/)
-- **Email**: [Resend](https://resend.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
+## Author
 
-## Documentation
+**Ashutosh Swamy**
 
-For a deeper dive into the architecture, see [DOCUMENTATION.md](DOCUMENTATION.md).
-
-## Security
-
-Please refer to [SECURITY.md](SECURITY.md) for vulnerability reporting.
+- [GitHub](https://github.com/ashutoshswamy)
+- [LinkedIn](https://linkedin.com/in/ashutoshswamy)
+- [X](https://x.com/ashutoshswamy_)
+- [Portfolio](https://ashutoshswamy.in)
 
 ## License
 
 MIT License. See [LICENSE](LICENSE).
-
