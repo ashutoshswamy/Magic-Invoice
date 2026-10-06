@@ -1,33 +1,20 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "./lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://magicinvoice.in";
   const lastModified = new Date();
+  const page = (path: string, changeFrequency: "weekly" | "monthly" | "yearly", priority: number) => ({
+    url: `${SITE_URL}${path}`,
+    lastModified,
+    changeFrequency,
+    priority,
+  });
 
   return [
-    {
-      url: `${baseUrl}/`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/cookies`,
-      lastModified,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
+    page("/", "weekly", 1),
+    page("/signup", "monthly", 0.6),
+    page("/privacy", "yearly", 0.3),
+    page("/terms", "yearly", 0.3),
+    page("/cookies", "yearly", 0.3),
   ];
 }

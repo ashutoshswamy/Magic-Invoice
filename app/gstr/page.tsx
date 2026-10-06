@@ -242,11 +242,11 @@ export default function GSTRPage() {
     fontSize: 9,
     letterSpacing: "0.18em",
     textTransform: "uppercase" as const,
-    color: "var(--text-muted)",
+    color: "var(--text-3)",
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div
         style={{
@@ -274,16 +274,16 @@ export default function GSTRPage() {
             </p>
             <h1
               style={{
-                fontFamily: "var(--font-playfair), serif",
+                fontFamily: "var(--font-display), serif",
                 fontWeight: 600,
                 fontSize: "clamp(24px, 4vw, 36px)",
-                color: "var(--text-primary)",
+                color: "var(--text)",
                 margin: "0 0 8px",
               }}
             >
               GSTR-1 Export
             </h1>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            <p style={{ fontSize: 14, color: "var(--text-3)" }}>
               FY {fy.start}–{String(fy.end).slice(-2)} · {invoices.length}{" "}
               invoice{invoices.length !== 1 ? "s" : ""} · Export for GST portal
               or CA
@@ -305,7 +305,7 @@ export default function GSTRPage() {
             >
               <Download size={13} /> B2CS CSV
             </button>
-            <button onClick={downloadJSON} className="btn-gold">
+            <button onClick={downloadJSON} className="btn-primary">
               <Download size={13} /> GSTR-1 JSON
             </button>
           </div>
@@ -315,7 +315,7 @@ export default function GSTRPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(180px, 100%), 1fr))",
             gap: 12,
           }}
         >
@@ -340,7 +340,7 @@ export default function GSTRPage() {
                   fontFamily: "var(--font-mono), monospace",
                   fontSize: 16,
                   fontWeight: 600,
-                  color: "var(--text-primary)",
+                  color: "var(--text)",
                   marginTop: 8,
                 }}
               >
@@ -353,7 +353,7 @@ export default function GSTRPage() {
         {/* GSTR-3B summary */}
         <div
           className="card"
-          style={{ padding: 28, borderLeft: "2px solid var(--gold)" }}
+          style={{ padding: 28, borderLeft: "2px solid var(--accent)" }}
         >
           <p className="section-label" style={{ marginBottom: 12 }}>
             GSTR-3B Summary
@@ -361,7 +361,7 @@ export default function GSTRPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(min(200px, 100%), 1fr))",
               gap: 16,
             }}
           >
@@ -388,7 +388,7 @@ export default function GSTRPage() {
                   style={{
                     fontFamily: "var(--font-mono), monospace",
                     fontSize: 14,
-                    color: "var(--text-primary)",
+                    color: "var(--text)",
                     fontWeight: 600,
                   }}
                 >
@@ -400,9 +400,9 @@ export default function GSTRPage() {
           <p
             style={{
               fontSize: 12,
-              color: "var(--text-muted)",
+              color: "var(--text-3)",
               marginTop: 16,
-              borderTop: "1px solid var(--border)",
+              borderTop: "1px solid var(--line)",
               paddingTop: 12,
             }}
           >
@@ -418,7 +418,7 @@ export default function GSTRPage() {
             style={{
               display: "flex",
               gap: 24,
-              borderBottom: "1px solid var(--border)",
+              borderBottom: "1px solid var(--line)",
               marginBottom: 20,
             }}
           >
@@ -443,7 +443,7 @@ export default function GSTRPage() {
             <p
               style={{
                 fontSize: 13,
-                color: "var(--text-muted)",
+                color: "var(--text-3)",
                 fontFamily: "var(--font-mono), monospace",
               }}
             >
@@ -462,7 +462,7 @@ export default function GSTRPage() {
           <p
             style={{
               fontSize: 11,
-              color: "var(--gold)",
+              color: "var(--accent)",
               fontFamily: "var(--font-mono), monospace",
             }}
           >
@@ -472,7 +472,7 @@ export default function GSTRPage() {
 
         <div
           className="card"
-          style={{ padding: "20px 24px", borderLeft: "2px solid var(--gold)" }}
+          style={{ padding: "20px 24px", borderLeft: "2px solid var(--accent)" }}
         >
           <p className="section-label" style={{ marginBottom: 8 }}>
             Month-wise breakdown
@@ -480,7 +480,7 @@ export default function GSTRPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(min(100px, 100%), 1fr))",
               gap: 8,
             }}
           >
@@ -507,7 +507,7 @@ export default function GSTRPage() {
                     style={{
                       fontFamily: "var(--font-mono), monospace",
                       fontSize: 12,
-                      color: total > 0 ? "var(--gold)" : "var(--text-muted)",
+                      color: total > 0 ? "var(--accent)" : "var(--text-3)",
                     }}
                   >
                     {total > 0 ? formatCurrency(total) : "—"}
@@ -526,7 +526,7 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
   if (!rows.length)
     return (
       <div className="card" style={{ padding: "32px", textAlign: "center" }}>
-        <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
+        <p style={{ fontSize: 13, color: "var(--text-3)" }}>
           No invoices in this category.
         </p>
       </div>
@@ -537,7 +537,7 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
     fontSize: 9,
     letterSpacing: "0.12em",
     textTransform: "uppercase" as const,
-    color: "var(--text-muted)",
+    color: "var(--text-3)",
   };
 
   return (
@@ -546,7 +546,7 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
         style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
       >
         <thead>
-          <tr style={{ borderBottom: "1px solid var(--border)" }}>
+          <tr style={{ borderBottom: "1px solid var(--line)" }}>
             {[
               "Invoice No",
               "Date",
@@ -577,25 +577,25 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
             <tr
               key={r.id}
               style={{
-                borderBottom: "1px solid var(--border)",
-                background: i % 2 === 0 ? "transparent" : "var(--ink-soft)",
+                borderBottom: "1px solid var(--line)",
+                background: i % 2 === 0 ? "transparent" : "var(--surface)",
               }}
             >
               <td
                 style={{
                   padding: "10px 12px",
                   fontFamily: "var(--font-mono), monospace",
-                  color: "var(--gold)",
+                  color: "var(--accent)",
                   fontSize: 12,
                 }}
               >
                 {r.invoice_number}
               </td>
-              <td style={{ padding: "10px 12px", color: "var(--text-muted)" }}>
+              <td style={{ padding: "10px 12px", color: "var(--text-3)" }}>
                 {r.issued_on}
               </td>
               <td
-                style={{ padding: "10px 12px", color: "var(--text-secondary)" }}
+                style={{ padding: "10px 12px", color: "var(--text-2)" }}
               >
                 {r.to_name || r.to_company || "—"}
               </td>
@@ -603,7 +603,7 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
                 style={{
                   padding: "10px 12px",
                   fontFamily: "var(--font-mono), monospace",
-                  color: "var(--text-muted)",
+                  color: "var(--text-3)",
                   fontSize: 11,
                 }}
               >
@@ -612,7 +612,7 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
               <td
                 style={{
                   padding: "10px 12px",
-                  color: "var(--text-primary)",
+                  color: "var(--text)",
                   fontFamily: "var(--font-mono), monospace",
                 }}
               >
@@ -621,7 +621,7 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
               <td
                 style={{
                   padding: "10px 12px",
-                  color: "var(--text-secondary)",
+                  color: "var(--text-2)",
                   fontFamily: "var(--font-mono), monospace",
                 }}
               >
@@ -630,7 +630,7 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
               <td
                 style={{
                   padding: "10px 12px",
-                  color: "var(--text-secondary)",
+                  color: "var(--text-2)",
                   fontFamily: "var(--font-mono), monospace",
                 }}
               >
@@ -639,7 +639,7 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
               <td
                 style={{
                   padding: "10px 12px",
-                  color: "var(--text-secondary)",
+                  color: "var(--text-2)",
                   fontFamily: "var(--font-mono), monospace",
                 }}
               >
@@ -648,7 +648,7 @@ function InvoiceTable({ rows }: { rows: InvoiceSummary[] }) {
               <td
                 style={{
                   padding: "10px 12px",
-                  color: "var(--cream)",
+                  color: "var(--text-strong)",
                   fontFamily: "var(--font-mono), monospace",
                   fontWeight: 600,
                 }}

@@ -14,7 +14,8 @@ import {
   limit as fsLimit,
   getDocs,
   doc,
-  writeBatch,
+  updateDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../lib/firebaseClient";
 import { formatDisplayDate } from "../lib/formatDate";
@@ -44,6 +45,7 @@ export default function InvoicesPage() {
         query(
           collection(db, "invoices"),
           where("user_id", "==", userId),
+          where("deleted_at", "==", null),
           orderBy("created_at", "desc"),
           fsLimit(20),
         ),
@@ -75,20 +77,16 @@ export default function InvoicesPage() {
 
   const handleDelete = async (invoiceId: string) => {
     const confirmed = window.confirm(
-      "Delete this invoice? This action cannot be undone.",
+      "Delete this invoice? It will be removed from your invoice list, GST returns and analytics.",
     );
     if (!confirmed) return;
 
     setDeletingId(invoiceId);
     setStatus(null);
     try {
-      const linesSnap = await getDocs(
-        collection(db, "invoices", invoiceId, "lines"),
-      );
-      const batch = writeBatch(db);
-      linesSnap.docs.forEach((lineDoc) => batch.delete(lineDoc.ref));
-      batch.delete(doc(db, "invoices", invoiceId));
-      await batch.commit();
+      // Soft delete: the record and its lines stay for the audit trail; every
+      // list, report and lookup skips invoices with deleted_at set.
+      await updateDoc(doc(db, "invoices", invoiceId), { deleted_at: serverTimestamp() });
       setStored((prev) => prev.filter((invoice) => invoice.id !== invoiceId));
       setStatus("Invoice deleted.");
     } catch {
@@ -105,16 +103,16 @@ export default function InvoicesPage() {
     !inv.paid && inv.due_date && new Date(inv.due_date) < today;
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px 64px", display: "flex", flexDirection: "column", gap: 32 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
             <p className="section-label" style={{ marginBottom: 10 }}>All invoices</p>
-            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text-primary)", margin: "0 0 8px" }}>
+            <h1 style={{ fontFamily: "var(--font-display), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text)", margin: "0 0 8px" }}>
               Invoice archive
             </h1>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Manage drafts and finalized invoices stored in your database.</p>
+            <p style={{ fontSize: 14, color: "var(--text-3)" }}>Manage drafts and finalized invoices stored in your database.</p>
           </div>
           <button onClick={loadInvoices} disabled={isLoading} className="btn-ghost">
             <RefreshCw size={13} />
@@ -123,17 +121,17 @@ export default function InvoicesPage() {
         </div>
 
         {isLoading && (
-          <p style={{ fontSize: 13, color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>Loading invoices...</p>
+          <p style={{ fontSize: 13, color: "var(--text-3)", fontFamily: "var(--font-mono), monospace" }}>Loading invoices...</p>
         )}
 
         {!isLoading && stored.length === 0 && (
           <div className="card" style={{ padding: "48px 32px", textAlign: "center" }}>
-            <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 12 }}>No invoices yet</p>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Create your first invoice from the dashboard.</p>
+            <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-3)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 12 }}>No invoices yet</p>
+            <p style={{ fontSize: 14, color: "var(--text-3)" }}>Create your first invoice from the dashboard.</p>
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))", gap: 12 }}>
           {stored.map((invoice, index) => (
             <motion.div
               key={invoice.id}
@@ -144,14 +142,14 @@ export default function InvoicesPage() {
               transition={{ delay: index * 0.04 }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
-                <div style={{ width: 36, height: 36, border: "1px solid var(--border-bright)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <FileText size={14} style={{ color: "var(--gold)" }} />
+                <div style={{ width: 36, height: 36, border: "1px solid var(--line-strong)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <FileText size={14} style={{ color: "var(--accent)" }} />
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 13, color: "var(--text-primary)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 13, color: "var(--text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {invoice.invoiceNumber}
                   </p>
-                  <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
+                  <p style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>
                     {invoice.created_at ? formatDisplayDate(invoice.created_at) : "Saved"}
                   </p>
                 </div>
@@ -167,7 +165,7 @@ export default function InvoicesPage() {
                 <button
                   onClick={() => handleDelete(invoice.id)}
                   disabled={deletingId === invoice.id}
-                  style={{ background: "none", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 2, padding: "5px 12px", fontSize: 10, fontFamily: "var(--font-mono), monospace", letterSpacing: "0.08em", textTransform: "uppercase", color: "#FCA5A5", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: deletingId === invoice.id ? 0.5 : 1 }}
+                  style={{ background: "none", border: "1px solid color-mix(in srgb, var(--bad) 30%, transparent)", borderRadius: 6, padding: "5px 12px", fontSize: 10, fontFamily: "var(--font-mono), monospace", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--bad)", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: deletingId === invoice.id ? 0.5 : 1 }}
                 >
                   <Trash2 size={11} />
                   {deletingId === invoice.id ? "..." : "Delete"}
@@ -177,7 +175,7 @@ export default function InvoicesPage() {
           ))}
         </div>
 
-        {status && <p style={{ fontSize: 11, color: "var(--gold)", fontFamily: "var(--font-mono), monospace" }}>{status}</p>}
+        {status && <p style={{ fontSize: 11, color: "var(--accent)", fontFamily: "var(--font-mono), monospace" }}>{status}</p>}
       </div>
     </div>
   );

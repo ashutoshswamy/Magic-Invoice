@@ -143,9 +143,9 @@ export default function ExpensesPage() {
     .reduce((s, e) => s + Number(e.gst_paid), 0);
 
   const fieldBox = {
-    background: "var(--ink-soft)",
-    border: "1px solid var(--border)",
-    borderRadius: 2,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    borderRadius: 6,
     padding: "12px 16px",
     display: "flex",
     flexDirection: "column" as const,
@@ -156,21 +156,21 @@ export default function ExpensesPage() {
     fontSize: 9,
     letterSpacing: "0.18em",
     textTransform: "uppercase" as const,
-    color: "var(--text-muted)",
+    color: "var(--text-3)",
   };
   const fieldInput = {
     background: "transparent",
     border: "none",
     outline: "none",
-    color: "var(--text-primary)",
+    color: "var(--text)",
     fontSize: 13,
-    fontFamily: "var(--font-dm-sans), sans-serif",
+    fontFamily: "var(--font-body), sans-serif",
     width: "100%",
     padding: 0,
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div
         style={{
@@ -188,23 +188,23 @@ export default function ExpensesPage() {
           </p>
           <h1
             style={{
-              fontFamily: "var(--font-playfair), serif",
+              fontFamily: "var(--font-display), serif",
               fontWeight: 600,
               fontSize: "clamp(24px, 4vw, 36px)",
-              color: "var(--text-primary)",
+              color: "var(--text)",
               margin: "0 0 8px",
             }}
           >
             Expenses &amp; ITC
           </h1>
-          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+          <p style={{ fontSize: 14, color: "var(--text-3)" }}>
             Track business expenses and GST paid (Input Tax Credit) for GSTR-3B
             offset.
           </p>
         </div>
 
         {/* Summary */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(200px, 100%), 1fr))", gap: 12 }}>
           {[
             { label: "Total expenses", value: formatINR(totalExpenses) },
             { label: "GST paid (total)", value: formatINR(totalGstPaid) },
@@ -223,7 +223,7 @@ export default function ExpensesPage() {
                   fontFamily: "var(--font-mono), monospace",
                   fontSize: 16,
                   fontWeight: 600,
-                  color: "var(--text-primary)",
+                  color: "var(--text)",
                   marginTop: 8,
                 }}
               >
@@ -246,7 +246,7 @@ export default function ExpensesPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(min(180px, 100%), 1fr))",
               gap: 12,
             }}
           >
@@ -347,10 +347,10 @@ export default function ExpensesPage() {
                       onChange={() =>
                         setDraft((p) => ({ ...p, itc_eligible: v }))
                       }
-                      style={{ accentColor: "var(--gold)" }}
+                      style={{ accentColor: "var(--accent)" }}
                     />
                     <span
-                      style={{ fontSize: 13, color: "var(--text-secondary)" }}
+                      style={{ fontSize: 13, color: "var(--text-2)" }}
                     >
                       {v ? "Yes" : "No"}
                     </span>
@@ -371,7 +371,7 @@ export default function ExpensesPage() {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="btn-gold"
+              className="btn-primary"
             >
               <Plus size={13} /> {isSaving ? "Saving..." : "Add expense"}
             </button>
@@ -379,7 +379,7 @@ export default function ExpensesPage() {
               <span
                 style={{
                   fontSize: 11,
-                  color: "var(--gold)",
+                  color: "var(--accent)",
                   fontFamily: "var(--font-mono), monospace",
                 }}
               >
@@ -394,7 +394,7 @@ export default function ExpensesPage() {
           <p
             style={{
               fontSize: 13,
-              color: "var(--text-muted)",
+              color: "var(--text-3)",
               fontFamily: "var(--font-mono), monospace",
             }}
           >
@@ -409,7 +409,7 @@ export default function ExpensesPage() {
               style={{
                 fontFamily: "var(--font-mono), monospace",
                 fontSize: 11,
-                color: "var(--text-muted)",
+                color: "var(--text-3)",
                 letterSpacing: "0.15em",
                 textTransform: "uppercase",
                 marginBottom: 12,
@@ -417,7 +417,7 @@ export default function ExpensesPage() {
             >
               No expenses yet
             </p>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            <p style={{ fontSize: 14, color: "var(--text-3)" }}>
               Add your first business expense above to start tracking ITC.
             </p>
           </div>
@@ -482,35 +482,35 @@ export default function ExpensesPage() {
                 font-size: 9px;
                 letter-spacing: 0.18em;
                 text-transform: uppercase;
-                color: var(--text-muted);
+                color: var(--text-3);
                 text-align: left;
                 padding: 8px 12px;
-                border-bottom: 1px solid var(--border);
+                border-bottom: 1px solid var(--line);
               }
-              .expense-row { border-bottom: 1px solid var(--border); }
-              .expense-row:nth-child(even) { background: var(--ink-soft); }
+              .expense-row { border-bottom: 1px solid var(--line); }
+              .expense-row:nth-child(even) { background: var(--surface); }
               .expense-row td { padding: 10px 12px; }
-              .exp-date { color: var(--text-muted); white-space: nowrap; }
-              .exp-vendor { color: var(--text-primary); font-weight: 600; }
-              .exp-desc { color: var(--text-secondary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-              .exp-cat { color: var(--text-muted); text-transform: capitalize; }
-              .exp-amt { fontFamily: var(--font-mono), monospace; color: var(--text-primary); }
-              .exp-gst { fontFamily: var(--font-mono), monospace; color: var(--text-secondary); }
+              .exp-date { color: var(--text-3); white-space: nowrap; }
+              .exp-vendor { color: var(--text); font-weight: 600; }
+              .exp-desc { color: var(--text-2); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+              .exp-cat { color: var(--text-3); text-transform: capitalize; }
+              .exp-amt { fontFamily: var(--font-mono), monospace; color: var(--text); }
+              .exp-gst { fontFamily: var(--font-mono), monospace; color: var(--text-2); }
               .itc-tag {
                 font-size: 10px;
                 font-family: var(--font-mono), monospace;
                 padding: 2px 8px;
                 border-radius: 99px;
-                background: var(--ink-soft);
-                color: var(--text-muted);
+                background: var(--surface);
+                color: var(--text-3);
               }
               .itc-tag.eligible {
-                background: rgba(16,185,129,0.15);
-                color: #10B981;
+                background: color-mix(in srgb, var(--ok) 15%, transparent);
+                color: var(--ok);
               }
               .delete-btn {
                 background: none;
-                border: 1px solid rgba(248,113,113,0.2);
+                border: 1px solid color-mix(in srgb, var(--bad) 20%, transparent);
                 border-radius: 2px;
                 width: 30px;
                 height: 30px;
@@ -518,7 +518,7 @@ export default function ExpensesPage() {
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
-                color: #FCA5A5;
+                color: var(--bad);
               }
               .delete-btn:disabled { opacity: 0.4; }
 
@@ -535,7 +535,7 @@ export default function ExpensesPage() {
                     "itc actions";
                   gap: 8px;
                   padding: 16px;
-                  border-bottom: 1px solid var(--border);
+                  border-bottom: 1px solid var(--line);
                 }
                 .expense-row td { padding: 0; border: none; }
                 .exp-vendor { grid-area: vendor; font-size: 14px; }
@@ -552,7 +552,7 @@ export default function ExpensesPage() {
                   font-family: var(--font-mono), monospace;
                   font-size: 8px;
                   text-transform: uppercase;
-                  color: var(--text-muted);
+                  color: var(--text-3);
                   display: block;
                   margin-bottom: 2px;
                 }
@@ -563,14 +563,14 @@ export default function ExpensesPage() {
 
         <div
           className="card"
-          style={{ padding: "16px 20px", borderLeft: "2px solid var(--gold)" }}
+          style={{ padding: "16px 20px", borderLeft: "2px solid var(--accent)" }}
         >
-          <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
-            <strong style={{ color: "var(--text-secondary)" }}>
+          <p style={{ fontSize: 12, color: "var(--text-3)" }}>
+            <strong style={{ color: "var(--text-2)" }}>
               ITC (Input Tax Credit):
             </strong>{" "}
             GST paid on eligible business expenses can be offset against your
-            GST payable in GSTR-3B. Magic Invoice generates the data — your CA
+            GST payable in GSTR-3B. Magic Invoice tracks the numbers; your CA
             files the returns.
           </p>
         </div>

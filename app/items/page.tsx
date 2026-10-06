@@ -168,9 +168,9 @@ export default function ItemsPage() {
   };
 
   const fieldBox = {
-    background: "var(--ink-soft)",
-    border: "1px solid var(--border)",
-    borderRadius: 2,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    borderRadius: 6,
     padding: "12px 16px",
     display: "flex",
     flexDirection: "column" as const,
@@ -181,21 +181,21 @@ export default function ItemsPage() {
     fontSize: 9,
     letterSpacing: "0.18em",
     textTransform: "uppercase" as const,
-    color: "var(--text-muted)",
+    color: "var(--text-3)",
   };
   const fieldInput = {
     background: "transparent",
     border: "none",
     outline: "none",
-    color: "var(--text-primary)",
+    color: "var(--text)",
     fontSize: 13,
-    fontFamily: "var(--font-dm-sans), sans-serif",
+    fontFamily: "var(--font-body), sans-serif",
     width: "100%",
     padding: 0,
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div
         style={{
@@ -213,16 +213,16 @@ export default function ItemsPage() {
           </p>
           <h1
             style={{
-              fontFamily: "var(--font-playfair), serif",
+              fontFamily: "var(--font-display), serif",
               fontWeight: 600,
               fontSize: "clamp(24px, 4vw, 36px)",
-              color: "var(--text-primary)",
+              color: "var(--text)",
               margin: "0 0 8px",
             }}
           >
             Services &amp; goods
           </h1>
-          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+          <p style={{ fontSize: 14, color: "var(--text-3)" }}>
             Save frequently used services and goods with HSN/SAC codes for quick
             invoice line insertion.
           </p>
@@ -241,7 +241,7 @@ export default function ItemsPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(min(180px, 100%), 1fr))",
               gap: 12,
             }}
           >
@@ -348,7 +348,7 @@ export default function ItemsPage() {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="btn-gold"
+              className="btn-primary"
             >
               <Plus size={13} /> {isSaving ? "Saving..." : "Add item"}
             </button>
@@ -363,7 +363,7 @@ export default function ItemsPage() {
               <span
                 style={{
                   fontSize: 11,
-                  color: "var(--gold)",
+                  color: "var(--accent)",
                   fontFamily: "var(--font-mono), monospace",
                 }}
               >
@@ -378,7 +378,7 @@ export default function ItemsPage() {
           <p
             style={{
               fontSize: 13,
-              color: "var(--text-muted)",
+              color: "var(--text-3)",
               fontFamily: "var(--font-mono), monospace",
             }}
           >
@@ -393,7 +393,7 @@ export default function ItemsPage() {
               style={{
                 fontFamily: "var(--font-mono), monospace",
                 fontSize: 11,
-                color: "var(--text-muted)",
+                color: "var(--text-3)",
                 letterSpacing: "0.15em",
                 textTransform: "uppercase",
                 marginBottom: 12,
@@ -401,7 +401,7 @@ export default function ItemsPage() {
             >
               No items yet
             </p>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            <p style={{ fontSize: 14, color: "var(--text-3)" }}>
               Add your first service or product above. AI will suggest HSN/SAC
               codes.
             </p>
@@ -443,7 +443,7 @@ export default function ItemsPage() {
                   <p
                     style={{
                       fontSize: 13,
-                      color: "var(--text-primary)",
+                      color: "var(--text)",
                       fontWeight: 600,
                       margin: "0 0 2px",
                     }}
@@ -451,7 +451,7 @@ export default function ItemsPage() {
                     {item.name}
                   </p>
                   {item.description && (
-                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    <p style={{ fontSize: 11, color: "var(--text-3)" }}>
                       {item.description}
                     </p>
                   )}
@@ -467,7 +467,7 @@ export default function ItemsPage() {
                     style={{
                       fontFamily: "var(--font-mono), monospace",
                       fontSize: 12,
-                      color: "var(--gold)",
+                      color: "var(--accent)",
                     }}
                   >
                     {item.hsn_sac_code || "—"}
@@ -483,7 +483,7 @@ export default function ItemsPage() {
                   <span
                     style={{
                       fontSize: 11,
-                      color: "var(--text-muted)",
+                      color: "var(--text-3)",
                       textTransform: "uppercase",
                     }}
                   >
@@ -501,7 +501,7 @@ export default function ItemsPage() {
                     style={{
                       fontFamily: "var(--font-mono), monospace",
                       fontSize: 12,
-                      color: "var(--text-primary)",
+                      color: "var(--text)",
                     }}
                   >
                     ₹{Number(item.default_rate).toLocaleString("en-IN")}/
@@ -519,7 +519,7 @@ export default function ItemsPage() {
                     style={{
                       fontFamily: "var(--font-mono), monospace",
                       fontSize: 12,
-                      color: "var(--text-secondary)",
+                      color: "var(--text-2)",
                     }}
                   >
                     {item.gst_rate}%
@@ -530,15 +530,15 @@ export default function ItemsPage() {
                   disabled={deletingId === item.id}
                   style={{
                     background: "none",
-                    border: "1px solid rgba(248,113,113,0.2)",
-                    borderRadius: 2,
+                    border: "1px solid color-mix(in srgb, var(--bad) 20%, transparent)",
+                    borderRadius: 6,
                     width: 36,
                     height: 36,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     cursor: "pointer",
-                    color: "#FCA5A5",
+                    color: "var(--bad)",
                     opacity: deletingId === item.id ? 0.4 : 1,
                   }}
                   className="item-delete"

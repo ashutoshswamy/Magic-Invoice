@@ -68,9 +68,10 @@ export default function AnalyticsPage() {
         const invoicesSnap = await getDocs(
           query(collection(db, "invoices"), where("user_id", "==", userId)),
         );
-        const rows = invoicesSnap.docs.map(
-          (d) => ({ id: d.id, ...d.data() }) as InvoiceRow,
-        );
+        const rows = invoicesSnap.docs
+          .filter((d) => !d.data().deleted_at)
+          .map((d) => ({ id: d.id, ...d.data() }) as InvoiceRow);
+        const liveIds = new Set(rows.map((r) => r.id));
         const paid = rows.filter((row) => row.paid).length;
         const unpaid = rows.length - paid;
 
@@ -85,7 +86,9 @@ export default function AnalyticsPage() {
               where("user_id", "==", userId),
             ),
           );
-          const lineRows = linesSnap.docs.map((d) => d.data() as LineRow);
+          const lineRows = linesSnap.docs
+            .map((d) => d.data() as LineRow)
+            .filter((line) => liveIds.has(line.invoice_id));
           const total = lineRows.reduce(
             (sum, line) =>
               sum + Number(line.quantity ?? 0) * Number(line.rate ?? 0),
@@ -183,33 +186,33 @@ export default function AnalyticsPage() {
         label: "Total invoices",
         value: invoiceCount.toLocaleString(),
         icon: FileText,
-        accent: "var(--gold-bright)",
-        accentBg: "rgba(245,158,11,0.10)",
-        gradient: "linear-gradient(90deg, var(--gold), var(--gold-bright))",
+        accent: "var(--accent-strong)",
+        accentBg: "color-mix(in srgb, var(--accent) 10%, transparent)",
+        gradient: "linear-gradient(90deg, var(--accent), var(--accent-strong))",
       },
       {
         label: "Paid",
         value: paidCount.toLocaleString(),
         icon: PieChart,
-        accent: "#34D399",
-        accentBg: "rgba(16,185,129,0.10)",
-        gradient: "linear-gradient(90deg, #10B981, #34D399)",
+        accent: "var(--ok)",
+        accentBg: "color-mix(in srgb, var(--ok) 10%, transparent)",
+        gradient: "linear-gradient(90deg, var(--ok), var(--ok))",
       },
       {
         label: "Unpaid",
         value: unpaidCount.toLocaleString(),
         icon: BarChart2,
-        accent: "#FB923C",
-        accentBg: "rgba(251,146,60,0.10)",
-        gradient: "linear-gradient(90deg, #F97316, #FB923C)",
+        accent: "var(--warn)",
+        accentBg: "color-mix(in srgb, var(--warn) 10%, transparent)",
+        gradient: "linear-gradient(90deg, var(--warn), var(--warn))",
       },
       {
         label: "Saved clients",
         value: clientCount.toLocaleString(),
         icon: Users,
-        accent: "#60A5FA",
-        accentBg: "rgba(59,130,246,0.10)",
-        gradient: "linear-gradient(90deg, #3B82F6, #60A5FA)",
+        accent: "var(--info)",
+        accentBg: "color-mix(in srgb, var(--info) 10%, transparent)",
+        gradient: "linear-gradient(90deg, var(--info), var(--info))",
       },
     ];
     // revenue card is rendered separately below
@@ -231,7 +234,7 @@ export default function AnalyticsPage() {
   }, [invoiceCount, paidCount]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div
         style={{
@@ -254,14 +257,14 @@ export default function AnalyticsPage() {
               width: 48,
               height: 48,
               borderRadius: 12,
-              background: "linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%)",
+              background: "linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
             }}
           >
-            <BarChart2 size={22} style={{ color: "var(--ink)" }} />
+            <BarChart2 size={22} style={{ color: "var(--bg)" }} />
           </div>
           <div>
             <p className="section-label" style={{ margin: 0 }}>
@@ -269,10 +272,10 @@ export default function AnalyticsPage() {
             </p>
             <h1
               style={{
-                fontFamily: "var(--font-playfair), serif",
+                fontFamily: "var(--font-display), serif",
                 fontWeight: 600,
                 fontSize: "clamp(24px, 4vw, 36px)",
-                color: "var(--text-primary)",
+                color: "var(--text)",
                 margin: "2px 0 0",
               }}
             >
@@ -290,11 +293,11 @@ export default function AnalyticsPage() {
               padding: "40px 0",
             }}
           >
-            <RefreshCw size={14} style={{ color: "var(--text-muted)", animation: "spin 1s linear infinite" }} />
+            <RefreshCw size={14} style={{ color: "var(--text-3)", animation: "spin 1s linear infinite" }} />
             <p
               style={{
                 fontSize: 13,
-                color: "var(--text-muted)",
+                color: "var(--text-3)",
                 fontFamily: "var(--font-mono), monospace",
               }}
             >
@@ -309,14 +312,14 @@ export default function AnalyticsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 }}
               style={{
-                background: "linear-gradient(135deg, var(--ink-soft) 0%, rgba(22,19,16,0.5) 100%)",
-                border: "1px solid var(--border)",
+                background: "linear-gradient(135deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 50%, transparent) 100%)",
+                border: "1px solid var(--line)",
                 borderRadius: 8,
                 padding: 0,
                 overflow: "hidden",
               }}
             >
-              <div style={{ height: 3, background: "linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-bright), var(--gold), var(--gold-dim))" }} />
+              <div style={{ height: 3, background: "linear-gradient(90deg, var(--accent-dim), var(--accent), var(--accent-strong), var(--accent), var(--accent-dim))" }} />
               <div style={{ padding: "28px 32px 32px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20 }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
@@ -325,13 +328,13 @@ export default function AnalyticsPage() {
                         width: 32,
                         height: 32,
                         borderRadius: 8,
-                        background: "rgba(217,119,6,0.12)",
+                        background: "color-mix(in srgb, var(--accent) 12%, transparent)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <DollarSign size={16} style={{ color: "var(--gold-bright)" }} />
+                      <DollarSign size={16} style={{ color: "var(--accent-strong)" }} />
                     </div>
                     <span
                       style={{
@@ -340,7 +343,7 @@ export default function AnalyticsPage() {
                         fontWeight: 600,
                         letterSpacing: "0.14em",
                         textTransform: "uppercase",
-                        color: "var(--gold-bright)",
+                        color: "var(--accent-strong)",
                       }}
                     >
                       Total Revenue
@@ -348,10 +351,10 @@ export default function AnalyticsPage() {
                   </div>
                   <p
                     style={{
-                      fontFamily: "var(--font-playfair), serif",
+                      fontFamily: "var(--font-display), serif",
                       fontSize: "clamp(28px, 5vw, 42px)",
                       fontWeight: 600,
-                      color: "var(--text-primary)",
+                      color: "var(--text)",
                       letterSpacing: "-0.02em",
                       margin: 0,
                     }}
@@ -363,30 +366,30 @@ export default function AnalyticsPage() {
                 {/* Collection rate mini-viz */}
                 <div style={{ minWidth: 180, flexShrink: 0 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                    <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-3)" }}>
                       Collection rate
                     </span>
-                    <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 12, fontWeight: 600, color: collectionRate >= 75 ? "#34D399" : collectionRate >= 40 ? "var(--gold-bright)" : "#FB923C" }}>
+                    <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 12, fontWeight: 600, color: collectionRate >= 75 ? "var(--ok)" : collectionRate >= 40 ? "var(--accent-strong)" : "var(--warn)" }}>
                       {collectionRate}%
                     </span>
                   </div>
-                  <div style={{ height: 6, borderRadius: 3, background: "var(--ink-muted)", overflow: "hidden" }}>
+                  <div style={{ height: 6, borderRadius: 6, background: "var(--surface-2)", overflow: "hidden" }}>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${collectionRate}%` }}
                       transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
                       style={{
                         height: "100%",
-                        borderRadius: 3,
+                        borderRadius: 6,
                         background: collectionRate >= 75
-                          ? "linear-gradient(90deg, #10B981, #34D399)"
+                          ? "linear-gradient(90deg, var(--ok), var(--ok))"
                           : collectionRate >= 40
-                            ? "linear-gradient(90deg, var(--gold), var(--gold-bright))"
-                            : "linear-gradient(90deg, #F97316, #FB923C)",
+                            ? "linear-gradient(90deg, var(--accent), var(--accent-strong))"
+                            : "linear-gradient(90deg, var(--warn), var(--warn))",
                       }}
                     />
                   </div>
-                  <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 9, color: "var(--text-muted)", marginTop: 6, letterSpacing: "0.06em" }}>
+                  <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 9, color: "var(--text-3)", marginTop: 6, letterSpacing: "0.06em" }}>
                     {paidCount} paid · {unpaidCount} outstanding
                   </p>
                 </div>
@@ -397,7 +400,7 @@ export default function AnalyticsPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, minmax(min(200px, 100%), 1fr))",
                 gap: 14,
               }}
             >
@@ -410,8 +413,8 @@ export default function AnalyticsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + index * 0.06 }}
                     style={{
-                      background: "linear-gradient(168deg, var(--ink-soft) 0%, rgba(22,19,16,0.5) 100%)",
-                      border: "1px solid var(--border)",
+                      background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 50%, transparent) 100%)",
+                      border: "1px solid var(--line)",
                       borderRadius: 6,
                       overflow: "hidden",
                     }}
@@ -447,10 +450,10 @@ export default function AnalyticsPage() {
                       </div>
                       <p
                         style={{
-                          fontFamily: "var(--font-playfair), serif",
+                          fontFamily: "var(--font-display), serif",
                           fontSize: 30,
                           fontWeight: 600,
-                          color: "var(--text-primary)",
+                          color: "var(--text)",
                           letterSpacing: "-0.02em",
                           margin: 0,
                         }}
@@ -469,7 +472,7 @@ export default function AnalyticsPage() {
           <p
             style={{
               fontSize: 11,
-              color: "var(--gold)",
+              color: "var(--accent)",
               fontFamily: "var(--font-mono), monospace",
             }}
           >
@@ -489,14 +492,14 @@ export default function AnalyticsPage() {
               width: 40,
               height: 40,
               borderRadius: 10,
-              background: "linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%)",
+              background: "linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
             }}
           >
-            <TrendingUp size={18} style={{ color: "var(--ink)" }} />
+            <TrendingUp size={18} style={{ color: "var(--bg)" }} />
           </div>
           <div>
             <p className="section-label" style={{ margin: 0 }}>
@@ -504,10 +507,10 @@ export default function AnalyticsPage() {
             </p>
             <h2
               style={{
-                fontFamily: "var(--font-playfair), serif",
+                fontFamily: "var(--font-display), serif",
                 fontSize: 22,
                 fontWeight: 600,
-                color: "var(--text-primary)",
+                color: "var(--text)",
                 margin: "2px 0 0",
               }}
             >
@@ -520,7 +523,7 @@ export default function AnalyticsPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))",
             gap: 16,
           }}
         >
@@ -530,8 +533,8 @@ export default function AnalyticsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             style={{
-              background: "linear-gradient(168deg, var(--ink-soft) 0%, rgba(22,19,16,0.6) 100%)",
-              border: "1px solid var(--border)",
+              background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 60%, transparent) 100%)",
+              border: "1px solid var(--line)",
               borderRadius: 6,
               padding: 0,
               overflow: "hidden",
@@ -539,7 +542,7 @@ export default function AnalyticsPage() {
             }}
           >
             {/* Top accent */}
-            <div style={{ height: 3, background: "linear-gradient(90deg, var(--gold), var(--gold-bright), var(--gold))" }} />
+            <div style={{ height: 3, background: "linear-gradient(90deg, var(--accent), var(--accent-strong), var(--accent))" }} />
 
             <div style={{ padding: "24px 28px 28px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
@@ -548,13 +551,13 @@ export default function AnalyticsPage() {
                     width: 30,
                     height: 30,
                     borderRadius: 8,
-                    background: "rgba(217,119,6,0.12)",
+                    background: "color-mix(in srgb, var(--accent) 12%, transparent)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <TrendingUp size={14} style={{ color: "var(--gold-bright)" }} />
+                  <TrendingUp size={14} style={{ color: "var(--accent-strong)" }} />
                 </div>
                 <span
                   style={{
@@ -563,27 +566,27 @@ export default function AnalyticsPage() {
                     fontWeight: 600,
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    color: "var(--gold-bright)",
+                    color: "var(--accent-strong)",
                   }}
                 >
                   Cash Flow
                 </span>
               </div>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", margin: "0 0 20px", lineHeight: 1.6 }}>
+              <p style={{ fontSize: 13, color: "var(--text-3)", margin: "0 0 20px", lineHeight: 1.6 }}>
                 AI reads your receivables and payables to give a plain-English cash position.
               </p>
 
               {aiInsight ? (
                 <div
                   style={{
-                    background: "rgba(217,119,6,0.06)",
-                    border: "1px solid rgba(217,119,6,0.15)",
+                    background: "color-mix(in srgb, var(--accent) 6%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--accent) 15%, transparent)",
                     borderRadius: 6,
                     padding: "16px 20px",
                     marginBottom: 14,
                   }}
                 >
-                  <p style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.8, margin: 0 }}>
+                  <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, margin: 0 }}>
                     {aiInsight}
                   </p>
                 </div>
@@ -592,7 +595,7 @@ export default function AnalyticsPage() {
               <button
                 onClick={fetchCashFlow}
                 disabled={isLoadingInsight}
-                className={aiInsight ? "btn-ghost" : "btn-gold"}
+                className={aiInsight ? "btn-ghost" : "btn-primary"}
                 style={aiInsight ? { fontSize: 10 } : {}}
               >
                 {aiInsight ? <RefreshCw size={11} /> : <TrendingUp size={13} />}{" "}
@@ -607,15 +610,15 @@ export default function AnalyticsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.28 }}
             style={{
-              background: "linear-gradient(168deg, var(--ink-soft) 0%, rgba(22,19,16,0.6) 100%)",
-              border: "1px solid var(--border)",
+              background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 60%, transparent) 100%)",
+              border: "1px solid var(--line)",
               borderRadius: 6,
               padding: 0,
               overflow: "hidden",
               position: "relative",
             }}
           >
-            <div style={{ height: 3, background: "linear-gradient(90deg, #3B82F6, #8B5CF6, #3B82F6)" }} />
+            <div style={{ height: 3, background: "linear-gradient(90deg, var(--info), var(--info), var(--info))" }} />
 
             <div style={{ padding: "24px 28px 28px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
@@ -624,13 +627,13 @@ export default function AnalyticsPage() {
                     width: 30,
                     height: 30,
                     borderRadius: 8,
-                    background: "rgba(59,130,246,0.12)",
+                    background: "color-mix(in srgb, var(--info) 12%, transparent)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <BarChart2 size={14} style={{ color: "#60A5FA" }} />
+                  <BarChart2 size={14} style={{ color: "var(--info)" }} />
                 </div>
                 <span
                   style={{
@@ -639,27 +642,27 @@ export default function AnalyticsPage() {
                     fontWeight: 600,
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    color: "#60A5FA",
+                    color: "var(--info)",
                   }}
                 >
                   Payment Prediction
                 </span>
               </div>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", margin: "0 0 20px", lineHeight: 1.6 }}>
+              <p style={{ fontSize: 13, color: "var(--text-3)", margin: "0 0 20px", lineHeight: 1.6 }}>
                 Predict which invoices are at risk of late payment based on patterns.
               </p>
 
               {aiPrediction ? (
                 <div
                   style={{
-                    background: "rgba(59,130,246,0.06)",
-                    border: "1px solid rgba(59,130,246,0.15)",
+                    background: "color-mix(in srgb, var(--info) 6%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--info) 15%, transparent)",
                     borderRadius: 6,
                     padding: "16px 20px",
                     marginBottom: 14,
                   }}
                 >
-                  <p style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.8, margin: 0 }}>
+                  <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, margin: 0 }}>
                     {aiPrediction}
                   </p>
                 </div>
@@ -668,7 +671,7 @@ export default function AnalyticsPage() {
               <button
                 onClick={fetchPrediction}
                 disabled={isLoadingPrediction}
-                className={aiPrediction ? "btn-ghost" : "btn-gold"}
+                className={aiPrediction ? "btn-ghost" : "btn-primary"}
                 style={aiPrediction ? { fontSize: 10 } : {}}
               >
                 {aiPrediction ? <RefreshCw size={11} /> : <BarChart2 size={13} />}{" "}
@@ -683,15 +686,15 @@ export default function AnalyticsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.36 }}
             style={{
-              background: "linear-gradient(168deg, var(--ink-soft) 0%, rgba(22,19,16,0.6) 100%)",
-              border: "1px solid var(--border)",
+              background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 60%, transparent) 100%)",
+              border: "1px solid var(--line)",
               borderRadius: 6,
               padding: 0,
               overflow: "hidden",
               gridColumn: "1 / -1",
             }}
           >
-            <div style={{ height: 3, background: "linear-gradient(90deg, #10B981, #34D399, #10B981)" }} />
+            <div style={{ height: 3, background: "linear-gradient(90deg, var(--ok), var(--ok), var(--ok))" }} />
 
             <div style={{ padding: "24px 28px 28px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
@@ -700,13 +703,13 @@ export default function AnalyticsPage() {
                     width: 30,
                     height: 30,
                     borderRadius: 8,
-                    background: "rgba(16,185,129,0.12)",
+                    background: "color-mix(in srgb, var(--ok) 12%, transparent)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <MessageSquare size={14} style={{ color: "#34D399" }} />
+                  <MessageSquare size={14} style={{ color: "var(--ok)" }} />
                 </div>
                 <span
                   style={{
@@ -715,13 +718,13 @@ export default function AnalyticsPage() {
                     fontWeight: 600,
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    color: "#34D399",
+                    color: "var(--ok)",
                   }}
                 >
                   Ask AI
                 </span>
               </div>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", margin: "0 0 16px", lineHeight: 1.6 }}>
+              <p style={{ fontSize: 13, color: "var(--text-3)", margin: "0 0 16px", lineHeight: 1.6 }}>
                 Ask anything about your invoices, revenue, or clients in plain English.
               </p>
 
@@ -734,23 +737,23 @@ export default function AnalyticsPage() {
                   style={{
                     flex: 1,
                     minWidth: 220,
-                    background: "var(--ink)",
-                    border: "1px solid var(--border-bright)",
+                    background: "var(--bg)",
+                    border: "1px solid var(--line-strong)",
                     borderRadius: 6,
                     padding: "12px 16px",
                     fontSize: 13,
-                    color: "var(--text-primary)",
+                    color: "var(--text)",
                     outline: "none",
-                    fontFamily: "var(--font-dm-sans), sans-serif",
+                    fontFamily: "var(--font-body), sans-serif",
                     transition: "border-color 0.2s",
                   }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = "#34D399"; }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(215,183,120,0.30)"; }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "var(--ok)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "color-mix(in srgb, var(--text) 30%, transparent)"; }}
                 />
                 <button
                   onClick={askAi}
                   disabled={isAskingAi || !aiQuestion.trim()}
-                  className="btn-gold"
+                  className="btn-primary"
                 >
                   <MessageSquare size={13} />{" "}
                   {isAskingAi ? "Thinking..." : "Ask"}
@@ -760,14 +763,14 @@ export default function AnalyticsPage() {
               {aiAnswer && (
                 <div
                   style={{
-                    background: "rgba(16,185,129,0.06)",
-                    border: "1px solid rgba(16,185,129,0.15)",
+                    background: "color-mix(in srgb, var(--ok) 6%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--ok) 15%, transparent)",
                     borderRadius: 6,
                     padding: "16px 20px",
                     marginTop: 16,
                   }}
                 >
-                  <p style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.8, margin: 0 }}>
+                  <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, margin: 0 }}>
                     {aiAnswer}
                   </p>
                 </div>

@@ -10,7 +10,7 @@ const FREE_FEATURES = [
   "Unlimited AI invoice generation",
   "GST calculation (CGST/SGST/IGST)",
   "Razorpay payment links",
-  "GSTR-1 + GSTR-3B export",
+  "GSTR-1 export + GSTR-3B summary",
   "Expense tracking + ITC",
   "AI cash flow insights",
   '"Built with Magic Invoice" branding',
@@ -22,11 +22,11 @@ export default function BillingPage() {
     fontSize: 9,
     letterSpacing: "0.18em",
     textTransform: "uppercase" as const,
-    color: "var(--text-muted)",
+    color: "var(--text-3)",
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div
         style={{
@@ -44,10 +44,10 @@ export default function BillingPage() {
           </p>
           <h1
             style={{
-              fontFamily: "var(--font-playfair), serif",
+              fontFamily: "var(--font-display), serif",
               fontWeight: 600,
               fontSize: "clamp(28px, 4vw, 40px)",
-              color: "var(--text-primary)",
+              color: "var(--text)",
               margin: "0 0 8px",
             }}
           >
@@ -56,7 +56,7 @@ export default function BillingPage() {
           <p
             style={{
               fontSize: 14,
-              color: "var(--text-muted)",
+              color: "var(--text-3)",
               maxWidth: 680,
               lineHeight: 1.7,
             }}
@@ -71,10 +71,10 @@ export default function BillingPage() {
           <p style={fieldLabel}>Included</p>
           <p
             style={{
-              fontFamily: "var(--font-playfair), serif",
+              fontFamily: "var(--font-display), serif",
               fontSize: 32,
               fontWeight: 600,
-              color: "var(--text-primary)",
+              color: "var(--text)",
               margin: "8px 0 4px",
             }}
           >
@@ -83,7 +83,7 @@ export default function BillingPage() {
           <p
             style={{
               fontSize: 13,
-              color: "var(--text-muted)",
+              color: "var(--text-3)",
               marginBottom: 24,
             }}
           >
@@ -97,9 +97,9 @@ export default function BillingPage() {
               >
                 <CheckCircle2
                   size={14}
-                  style={{ color: "var(--gold)", flexShrink: 0, marginTop: 1 }}
+                  style={{ color: "var(--accent)", flexShrink: 0, marginTop: 1 }}
                 />
-                <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                <span style={{ fontSize: 13, color: "var(--text-2)" }}>
                   {f}
                 </span>
               </div>
@@ -108,7 +108,7 @@ export default function BillingPage() {
           <div style={{ marginTop: 24 }}>
             <Link
               href="/dashboard"
-              className="btn-gold"
+              className="btn-primary"
               style={{ textDecoration: "none", display: "inline-flex" }}
             >
               Open dashboard →
@@ -118,21 +118,21 @@ export default function BillingPage() {
 
         <div
           className="card"
-          style={{ padding: "20px 24px", borderLeft: "2px solid var(--gold)" }}
+          style={{ padding: "20px 24px", borderLeft: "2px solid var(--accent)" }}
         >
           <p
             style={{
               fontSize: 12,
-              color: "var(--text-muted)",
+              color: "var(--text-3)",
               lineHeight: 1.75,
             }}
           >
-            <strong style={{ color: "var(--text-secondary)" }}>
+            <strong style={{ color: "var(--text-2)" }}>
               Need help?
             </strong>{" "}
             Email{" "}
-            <span style={{ color: "var(--gold)" }}>
-              support@magicinvoice.ai
+            <span style={{ color: "var(--accent)" }}>
+              ashutoshswamy397@gmail.com
             </span>
             . Billing is permanently disabled in this workspace.
           </p>

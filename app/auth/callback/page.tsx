@@ -13,7 +13,7 @@ export default function AuthCallbackPage() {
     <div
       style={{
         minHeight: "100vh",
-        background: "var(--ink)",
+        background: "var(--bg)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -24,8 +24,8 @@ export default function AuthCallbackPage() {
           style={{
             width: 28,
             height: 28,
-            border: "2px solid var(--border)",
-            borderTopColor: "var(--gold)",
+            border: "2px solid var(--line)",
+            borderTopColor: "var(--accent)",
             borderRadius: "50%",
             animation: "spin 0.8s linear infinite",
           }}
@@ -36,7 +36,7 @@ export default function AuthCallbackPage() {
             fontSize: 11,
             letterSpacing: "0.15em",
             textTransform: "uppercase",
-            color: "var(--text-muted)",
+            color: "var(--text-3)",
           }}
         >
           Redirecting...

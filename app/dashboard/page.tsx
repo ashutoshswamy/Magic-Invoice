@@ -687,9 +687,9 @@ export default function DashboardPage() {
   };
 
   const fieldBox = {
-    background: "var(--ink-soft)",
-    border: "1px solid var(--border)",
-    borderRadius: 2,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    borderRadius: 6,
     padding: "12px 16px",
     display: "flex",
     flexDirection: "column" as const,
@@ -700,25 +700,25 @@ export default function DashboardPage() {
     fontSize: 9,
     letterSpacing: "0.18em",
     textTransform: "uppercase" as const,
-    color: "var(--text-muted)",
+    color: "var(--text-3)",
   };
   const fieldInput = {
     background: "transparent",
     border: "none",
     outline: "none",
-    color: "var(--text-primary)",
+    color: "var(--text)",
     fontSize: 13,
-    fontFamily: "var(--font-dm-sans), sans-serif",
+    fontFamily: "var(--font-body), sans-serif",
     width: "100%",
     padding: 0,
   };
 
   if (!isAuthReady) {
     return (
-      <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+      <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
         <TopNav />
         <div style={{ maxWidth: 960, margin: "0 auto", padding: "40px 24px" }}>
-          <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
+          <p style={{ fontSize: 13, color: "var(--text-3)" }}>
             Checking session...
           </p>
         </div>
@@ -731,7 +731,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div ref={containerRef} style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div ref={containerRef} style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <div className="no-print">
         <TopNav />
       </div>
@@ -765,10 +765,10 @@ export default function DashboardPage() {
                 </p>
                 <h2
                   style={{
-                    fontFamily: "var(--font-playfair), serif",
+                    fontFamily: "var(--font-display), serif",
                     fontSize: 22,
                     fontWeight: 600,
-                    color: "var(--text-primary)",
+                    color: "var(--text)",
                     margin: 0,
                   }}
                 >
@@ -781,9 +781,9 @@ export default function DashboardPage() {
                   fontSize: 10,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  color: "var(--text-muted)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 2,
+                  color: "var(--text-3)",
+                  border: "1px solid var(--line)",
+                  borderRadius: 6,
                   padding: "4px 10px",
                 }}
               >
@@ -794,13 +794,13 @@ export default function DashboardPage() {
               style={{
                 width: "100%",
                 height: 120,
-                background: "var(--ink)",
-                border: "1px solid var(--border-bright)",
-                borderRadius: 2,
+                background: "var(--bg)",
+                border: "1px solid var(--line-strong)",
+                borderRadius: 6,
                 padding: "14px 16px",
                 fontSize: 14,
-                color: "var(--text-primary)",
-                fontFamily: "var(--font-dm-sans), sans-serif",
+                color: "var(--text)",
+                fontFamily: "var(--font-body), sans-serif",
                 outline: "none",
                 resize: "vertical",
                 lineHeight: 1.6,
@@ -856,7 +856,7 @@ export default function DashboardPage() {
                 style={{
                   marginTop: 8,
                   fontSize: 11,
-                  color: "var(--text-muted)",
+                  color: "var(--text-3)",
                   fontFamily: "var(--font-mono), monospace",
                 }}
               >
@@ -868,7 +868,7 @@ export default function DashboardPage() {
                 style={{
                   marginTop: 8,
                   fontSize: 11,
-                  color: "var(--gold)",
+                  color: "var(--accent)",
                   fontFamily: "var(--font-mono), monospace",
                 }}
               >
@@ -889,7 +889,7 @@ export default function DashboardPage() {
               <button
                 onClick={handleParse}
                 disabled={isParsing}
-                className="btn-gold"
+                className="btn-primary"
               >
                 <Wand2 size={13} />
                 {isParsing ? "Parsing..." : "Generate invoice"}
@@ -910,7 +910,7 @@ export default function DashboardPage() {
                 <span
                   style={{
                     fontSize: 11,
-                    color: "var(--gold)",
+                    color: "var(--accent)",
                     fontFamily: "var(--font-mono), monospace",
                   }}
                 >
@@ -941,10 +941,10 @@ export default function DashboardPage() {
                 </p>
                 <h3
                   style={{
-                    fontFamily: "var(--font-playfair), serif",
+                    fontFamily: "var(--font-display), serif",
                     fontSize: 18,
                     fontWeight: 600,
-                    color: "var(--text-primary)",
+                    color: "var(--text)",
                     margin: 0,
                   }}
                 >
@@ -969,7 +969,7 @@ export default function DashboardPage() {
                         padding: "6px 14px",
                         borderBottom:
                           editorTab === key
-                            ? "1px solid var(--gold)"
+                            ? "1px solid var(--accent)"
                             : "1px solid transparent",
                       }}
                     >
@@ -989,7 +989,7 @@ export default function DashboardPage() {
                   >
                     <button
                       onClick={addLine}
-                      className="btn-gold"
+                      className="btn-primary"
                       style={{ fontSize: 10, padding: "6px 12px" }}
                     >
                       <Plus size={11} /> Add line
@@ -1015,7 +1015,7 @@ export default function DashboardPage() {
                   style={{
                     display: "grid",
                     gridTemplateColumns:
-                      "repeat(auto-fill, minmax(200px, 1fr))",
+                      "repeat(auto-fill, minmax(min(200px, 100%), 1fr))",
                     gap: 12,
                   }}
                 >
@@ -1081,12 +1081,12 @@ export default function DashboardPage() {
                             onChange={() =>
                               setInvoice((prev) => ({ ...prev, paid }))
                             }
-                            style={{ accentColor: "var(--gold)" }}
+                            style={{ accentColor: "var(--accent)" }}
                           />
                           <span
                             style={{
                               fontSize: 13,
-                              color: "var(--text-secondary)",
+                              color: "var(--text-2)",
                             }}
                           >
                             {paid ? "Paid" : "Unpaid"}
@@ -1120,12 +1120,12 @@ export default function DashboardPage() {
                 className="tab-content"
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(min(200px, 100%), 1fr))",
                   gap: 12,
                 }}
               >
                 <div style={{ gridColumn: "1 / -1" }}>
-                  <p style={{ ...fieldLabel, color: "var(--gold)" }}>From</p>
+                  <p style={{ ...fieldLabel, color: "var(--accent)" }}>From</p>
                 </div>
                 {(
                   [
@@ -1169,7 +1169,7 @@ export default function DashboardPage() {
                   </div>
                 ))}
                 <div style={{ gridColumn: "1 / -1", marginTop: 8 }}>
-                  <p style={{ ...fieldLabel, color: "var(--gold)" }}>To</p>
+                  <p style={{ ...fieldLabel, color: "var(--accent)" }}>To</p>
                 </div>
                 {(
                   [
@@ -1229,7 +1229,7 @@ export default function DashboardPage() {
                     <p style={{ ...fieldLabel, marginBottom: 4 }}>
                       Charges &amp; tax
                     </p>
-                    <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
+                    <p style={{ fontSize: 13, color: "var(--text-3)" }}>
                       Tax and extra fees like travel or platform charges.
                     </p>
                   </div>
@@ -1245,7 +1245,7 @@ export default function DashboardPage() {
                   style={{
                     display: "grid",
                     gridTemplateColumns:
-                      "repeat(auto-fill, minmax(180px, 1fr))",
+                      "repeat(auto-fill, minmax(min(180px, 100%), 1fr))",
                     gap: 12,
                     marginBottom: 16,
                   }}
@@ -1269,7 +1269,7 @@ export default function DashboardPage() {
                     <span
                       style={{
                         fontSize: 13,
-                        color: "var(--text-primary)",
+                        color: "var(--text)",
                         fontFamily: "var(--font-mono), monospace",
                       }}
                     >
@@ -1339,15 +1339,15 @@ export default function DashboardPage() {
                           onClick={() => removeCharge(charge.id)}
                           style={{
                             background: "none",
-                            border: "1px solid var(--border)",
-                            borderRadius: 2,
+                            border: "1px solid var(--line)",
+                            borderRadius: 6,
                             width: 36,
                             height: 36,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             cursor: "pointer",
-                            color: "var(--text-muted)",
+                            color: "var(--text-3)",
                           }}
                         >
                           <Trash2 size={13} />
@@ -1359,7 +1359,7 @@ export default function DashboardPage() {
                   <p
                     style={{
                       fontSize: 12,
-                      color: "var(--text-muted)",
+                      color: "var(--text-3)",
                       fontFamily: "var(--font-mono), monospace",
                     }}
                   >
@@ -1381,9 +1381,9 @@ export default function DashboardPage() {
                       gap: 10,
                       alignItems: "center",
                       padding: "10px 12px",
-                      background: "var(--ink-soft)",
-                      borderRadius: 2,
-                      border: "1px solid var(--border)",
+                      background: "var(--surface)",
+                      borderRadius: 6,
+                      border: "1px solid var(--line)",
                     }}
                   >
                     <span
@@ -1392,7 +1392,7 @@ export default function DashboardPage() {
                         fontSize: 9,
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
-                        color: "var(--text-muted)",
+                        color: "var(--text-3)",
                         flexShrink: 0,
                       }}
                     >
@@ -1411,9 +1411,9 @@ export default function DashboardPage() {
                         background: "transparent",
                         border: "none",
                         outline: "none",
-                        color: "var(--text-primary)",
+                        color: "var(--text)",
                         fontSize: 13,
-                        fontFamily: "var(--font-dm-sans), sans-serif",
+                        fontFamily: "var(--font-body), sans-serif",
                         cursor: "pointer",
                       }}
                     >
@@ -1519,15 +1519,15 @@ export default function DashboardPage() {
                       onClick={() => removeLine(line.id)}
                       style={{
                         background: "none",
-                        border: "1px solid var(--border)",
-                        borderRadius: 2,
+                        border: "1px solid var(--line)",
+                        borderRadius: 6,
                         width: 36,
                         height: 36,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         cursor: "pointer",
-                        color: "var(--text-muted)",
+                        color: "var(--text-3)",
                         flexShrink: 0,
                       }}
                     >
@@ -1557,7 +1557,7 @@ export default function DashboardPage() {
                   "qty rate delete"
                   "hsn hsn delete";
                 gap: 10px !important;
-                border-bottom: 1px solid var(--border);
+                border-bottom: 1px solid var(--line);
                 padding-bottom: 16px;
               }
               .line-desc {
@@ -1591,7 +1591,7 @@ export default function DashboardPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(120px, 100%), 1fr))",
               gap: 12,
             }}
           >
@@ -1625,18 +1625,18 @@ export default function DashboardPage() {
                         fontSize: 9,
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
-                        color: "var(--text-muted)",
+                        color: "var(--text-3)",
                       }}
                     >
                       {stat.label}
                     </span>
-                    <Icon size={13} style={{ color: "var(--gold)" }} />
+                    <Icon size={13} style={{ color: "var(--accent)" }} />
                   </div>
                   <p
                     style={{
                       fontSize: 15,
                       fontWeight: 600,
-                      color: "var(--text-primary)",
+                      color: "var(--text)",
                       fontFamily: "var(--font-mono), monospace",
                     }}
                   >
@@ -1652,7 +1652,7 @@ export default function DashboardPage() {
             className="dashboard-tip-card glass-panel"
             style={{
               padding: "20px 24px",
-              borderLeft: "2px solid var(--gold)",
+              borderLeft: "2px solid var(--accent)",
               opacity: 0,
             }}
           >
@@ -1662,7 +1662,7 @@ export default function DashboardPage() {
             <p
               style={{
                 fontSize: 13,
-                color: "var(--text-secondary)",
+                color: "var(--text-2)",
                 lineHeight: 1.6,
               }}
             >

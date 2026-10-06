@@ -105,9 +105,9 @@ export default function ClientsPage() {
           ),
         );
         setInvoices(
-          invoicesSnap.docs.map(
-            (d) => ({ id: d.id, ...d.data() }) as InvoiceSummary,
-          ),
+          invoicesSnap.docs
+            .filter((d) => !d.data().deleted_at)
+            .map((d) => ({ id: d.id, ...d.data() }) as InvoiceSummary),
         );
       } catch {
         setStatus("Unable to load clients.");
@@ -283,32 +283,32 @@ export default function ClientsPage() {
     });
   };
 
-  const fieldBox = { background: "var(--ink-soft)", border: "1px solid var(--border)", borderRadius: 2, padding: "10px 14px", display: "flex", flexDirection: "column" as const, gap: 5 };
-  const fieldLabel = { fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "var(--text-muted)" };
-  const fieldInput = { background: "transparent", border: "none", outline: "none", color: "var(--text-primary)", fontSize: 13, width: "100%", padding: 0 };
+  const fieldBox = { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 6, padding: "10px 14px", display: "flex", flexDirection: "column" as const, gap: 5 };
+  const fieldLabel = { fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "var(--text-3)" };
+  const fieldInput = { background: "transparent", border: "none", outline: "none", color: "var(--text)", fontSize: 13, width: "100%", padding: 0 };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px 64px", display: "flex", flexDirection: "column", gap: 32 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
             <p className="section-label" style={{ marginBottom: 10 }}>Clients</p>
-            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text-primary)", margin: "0 0 8px" }}>
+            <h1 style={{ fontFamily: "var(--font-display), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text)", margin: "0 0 8px" }}>
               Client directory
             </h1>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Saved clients for quick invoicing.</p>
+            <p style={{ fontSize: 14, color: "var(--text-3)" }}>Saved clients for quick invoicing.</p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid var(--border)", borderRadius: 2, padding: "8px 16px" }}>
-            <Users size={13} style={{ color: "var(--gold)" }} />
-            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.08em" }}>{clients.length} saved</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid var(--line)", borderRadius: 6, padding: "8px 16px" }}>
+            <Users size={13} style={{ color: "var(--accent)" }} />
+            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-2)", letterSpacing: "0.08em" }}>{clients.length} saved</span>
           </div>
         </div>
 
         {isLoading ? (
-          <p style={{ fontSize: 13, color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>Loading clients...</p>
+          <p style={{ fontSize: 13, color: "var(--text-3)", fontFamily: "var(--font-mono), monospace" }}>Loading clients...</p>
         ) : clients.length ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))", gap: 16 }}>
             {clients.map((client, index) => {
               const matchedInvoices = invoiceMatches(client);
               return (
@@ -322,7 +322,7 @@ export default function ClientsPage() {
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
                     <div style={{ minWidth: 0 }}>
-                      <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 17, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <p style={{ fontFamily: "var(--font-display), serif", fontSize: 17, fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {client.name}
                       </p>
                       <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 7 }}>
@@ -331,21 +331,21 @@ export default function ClientsPage() {
                           { icon: Mail, val: client.email || "No email" },
                           { icon: Phone, val: client.phone || "No phone" },
                         ].map(({ icon: Icon, val }) => (
-                          <p key={val} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-secondary)" }}>
-                            <Icon size={12} style={{ color: "var(--gold)", flexShrink: 0 }} />
+                          <p key={val} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-2)" }}>
+                            <Icon size={12} style={{ color: "var(--accent)", flexShrink: 0 }} />
                             {val}
                           </p>
                         ))}
                         <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                          <MapPin size={12} style={{ color: "var(--gold)", flexShrink: 0, marginTop: 2 }} />
-                          <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                          <MapPin size={12} style={{ color: "var(--accent)", flexShrink: 0, marginTop: 2 }} />
+                          <div style={{ fontSize: 13, color: "var(--text-2)" }}>
                             {[client.address_line1, client.address_line2, [client.city, client.state, client.postal_code].filter(Boolean).join(", "), client.country].filter(Boolean).map((line, idx) => (
                               <p key={idx}>{line}</p>
                             ))}
                             {!client.address_line1 && !client.city && <p>No address</p>}
                           </div>
                         </div>
-                        <p style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>
+                        <p style={{ fontSize: 11, color: "var(--text-3)", fontFamily: "var(--font-mono), monospace" }}>
                           Added {client.created_at ? formatDisplayDate(client.created_at) : "recently"}
                         </p>
                       </div>
@@ -353,7 +353,7 @@ export default function ClientsPage() {
                     <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
                       {editingId === client.id ? (
                         <>
-                          <button onClick={() => saveEdit(client.id)} className="btn-gold" style={{ fontSize: 10, padding: "6px 12px" }}>
+                          <button onClick={() => saveEdit(client.id)} className="btn-primary" style={{ fontSize: 10, padding: "6px 12px" }}>
                             <Save size={11} /> Save
                           </button>
                           <button onClick={() => cancelEdit(client.id)} className="btn-ghost" style={{ fontSize: 10, padding: "6px 12px" }}>
@@ -368,7 +368,7 @@ export default function ClientsPage() {
                           <button
                             onClick={() => handleDelete(client.id)}
                             disabled={deletingId === client.id}
-                            style={{ background: "none", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 2, padding: "6px 12px", fontSize: 10, fontFamily: "var(--font-mono), monospace", letterSpacing: "0.08em", textTransform: "uppercase", color: "#FCA5A5", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: deletingId === client.id ? 0.5 : 1 }}
+                            style={{ background: "none", border: "1px solid color-mix(in srgb, var(--bad) 30%, transparent)", borderRadius: 6, padding: "6px 12px", fontSize: 10, fontFamily: "var(--font-mono), monospace", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--bad)", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: deletingId === client.id ? 0.5 : 1 }}
                           >
                             <Trash2 size={11} />
                             {deletingId === client.id ? "..." : "Delete"}
@@ -379,7 +379,7 @@ export default function ClientsPage() {
                   </div>
 
                   {editingId === client.id && (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10, marginBottom: 16 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(160px, 100%), 1fr))", gap: 10, marginBottom: 16 }}>
                       {(["name", "company", "email", "phone", "address_line1", "address_line2", "city", "state", "postal_code", "country"] as const).map((f) => (
                         <div key={f} style={fieldBox}>
                           <span style={fieldLabel}>{f.replace(/_/g, " ")}</span>
@@ -389,7 +389,7 @@ export default function ClientsPage() {
                     </div>
                   )}
 
-                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                  <div style={{ borderTop: "1px solid var(--line)", paddingTop: 16 }}>
                     <p className="section-label" style={{ marginBottom: 10, fontSize: 9 }}>Invoices</p>
                     {matchedInvoices.length ? (
                       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -397,22 +397,22 @@ export default function ClientsPage() {
                           <Link
                             key={invoice.id}
                             href={`/invoices/${invoice.id}`}
-                            style={{ display: "flex", justifyContent: "space-between", gap: 12, background: "var(--ink)", border: "1px solid var(--border)", borderRadius: 2, padding: "8px 12px", textDecoration: "none" }}
+                            style={{ display: "flex", justifyContent: "space-between", gap: 12, background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 6, padding: "8px 12px", textDecoration: "none" }}
                           >
-                            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {invoice.invoice_number || "Untitled"}
                             </span>
-                            <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>
+                            <span style={{ fontSize: 11, color: "var(--text-3)", flexShrink: 0 }}>
                               {invoice.issued_on ? formatDisplayDate(invoice.issued_on) : ""}
                             </span>
                           </Link>
                         ))}
                         {matchedInvoices.length > 3 && (
-                          <p style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>+{matchedInvoices.length - 3} more</p>
+                          <p style={{ fontSize: 11, color: "var(--text-3)", fontFamily: "var(--font-mono), monospace" }}>+{matchedInvoices.length - 3} more</p>
                         )}
                       </div>
                     ) : (
-                      <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No invoices yet.</p>
+                      <p style={{ fontSize: 13, color: "var(--text-3)" }}>No invoices yet.</p>
                     )}
                   </div>
                 </motion.div>
@@ -421,11 +421,11 @@ export default function ClientsPage() {
           </div>
         ) : (
           <div className="card" style={{ padding: 32 }}>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>No clients saved yet. Save a client from the dashboard to see them here.</p>
+            <p style={{ fontSize: 14, color: "var(--text-3)" }}>No clients saved yet. Save a client from the dashboard to see them here.</p>
           </div>
         )}
 
-        {status && <p style={{ fontSize: 11, color: "var(--gold)", fontFamily: "var(--font-mono), monospace" }}>{status}</p>}
+        {status && <p style={{ fontSize: 11, color: "var(--accent)", fontFamily: "var(--font-mono), monospace" }}>{status}</p>}
       </div>
     </div>
   );

@@ -84,9 +84,9 @@ export default function SettingsPage() {
     }
   };
 
-  const fieldBox = { background: "var(--ink-soft)", border: "1px solid var(--border)", borderRadius: 2, padding: "12px 16px", display: "flex", flexDirection: "column" as const, gap: 6 };
-  const fieldLabel = { fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "var(--text-muted)" };
-  const fieldInput = { background: "transparent", border: "none", outline: "none", color: "var(--text-primary)", fontSize: 13, width: "100%", padding: 0 };
+  const fieldBox = { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 6, padding: "12px 16px", display: "flex", flexDirection: "column" as const, gap: 6 };
+  const fieldLabel = { fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "var(--text-3)" };
+  const fieldInput = { background: "transparent", border: "none", outline: "none", color: "var(--text)", fontSize: 13, width: "100%", padding: 0 };
 
   const fields = [
     { label: "Default currency", value: invoiceCurrency, setter: setInvoiceCurrency, placeholder: "INR" },
@@ -104,12 +104,12 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "40px 24px 64px", display: "flex", flexDirection: "column", gap: 32 }}>
         <div>
           <p className="section-label" style={{ marginBottom: 10 }}>Settings</p>
-          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text-primary)", margin: 0 }}>
+          <h1 style={{ fontFamily: "var(--font-display), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text)", margin: 0 }}>
             Invoice defaults
           </h1>
         </div>
@@ -121,10 +121,10 @@ export default function SettingsPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-            <FileText size={13} style={{ color: "var(--gold)" }} />
+            <FileText size={13} style={{ color: "var(--accent)" }} />
             <p className="section-label" style={{ margin: 0 }}>Business &amp; invoice defaults</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))", gap: 12 }}>
             {fields.map((f) => (
               <div key={f.label} style={fieldBox}>
                 <span style={fieldLabel}>{f.label}</span>
@@ -138,11 +138,11 @@ export default function SettingsPage() {
             ))}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 24 }}>
-            <button onClick={handleSave} disabled={isSaving} className="btn-gold">
+            <button onClick={handleSave} disabled={isSaving} className="btn-primary">
               <Save size={13} />
               {isSaving ? "Saving..." : "Save defaults"}
             </button>
-            {status && <span style={{ fontSize: 11, color: "var(--gold)", fontFamily: "var(--font-mono), monospace" }}>{status}</span>}
+            {status && <span style={{ fontSize: 11, color: "var(--accent)", fontFamily: "var(--font-mono), monospace" }}>{status}</span>}
           </div>
         </motion.div>
       </div>

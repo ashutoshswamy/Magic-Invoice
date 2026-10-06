@@ -18,23 +18,23 @@ export default function ProfilePage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "40px 24px 64px", display: "flex", flexDirection: "column", gap: 32 }}>
         <div>
           <p className="section-label" style={{ marginBottom: 10 }}>Account</p>
-          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text-primary)", margin: 0 }}>
+          <h1 style={{ fontFamily: "var(--font-display), serif", fontWeight: 600, fontSize: "clamp(24px, 4vw, 36px)", color: "var(--text)", margin: 0 }}>
             Your profile
           </h1>
         </div>
         <motion.div className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 16, maxWidth: 480 }} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <div>
-            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)" }}>Email</span>
-            <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--text-primary)" }}>
+            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-3)" }}>Email</span>
+            <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--text)" }}>
               {isLoaded ? user?.email ?? "—" : "Loading..."}
             </p>
           </div>
-          <button onClick={handleSignOut} className="btn-gold" style={{ alignSelf: "flex-start" }}>
+          <button onClick={handleSignOut} className="btn-primary" style={{ alignSelf: "flex-start" }}>
             Sign out
           </button>
         </motion.div>

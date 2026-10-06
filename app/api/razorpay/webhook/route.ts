@@ -7,9 +7,16 @@ export async function POST(request: Request) {
   const signature = request.headers.get("x-razorpay-signature") ?? "";
   const body = await request.text();
 
-  if (secret) {
-    const expected = crypto.createHmac("sha256", secret).update(body).digest("hex");
-    if (expected !== signature) return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  // Fail closed: without a secret we cannot verify Razorpay sent this, and an
+  // unverified "paid" event would let anyone mark any invoice as paid.
+  if (!secret) {
+    console.error("RAZORPAY_WEBHOOK_SECRET is not set; rejecting webhook.");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+  const expected = Buffer.from(crypto.createHmac("sha256", secret).update(body).digest("hex"));
+  const received = Buffer.from(signature);
+  if (expected.length !== received.length || !crypto.timingSafeEqual(expected, received)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   let event: { event?: string; payload?: { payment_link?: { entity?: { notes?: { invoice_id?: string } } }; payment?: { entity?: { status?: string } } } };

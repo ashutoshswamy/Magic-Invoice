@@ -129,7 +129,7 @@ export default function InvoiceDetailPage() {
       if (!invoiceId) { setStatus("Missing invoice id."); setIsLoading(false); return; }
       try {
         const invoiceSnap = await getDoc(doc(db, "invoices", invoiceId));
-        if (!invoiceSnap.exists()) throw new Error("Invoice not found.");
+        if (!invoiceSnap.exists() || invoiceSnap.data().deleted_at) throw new Error("Invoice not found.");
         const invoiceRow = { id: invoiceSnap.id, ...invoiceSnap.data() } as InvoiceRow;
         const linesSnap = await getDocs(
           query(
@@ -196,7 +196,7 @@ export default function InvoiceDetailPage() {
 
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <div className="no-print">
         <TopNav />
       </div>
@@ -225,10 +225,10 @@ export default function InvoiceDetailPage() {
             <p className="section-label" style={{ marginBottom: 10 }}>Invoice detail</p>
             <h1
               style={{
-                fontFamily: "var(--font-playfair), serif",
+                fontFamily: "var(--font-display), serif",
                 fontWeight: 600,
                 fontSize: "clamp(22px, 4vw, 34px)",
-                color: "var(--text-primary)",
+                color: "var(--text)",
                 margin: 0,
               }}
             >
@@ -266,22 +266,22 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
         {paymentLinkUrl && (
-          <div className="no-print card" style={{ padding: "14px 20px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", borderLeft: "2px solid var(--gold)" }}>
-            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Payment link</span>
-            <a href={paymentLinkUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--gold)", wordBreak: "break-all" }}>{paymentLinkUrl}</a>
+          <div className="no-print card" style={{ padding: "14px 20px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", borderLeft: "2px solid var(--accent)" }}>
+            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 10, color: "var(--text-3)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Payment link</span>
+            <a href={paymentLinkUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--accent)", wordBreak: "break-all" }}>{paymentLinkUrl}</a>
             <button onClick={() => { navigator.clipboard.writeText(paymentLinkUrl); setStatus("Link copied."); }} className="btn-ghost" style={{ fontSize: 10, padding: "5px 12px", flexShrink: 0 }}>Copy</button>
           </div>
         )}
 
         {status && (
-          <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--gold)", letterSpacing: "0.08em" }}>
+          <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--accent)", letterSpacing: "0.08em" }}>
             {status}
           </p>
         )}
 
         {isLoading ? (
           <div className="card" style={{ padding: 32 }}>
-            <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+            <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-3)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
               Loading invoice...
             </p>
           </div>
@@ -292,8 +292,8 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
         ) : !status ? null : (
-          <div className="card" style={{ padding: 32, borderColor: "rgba(248,113,113,0.3)" }}>
-            <p style={{ fontSize: 14, color: "#FCA5A5" }}>{status}</p>
+          <div className="card" style={{ padding: 32, borderColor: "color-mix(in srgb, var(--bad) 30%, transparent)" }}>
+            <p style={{ fontSize: 14, color: "var(--bad)" }}>{status}</p>
           </div>
         )}
       </div>

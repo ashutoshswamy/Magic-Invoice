@@ -1,1 +1,14 @@
-{"name":"Magic Invoice","short_name":"Magic Invoice","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#090705","background_color":"#090705","display":"standalone"}
+{
+  "name": "Magic Invoice",
+  "short_name": "Magic Invoice",
+  "description": "AI GST invoice generator for Indian freelancers and small businesses.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#2e3eb8",
+  "background_color": "#f1f2ee",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

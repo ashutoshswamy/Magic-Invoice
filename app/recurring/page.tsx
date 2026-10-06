@@ -280,9 +280,9 @@ export default function RecurringPage() {
     setDraft((p) => ({ ...p, lines: p.lines.filter((_, i) => i !== idx) }));
 
   const fieldBox = {
-    background: "var(--ink-soft)",
-    border: "1px solid var(--border)",
-    borderRadius: 2,
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    borderRadius: 6,
     padding: "10px 14px",
     display: "flex",
     flexDirection: "column" as const,
@@ -293,15 +293,15 @@ export default function RecurringPage() {
     fontSize: 9,
     letterSpacing: "0.18em",
     textTransform: "uppercase" as const,
-    color: "var(--text-muted)",
+    color: "var(--text-3)",
   };
   const fieldInput = {
     background: "transparent",
     border: "none",
     outline: "none",
-    color: "var(--text-primary)",
+    color: "var(--text)",
     fontSize: 13,
-    fontFamily: "var(--font-dm-sans), sans-serif",
+    fontFamily: "var(--font-body), sans-serif",
     width: "100%",
     padding: 0,
   };
@@ -310,7 +310,7 @@ export default function RecurringPage() {
   const pausedItems = items.filter((r) => !r.active);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--ink)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <TopNav />
       <div
         style={{
@@ -338,16 +338,16 @@ export default function RecurringPage() {
             </p>
             <h1
               style={{
-                fontFamily: "var(--font-playfair), serif",
+                fontFamily: "var(--font-display), serif",
                 fontWeight: 600,
                 fontSize: "clamp(24px, 4vw, 36px)",
-                color: "var(--text-primary)",
+                color: "var(--text)",
                 margin: "0 0 8px",
               }}
             >
               Recurring Invoices
             </h1>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            <p style={{ fontSize: 14, color: "var(--text-3)" }}>
               Auto-generate invoices on a weekly, monthly, quarterly, or yearly
               schedule.
             </p>
@@ -374,7 +374,7 @@ export default function RecurringPage() {
                 setShowForm((v) => !v);
                 setDraft(emptyDraft());
               }}
-              className="btn-gold"
+              className="btn-primary"
               style={{ fontSize: 12 }}
             >
               <Plus size={12} />
@@ -390,13 +390,13 @@ export default function RecurringPage() {
             exit={{ opacity: 0 }}
             style={{
               padding: "12px 18px",
-              borderRadius: 2,
+              borderRadius: 6,
               background: status.ok
-                ? "rgba(16,185,129,0.12)"
-                : "rgba(248,113,113,0.12)",
-              borderLeft: `2px solid ${status.ok ? "#10B981" : "#F87171"}`,
+                ? "color-mix(in srgb, var(--ok) 12%, transparent)"
+                : "color-mix(in srgb, var(--bad) 12%, transparent)",
+              borderLeft: `2px solid ${status.ok ? "var(--ok)" : "var(--bad)"}`,
               fontSize: 13,
-              color: status.ok ? "#10B981" : "#F87171",
+              color: status.ok ? "var(--ok)" : "var(--bad)",
               fontFamily: "var(--font-mono), monospace",
             }}
           >
@@ -423,7 +423,7 @@ export default function RecurringPage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(min(160px, 100%), 1fr))",
                   gap: 10,
                   marginBottom: 20,
                 }}
@@ -496,7 +496,7 @@ export default function RecurringPage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(min(180px, 100%), 1fr))",
                   gap: 10,
                   marginBottom: 20,
                 }}
@@ -570,7 +570,7 @@ export default function RecurringPage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(min(180px, 100%), 1fr))",
                   gap: 10,
                   marginBottom: 20,
                 }}
@@ -708,15 +708,15 @@ export default function RecurringPage() {
                       disabled={draft.lines.length === 1}
                       style={{
                         background: "none",
-                        border: "1px solid rgba(248,113,113,0.2)",
-                        borderRadius: 2,
+                        border: "1px solid color-mix(in srgb, var(--bad) 20%, transparent)",
+                        borderRadius: 6,
                         width: 32,
                         height: 32,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         cursor: "pointer",
-                        color: "#FCA5A5",
+                        color: "var(--bad)",
                         opacity: draft.lines.length === 1 ? 0.3 : 1,
                       }}
                     >
@@ -773,7 +773,7 @@ export default function RecurringPage() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="btn-gold"
+                  className="btn-primary"
                   style={{ fontSize: 13 }}
                 >
                   <RefreshCw size={13} />{" "}
@@ -796,7 +796,7 @@ export default function RecurringPage() {
           <p
             style={{
               fontSize: 13,
-              color: "var(--text-muted)",
+              color: "var(--text-3)",
               fontFamily: "var(--font-mono), monospace",
             }}
           >
@@ -811,7 +811,7 @@ export default function RecurringPage() {
               style={{
                 fontFamily: "var(--font-mono), monospace",
                 fontSize: 11,
-                color: "var(--text-muted)",
+                color: "var(--text-3)",
                 letterSpacing: "0.15em",
                 textTransform: "uppercase",
                 marginBottom: 12,
@@ -819,7 +819,7 @@ export default function RecurringPage() {
             >
               No recurring schedules
             </p>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            <p style={{ fontSize: 14, color: "var(--text-3)" }}>
               Create a schedule to auto-generate invoices for retainer clients.
             </p>
           </div>
@@ -859,8 +859,8 @@ export default function RecurringPage() {
                         height: 8,
                         borderRadius: "50%",
                         background: item.active
-                          ? "#10B981"
-                          : "var(--text-muted)",
+                          ? "var(--ok)"
+                          : "var(--text-3)",
                         flexShrink: 0,
                       }}
                     />
@@ -870,7 +870,7 @@ export default function RecurringPage() {
                         style={{
                           fontSize: 14,
                           fontWeight: 600,
-                          color: "var(--text-primary)",
+                          color: "var(--text)",
                           margin: 0,
                         }}
                       >
@@ -879,7 +879,7 @@ export default function RecurringPage() {
                           <span
                             style={{
                               fontWeight: 400,
-                              color: "var(--text-muted)",
+                              color: "var(--text-3)",
                               marginLeft: 8,
                               fontSize: 12,
                             }}
@@ -891,7 +891,7 @@ export default function RecurringPage() {
                       <p
                         style={{
                           fontSize: 11,
-                          color: "var(--text-muted)",
+                          color: "var(--text-3)",
                           fontFamily: "var(--font-mono), monospace",
                           marginTop: 2,
                         }}
@@ -906,7 +906,7 @@ export default function RecurringPage() {
                         fontFamily: "var(--font-mono), monospace",
                         fontSize: 15,
                         fontWeight: 600,
-                        color: "var(--text-primary)",
+                        color: "var(--text)",
                         flexShrink: 0,
                       }}
                     >
@@ -923,7 +923,7 @@ export default function RecurringPage() {
                           background: "none",
                           border: "none",
                           cursor: "pointer",
-                          color: item.active ? "#10B981" : "var(--text-muted)",
+                          color: item.active ? "var(--ok)" : "var(--text-3)",
                           display: "flex",
                           alignItems: "center",
                         }}
@@ -943,15 +943,15 @@ export default function RecurringPage() {
                         disabled={deletingId === item.id}
                         style={{
                           background: "none",
-                          border: "1px solid rgba(248,113,113,0.2)",
-                          borderRadius: 2,
+                          border: "1px solid color-mix(in srgb, var(--bad) 20%, transparent)",
+                          borderRadius: 6,
                           width: 30,
                           height: 30,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           cursor: "pointer",
-                          color: "#FCA5A5",
+                          color: "var(--bad)",
                           opacity: deletingId === item.id ? 0.4 : 1,
                         }}
                       >
@@ -959,7 +959,7 @@ export default function RecurringPage() {
                       </button>
                       <div
                         style={{
-                          color: "var(--text-muted)",
+                          color: "var(--text-3)",
                           display: "flex",
                           alignItems: "center",
                         }}
@@ -986,14 +986,14 @@ export default function RecurringPage() {
                         <div
                           style={{
                             padding: "0 24px 20px",
-                            borderTop: "1px solid var(--border)",
+                            borderTop: "1px solid var(--line)",
                           }}
                         >
                           <div
                             style={{
                               display: "grid",
                               gridTemplateColumns:
-                                "repeat(auto-fill, minmax(140px, 1fr))",
+                                "repeat(auto-fill, minmax(min(140px, 100%), 1fr))",
                               gap: 14,
                               paddingTop: 16,
                             }}
@@ -1028,7 +1028,7 @@ export default function RecurringPage() {
                                 <p
                                   style={{
                                     fontSize: 12,
-                                    color: "var(--text-secondary)",
+                                    color: "var(--text-2)",
                                     margin: 0,
                                   }}
                                 >
@@ -1057,16 +1057,16 @@ export default function RecurringPage() {
                                     display: "flex",
                                     justifyContent: "space-between",
                                     fontSize: 12,
-                                    color: "var(--text-secondary)",
+                                    color: "var(--text-2)",
                                     padding: "4px 0",
-                                    borderBottom: "1px solid var(--border)",
+                                    borderBottom: "1px solid var(--line)",
                                   }}
                                 >
                                   <span>{line.description}</span>
                                   <span
                                     style={{
                                       fontFamily: "var(--font-mono), monospace",
-                                      color: "var(--text-primary)",
+                                      color: "var(--text)",
                                     }}
                                   >
                                     {line.quantity} × {formatINR(line.rate)}
@@ -1081,14 +1081,14 @@ export default function RecurringPage() {
                                   padding: "6px 0",
                                 }}
                               >
-                                <span style={{ color: "var(--text-muted)" }}>
+                                <span style={{ color: "var(--text-3)" }}>
                                   Total (incl. {item.tax_rate}% GST)
                                 </span>
                                 <span
                                   style={{
                                     fontFamily: "var(--font-mono), monospace",
                                     fontWeight: 600,
-                                    color: "var(--text-primary)",
+                                    color: "var(--text)",
                                   }}
                                 >
                                   {formatINR(total)}
@@ -1105,7 +1105,7 @@ export default function RecurringPage() {
                               <p
                                 style={{
                                   fontSize: 12,
-                                  color: "var(--text-muted)",
+                                  color: "var(--text-3)",
                                   margin: 0,
                                 }}
                               >
@@ -1126,20 +1126,20 @@ export default function RecurringPage() {
         {/* Info box */}
         <div
           className="card"
-          style={{ padding: "16px 20px", borderLeft: "2px solid var(--gold)" }}
+          style={{ padding: "16px 20px", borderLeft: "2px solid var(--accent)" }}
         >
           <p
             style={{
               fontSize: 12,
-              color: "var(--text-muted)",
+              color: "var(--text-3)",
               lineHeight: 1.75,
             }}
           >
-            <strong style={{ color: "var(--text-secondary)" }}>
+            <strong style={{ color: "var(--text-2)" }}>
               How it works:
             </strong>{" "}
             Each schedule generates a draft invoice on its next run date. Click{" "}
-            <strong style={{ color: "var(--text-secondary)" }}>
+            <strong style={{ color: "var(--text-2)" }}>
               Run due now
             </strong>{" "}
             to generate all invoices whose run date is today or in the past. For
@@ -1147,7 +1147,7 @@ export default function RecurringPage() {
             <code
               style={{
                 fontFamily: "var(--font-mono), monospace",
-                color: "var(--gold)",
+                color: "var(--accent)",
               }}
             >
               POST /api/recurring/run
