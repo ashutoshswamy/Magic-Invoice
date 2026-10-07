@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import {
   Building2,
@@ -312,13 +312,11 @@ export default function ClientsPage() {
             {clients.map((client, index) => {
               const matchedInvoices = invoiceMatches(client);
               return (
-                <motion.div
+                <Reveal
+                  vars={{ delay: index * 0.04 }}
                   key={client.id}
                   className="card"
                   style={{ padding: "24px" }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.04 }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
                     <div style={{ minWidth: 0 }}>
@@ -415,7 +413,7 @@ export default function ClientsPage() {
                       <p style={{ fontSize: 13, color: "var(--text-3)" }}>No invoices yet.</p>
                     )}
                   </div>
-                </motion.div>
+                </Reveal>
               );
             })}
           </div>

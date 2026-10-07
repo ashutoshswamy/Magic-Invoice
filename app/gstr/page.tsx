@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { Download, RefreshCw } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -327,12 +327,11 @@ export default function GSTRPage() {
             { label: "Total tax", value: formatCurrency(totalTax) },
             { label: "Invoice total", value: formatCurrency(grandTotal) },
           ].map((c) => (
-            <motion.div
+            <Reveal
+              vars={{ y: 8 }}
               key={c.label}
               className="card"
               style={{ padding: "18px 20px" }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
             >
               <span style={fieldLabel}>{c.label}</span>
               <p
@@ -346,7 +345,7 @@ export default function GSTRPage() {
               >
                 {c.value}
               </p>
-            </motion.div>
+            </Reveal>
           ))}
         </div>
 

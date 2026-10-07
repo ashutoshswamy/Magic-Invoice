@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import {
   Plus,
@@ -384,10 +384,8 @@ export default function RecurringPage() {
         </div>
 
         {status && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
+          <Reveal
+            vars={{ y: -6 }}
             style={{
               padding: "12px 18px",
               borderRadius: 6,
@@ -401,18 +399,15 @@ export default function RecurringPage() {
             }}
           >
             {status.msg}
-          </motion.div>
+          </Reveal>
         )}
 
         {/* Create form */}
-        <AnimatePresence>
           {showForm && (
-            <motion.div
+            <Reveal
+              vars={{ y: -12 }}
               className="card"
               style={{ padding: 28 }}
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
             >
               <p className="section-label" style={{ marginBottom: 20 }}>
                 New recurring schedule
@@ -787,9 +782,8 @@ export default function RecurringPage() {
                   Cancel
                 </button>
               </div>
-            </motion.div>
+            </Reveal>
           )}
-        </AnimatePresence>
 
         {/* List */}
         {loading ? (
@@ -829,16 +823,14 @@ export default function RecurringPage() {
               const total = lineTotal(item.lines ?? [], item.tax_rate);
               const expanded = expandedId === item.id;
               return (
-                <motion.div
+                <Reveal
+                  vars={{ y: 8, delay: i * 0.03 }}
                   key={item.id}
                   className="card"
                   style={{
                     overflow: "hidden",
                     opacity: item.active ? 1 : 0.55,
                   }}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: item.active ? 1 : 0.55, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
                 >
                   {/* Row */}
                   <div
@@ -974,13 +966,9 @@ export default function RecurringPage() {
                   </div>
 
                   {/* Expanded details */}
-                  <AnimatePresence>
                     {expanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                      <Reveal
+                        vars={{ y: 0, height: 0, duration: 0.2, clearProps: "height,visibility" }}
                         style={{ overflow: "hidden" }}
                       >
                         <div
@@ -1114,10 +1102,9 @@ export default function RecurringPage() {
                             </div>
                           )}
                         </div>
-                      </motion.div>
+                      </Reveal>
                     )}
-                  </AnimatePresence>
-                </motion.div>
+                </Reveal>
               );
             })}
           </div>

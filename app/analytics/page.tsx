@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import {
   BarChart2,
@@ -247,9 +247,8 @@ export default function AnalyticsPage() {
         }}
       >
         {/* ── Hero Header ─────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
+        <Reveal
+          vars={{ y: 14 }}
           style={{ display: "flex", alignItems: "center", gap: 16 }}
         >
           <div
@@ -282,7 +281,7 @@ export default function AnalyticsPage() {
               Invoice analytics
             </h1>
           </div>
-        </motion.div>
+        </Reveal>
 
         {isLoading ? (
           <div
@@ -307,10 +306,8 @@ export default function AnalyticsPage() {
         ) : (
           <>
             {/* ── Revenue Hero Card ────────────────────────── */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
+            <Reveal
+              vars={{ y: 12, delay: 0.05 }}
               style={{
                 background: "linear-gradient(135deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 50%, transparent) 100%)",
                 border: "1px solid var(--line)",
@@ -374,11 +371,10 @@ export default function AnalyticsPage() {
                     </span>
                   </div>
                   <div style={{ height: 6, borderRadius: 6, background: "var(--surface-2)", overflow: "hidden" }}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${collectionRate}%` }}
-                      transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+                    <Reveal
+                      vars={{ y: 0, width: 0, duration: 0.8, delay: 0.3 }}
                       style={{
+                        width: `${collectionRate}%`,
                         height: "100%",
                         borderRadius: 6,
                         background: collectionRate >= 75
@@ -394,7 +390,7 @@ export default function AnalyticsPage() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </Reveal>
 
             {/* ── Stat Cards Grid ─────────────────────────── */}
             <div
@@ -407,11 +403,9 @@ export default function AnalyticsPage() {
               {cards.map((card, index) => {
                 const Icon = card.icon;
                 return (
-                  <motion.div
+                  <Reveal
+                    vars={{ delay: 0.1 + index * 0.06 }}
                     key={card.label}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + index * 0.06 }}
                     style={{
                       background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 50%, transparent) 100%)",
                       border: "1px solid var(--line)",
@@ -461,7 +455,7 @@ export default function AnalyticsPage() {
                         {card.value}
                       </p>
                     </div>
-                  </motion.div>
+                  </Reveal>
                 );
               })}
             </div>
@@ -481,10 +475,8 @@ export default function AnalyticsPage() {
         )}
 
         {/* ── AI Insights Header ────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+        <Reveal
+          vars={{ y: 14, delay: 0.15 }}
           style={{ display: "flex", alignItems: "center", gap: 14 }}
         >
           <div
@@ -517,7 +509,7 @@ export default function AnalyticsPage() {
               AI-powered analysis
             </h2>
           </div>
-        </motion.div>
+        </Reveal>
 
         {/* ── AI Cards Grid ──────────────────────────────────── */}
         <div
@@ -528,10 +520,8 @@ export default function AnalyticsPage() {
           }}
         >
           {/* Cash Flow Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+          <Reveal
+            vars={{ y: 14, delay: 0.2 }}
             style={{
               background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 60%, transparent) 100%)",
               border: "1px solid var(--line)",
@@ -602,13 +592,11 @@ export default function AnalyticsPage() {
                 {isLoadingInsight ? "Analysing..." : aiInsight ? "Refresh" : "Generate insight"}
               </button>
             </div>
-          </motion.div>
+          </Reveal>
 
           {/* Payment Prediction Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.28 }}
+          <Reveal
+            vars={{ y: 14, delay: 0.28 }}
             style={{
               background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 60%, transparent) 100%)",
               border: "1px solid var(--line)",
@@ -678,13 +666,11 @@ export default function AnalyticsPage() {
                 {isLoadingPrediction ? "Predicting..." : aiPrediction ? "Refresh" : "Generate prediction"}
               </button>
             </div>
-          </motion.div>
+          </Reveal>
 
           {/* Ask AI Card — full width */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.36 }}
+          <Reveal
+            vars={{ y: 14, delay: 0.36 }}
             style={{
               background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 60%, transparent) 100%)",
               border: "1px solid var(--line)",
@@ -776,7 +762,7 @@ export default function AnalyticsPage() {
                 </div>
               )}
             </div>
-          </motion.div>
+          </Reveal>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { FileText, Save } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -114,11 +114,10 @@ export default function SettingsPage() {
           </h1>
         </div>
 
-        <motion.div
+        <Reveal
+          vars={{ y: 12 }}
           className="card"
           style={{ padding: 32 }}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
             <FileText size={13} style={{ color: "var(--accent)" }} />
@@ -144,7 +143,7 @@ export default function SettingsPage() {
             </button>
             {status && <span style={{ fontSize: 11, color: "var(--accent)", fontFamily: "var(--font-mono), monospace" }}>{status}</span>}
           </div>
-        </motion.div>
+        </Reveal>
       </div>
     </div>
   );

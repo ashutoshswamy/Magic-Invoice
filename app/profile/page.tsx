@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import Reveal from "../components/Reveal";
 import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebaseClient";
 import { useAuth } from "../lib/useAuth";
@@ -27,7 +27,7 @@ export default function ProfilePage() {
             Your profile
           </h1>
         </div>
-        <motion.div className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 16, maxWidth: 480 }} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+        <Reveal vars={{ y: 12 }} className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 16, maxWidth: 480 }}>
           <div>
             <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-3)" }}>Email</span>
             <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--text)" }}>
@@ -37,7 +37,7 @@ export default function ProfilePage() {
           <button onClick={handleSignOut} className="btn-primary" style={{ alignSelf: "flex-start" }}>
             Sign out
           </button>
-        </motion.div>
+        </Reveal>
       </div>
     </div>
   );

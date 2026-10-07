@@ -6,11 +6,16 @@ A high-performance, AI-powered invoicing workspace built with Next.js 16, React 
 
 ## Features
 
-- AI-powered drafts — generate full invoices from simple sentences using advanced AI models
-- Client management — reusable directory of clients for lightning-fast invoicing
-- Live analytics — visual revenue tracking and payment status insights
-- Secure storage — robust data isolation and persistence powered by Firebase (Firestore + Auth)
-- Modern UI — smooth transitions with Framer Motion, GSAP, and a premium design aesthetic
+- AI-powered drafts — generate full invoices from simple sentences using Google Gemini
+- Client & item management — reusable directories of clients and products/services
+- GST ready — CGST/SGST/IGST calculation, GSTR-1 export, and GSTR-3B summary
+- Expense tracking — log expenses and track input tax credit (ITC)
+- Recurring invoices — weekly, monthly, quarterly, or yearly schedules
+- Razorpay payment links — share links and auto-update status via webhooks
+- Live analytics — revenue tracking, payment status, and AI cash flow insights
+- Secure storage — per-user data isolation powered by Firebase (Firestore + Auth)
+- Modern UI — smooth GSAP animations and a premium design aesthetic
+- Free — unlimited invoices, clients, and AI generation
 
 ## Author
 

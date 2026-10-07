@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { FileText, RefreshCw, Trash2, UploadCloud } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -133,13 +133,11 @@ export default function InvoicesPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))", gap: 12 }}>
           {stored.map((invoice, index) => (
-            <motion.div
+            <Reveal
+              vars={{ delay: index * 0.04 }}
               key={invoice.id}
               className="card"
               style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.04 }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
                 <div style={{ width: 36, height: 36, border: "1px solid var(--line-strong)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -171,7 +169,7 @@ export default function InvoicesPage() {
                   {deletingId === invoice.id ? "..." : "Delete"}
                 </button>
               </div>
-            </motion.div>
+            </Reveal>
           ))}
         </div>
 

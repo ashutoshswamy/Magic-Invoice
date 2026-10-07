@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { Plus, Trash2 } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -229,11 +229,9 @@ export default function ItemsPage() {
         </div>
 
         {/* Add form */}
-        <motion.div
+        <Reveal
           className="card"
           style={{ padding: 28 }}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
         >
           <p className="section-label" style={{ marginBottom: 16 }}>
             Add new item
@@ -371,7 +369,7 @@ export default function ItemsPage() {
               </span>
             )}
           </div>
-        </motion.div>
+        </Reveal>
 
         {/* Items list */}
         {isLoading ? (
@@ -424,7 +422,8 @@ export default function ItemsPage() {
               ))}
             </div>
             {items.map((item, i) => (
-              <motion.div
+              <Reveal
+                vars={{ y: 6, delay: i * 0.03 }}
                 key={item.id}
                 className="card items-grid"
                 style={{
@@ -435,9 +434,6 @@ export default function ItemsPage() {
                   alignItems: "center",
                   marginBottom: 1,
                 }}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
               >
                 <div className="item-main">
                   <p
@@ -545,7 +541,7 @@ export default function ItemsPage() {
                 >
                   <Trash2 size={13} />
                 </button>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         )}

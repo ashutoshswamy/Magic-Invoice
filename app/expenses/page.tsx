@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { Plus, Trash2 } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -210,12 +210,11 @@ export default function ExpensesPage() {
             { label: "GST paid (total)", value: formatINR(totalGstPaid) },
             { label: "ITC eligible", value: formatINR(itcEligible) },
           ].map((c) => (
-            <motion.div
+            <Reveal
+              vars={{ y: 8 }}
               key={c.label}
               className="card"
               style={{ padding: "18px 20px" }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
             >
               <span style={fieldLabel}>{c.label}</span>
               <p
@@ -229,16 +228,14 @@ export default function ExpensesPage() {
               >
                 {c.value}
               </p>
-            </motion.div>
+            </Reveal>
           ))}
         </div>
 
         {/* Add form */}
-        <motion.div
+        <Reveal
           className="card"
           style={{ padding: 28 }}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
         >
           <p className="section-label" style={{ marginBottom: 16 }}>
             Add expense
@@ -387,7 +384,7 @@ export default function ExpensesPage() {
               </span>
             )}
           </div>
-        </motion.div>
+        </Reveal>
 
         {/* Expenses list */}
         {isLoading ? (
@@ -442,12 +439,10 @@ export default function ExpensesPage() {
               </thead>
               <tbody>
                 {expenses.map((exp, i) => (
-                  <motion.tr
+                  <Reveal as="tr"
+                    vars={{ y: 0, delay: i * 0.02 }}
                     key={exp.id}
                     className="expense-row"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.02 }}
                   >
                     <td className="exp-date" data-label="Date">{exp.expense_date}</td>
                     <td className="exp-vendor" data-label="Vendor">{exp.vendor}</td>
@@ -469,7 +464,7 @@ export default function ExpensesPage() {
                         <Trash2 size={12} />
                       </button>
                     </td>
-                  </motion.tr>
+                  </Reveal>
                 ))}
               </tbody>
             </table>

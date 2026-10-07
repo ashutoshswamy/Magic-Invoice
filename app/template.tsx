@@ -19,7 +19,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const targets = gsap.utils
           .toArray<HTMLElement>("h1, .section-label, .card, .glass-panel, form", ref.current)
-          .filter((el) => !el.closest("header"))
+          .filter((el) => !el.closest("header, [data-reveal]"))
           .slice(0, 14);
         gsap.from(targets, {
           autoAlpha: 0,
