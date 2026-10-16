@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { adminAuth } from "./app/lib/firebaseAdmin";
+import { SESSION_COOKIE } from "./app/lib/sessionCookie";
 
 const PROTECTED_PATHS = [
   "/dashboard",
@@ -23,17 +23,12 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = req.cookies.get("__session")?.value;
+  const session = req.cookies.get(SESSION_COOKIE)?.value;
   if (!session) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  try {
-    await adminAuth.verifySessionCookie(session, true);
-    return NextResponse.next();
-  } catch {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
+  return NextResponse.next();
 }
 
 export const config = {

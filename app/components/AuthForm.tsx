@@ -127,32 +127,9 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
     getRedirectResult(auth).catch(() => setError(t.googleError));
   }, [mode, t.googleError]);
 
-  // Single path to the dashboard: whenever Firebase reports a signed-in user
-  // (fresh sign-in or a persisted one), mint the server session cookie first.
-  // proxy.ts guards app routes on that cookie, so navigating without it
-  // bounces straight back here and loops.
   useEffect(() => {
-    if (!isLoaded || !user) return;
-    let cancelled = false;
-    (async () => {
-      setIsSubmitting(true);
-      const res = await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken: await user.getIdToken() }),
-      }).catch(() => null);
-      if (cancelled) return;
-      if (res?.ok) {
-        window.location.replace("/dashboard");
-      } else {
-        setError(`You are signed in, but the server could not start your session (${res?.status ?? "network error"}). Try again in a moment.`);
-        setIsSubmitting(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoaded, user]);
+    if (isLoaded && user && !isSubmitting) window.location.replace("/dashboard");
+  }, [isLoaded, user, isSubmitting]);
 
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,7 +147,7 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
     try {
       if (mode === "login") await signInWithEmailAndPassword(auth, email, password);
       else await createUserWithEmailAndPassword(auth, email, password);
-      // the effect above takes it from here
+      setIsSubmitting(false);
     } catch {
       setError(t.error);
       setIsSubmitting(false);

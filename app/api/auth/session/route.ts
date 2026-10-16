@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminAuth } from "@/app/lib/firebaseAdmin";
+import { SESSION_COOKIE, SESSION_MARKER } from "@/app/lib/sessionCookie";
 
 const SESSION_EXPIRES_IN_MS = 14 * 24 * 60 * 60 * 1000; // 14 days (Admin SDK max)
 
@@ -15,8 +16,15 @@ export async function POST(request: Request) {
     });
 
     const response = NextResponse.json({ ok: true });
-    response.cookies.set("__session", sessionCookie, {
+    response.cookies.set(SESSION_COOKIE, sessionCookie, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: SESSION_EXPIRES_IN_MS / 1000,
+    });
+    response.cookies.set(SESSION_MARKER, "1", {
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
