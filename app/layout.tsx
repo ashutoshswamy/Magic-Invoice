@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Archivo, Instrument_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "./lib/seo";
+import Analytics from "./components/Analytics";
+import CookieConsent from "./components/CookieConsent";
+import ToastProvider from "./components/ToastProvider";
 
 const archivo = Archivo({
   variable: "--font-archivo",
@@ -112,19 +114,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-GFLEERSHLH"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-GFLEERSHLH');
-          `}
-        </Script>
-        {children}
+        <ToastProvider><Analytics />{children}<CookieConsent /></ToastProvider>
       </body>
     </html>
   );

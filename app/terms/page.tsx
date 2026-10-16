@@ -27,23 +27,31 @@ const sections = [
     ],
   },
   {
-    title: "4. Account Security",
+    title: "4. Eligibility and Consent",
+    content: "You must be at least 18 years old to create an account. Signup requires acceptance of these Terms and the Privacy Policy.",
+  },
+  {
+    title: "5. Account Security",
     content: "You are responsible for safeguarding access to your account and for all activity under your credentials.",
   },
   {
-    title: "5. Termination",
+    title: "6. Service Providers and Payments",
+    content: "Magic Invoice uses Firebase for authentication and storage, Google Gemini for AI-assisted drafting, Google Analytics when you consent to optional analytics cookies, and Razorpay for payment links.",
+  },
+  {
+    title: "7. Termination",
     content: "We may suspend or terminate access to the Service at any time for any reason, including misuse or violations of these Terms.",
   },
   {
-    title: "6. Limitation of Liability",
+    title: "8. Limitation of Liability",
     content: "To the maximum extent permitted by law, Magic Invoice is not liable for indirect, incidental, special, consequential, or punitive damages arising from your use of the Service.",
   },
   {
-    title: "7. Changes",
+    title: "9. Changes",
     content: "We may update these Terms from time to time by posting a revised version on this page.",
   },
   {
-    title: "8. Contact Us",
+    title: "10. Contact Us",
     contact: true,
   },
 ];
@@ -59,7 +67,7 @@ export default function TermsPage() {
             Terms of Service
           </h1>
           <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em" }}>
-            Last updated: January 18, 2026
+            Last updated: October 17, 2026
           </p>
         </div>
 

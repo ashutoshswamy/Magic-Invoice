@@ -16,11 +16,12 @@ const sections = [
   },
   {
     title: "2. How We Use Cookies",
-    content: "Magic Invoice uses cookies for essential functionality, including authentication and session security.",
+    content: "Magic Invoice uses essential storage for authentication, session security, theme preference and cookie-consent preference. Optional Google Analytics cookies load only after you accept them.",
     list: [
       "Authentication and login sessions",
       "Security and CSRF protection",
       "Session state and preferences",
+      "Optional analytics, only after consent",
     ],
   },
   {
@@ -52,7 +53,7 @@ export default function CookiesPage() {
             Cookie Policy
           </h1>
           <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em" }}>
-            Last updated: January 18, 2026
+            Last updated: October 17, 2026
           </p>
         </div>
 

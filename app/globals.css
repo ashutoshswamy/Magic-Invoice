@@ -154,6 +154,17 @@ img, video { max-width: 100%; height: auto; }
 .btn-ghost:hover { border-color: var(--text-3); background: var(--surface); }
 .btn-primary:active, .btn-ghost:active { transform: translateY(1px) scale(0.99); }
 .btn-primary:disabled, .btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.spinner-wrap { display: inline-flex; align-items: center; gap: 8px; }
+.spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 999px; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 100; display: grid; gap: 8px; max-width: min(360px, calc(100vw - 40px)); }
+.toast { padding: 12px 16px; border: 1px solid var(--line-strong); border-left: 3px solid var(--ok); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); font-size: 14px; }
+.toast-error { border-left-color: var(--bad); }
+.cookie-banner { position: fixed; z-index: 90; left: 20px; right: 20px; bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 18px; border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }
+.cookie-banner p { margin: 3px 0 0; color: var(--text-2); font-size: 13px; }
+.cookie-banner a { color: var(--accent); text-decoration: underline; }
+.cookie-actions { display: flex; flex-shrink: 0; gap: 8px; }
+@media (max-width: 640px) { .cookie-banner { display: grid; } .cookie-actions { justify-content: end; } }
 
 /* ── Labels & tabs ──────────────────────────────────────────────────────────── */
 .section-label {

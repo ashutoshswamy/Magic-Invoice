@@ -23,7 +23,11 @@ const sections = [
     ],
   },
   {
-    title: "3. How We Use Your Data",
+    title: "3. Service Providers",
+    content: "Firebase processes authentication and stored application data. Google Gemini processes invoice prompts when you request AI drafting. Razorpay processes payment-link information. Google Analytics receives usage data only after you accept optional analytics cookies.",
+  },
+  {
+    title: "4. How We Use Your Data",
     list: [
       "Generate and store invoices you create.",
       "Maintain your account and preferences.",
@@ -31,26 +35,30 @@ const sections = [
     ],
   },
   {
-    title: "4. Data Sharing",
+    title: "5. Data Sharing",
     content: "We do not sell your data. We share information only with service providers needed to operate Magic Invoice, including our authentication and storage providers and AI providers for invoice drafting.",
   },
   {
-    title: "5. Data Security",
+    title: "6. Data Security",
     content: "We rely on secure infrastructure and industry-standard protections to keep your data safe.",
   },
   {
-    title: "6. Your Rights",
+    title: "7. Your Rights",
     list: [
       "Access, correct, or delete your account data.",
       "Request export of your invoice data.",
     ],
   },
   {
-    title: "7. Changes",
+    title: "8. Cookies and Consent",
+    content: "Essential cookies support authentication and security. Optional analytics cookies are disabled until you choose to accept them.",
+  },
+  {
+    title: "9. Changes",
     content: "We may update this policy by posting a revised version here.",
   },
   {
-    title: "8. Contact Us",
+    title: "10. Contact Us",
     contact: true,
   },
 ];
@@ -66,7 +74,7 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em" }}>
-            Last updated: January 18, 2026
+            Last updated: October 17, 2026
           </p>
         </div>
 

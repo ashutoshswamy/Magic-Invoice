@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
 } from "firebase/auth";
 import { auth } from "../lib/firebaseClient";
@@ -14,6 +15,7 @@ import { useAuth } from "../lib/useAuth";
 import TopNav from "./TopNav";
 import HeroDemo from "./HeroDemo";
 import { Eye, EyeOff } from "lucide-react";
+import Spinner from "./Spinner";
 
 // Official multicolour Google "G" mark (required by Google's sign-in branding guidelines).
 function GoogleMark() {
@@ -119,6 +121,13 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [accepted, setAccepted] = useState(false);
+  const [isAdult, setIsAdult] = useState(false);
+
+  useEffect(() => {
+    if (mode !== "signup") return;
+    getRedirectResult(auth).catch(() => setError(t.googleError));
+  }, [mode, t.googleError]);
 
   // Single path to the dashboard: whenever Firebase reports a signed-in user
   // (fresh sign-in or a persisted one), mint the server session cookie first.
@@ -151,6 +160,10 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (mode === "signup" && (!accepted || !isAdult)) {
+      setError("Confirm you are 18 or older and accept the Terms and Privacy Policy.");
+      return;
+    }
     if (mode === "signup" && password !== confirm) {
       setConfirmError("Passwords do not match.");
       return;
@@ -171,7 +184,12 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
     setError(null);
     setIsSubmitting(true);
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      if (mode === "signup" && (!accepted || !isAdult)) {
+        setError("Confirm you are 18 or older and accept the Terms and Privacy Policy.");
+        setIsSubmitting(false);
+        return;
+      }
+      await signInWithRedirect(auth, new GoogleAuthProvider());
     } catch {
       setError(t.googleError);
       setIsSubmitting(false);
@@ -236,11 +254,15 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
                 error={confirmError}
               />
             )}
+            {mode === "signup" && <div className="grid gap-3 text-sm text-ink-2">
+              <label className="flex items-start gap-2"><input type="checkbox" checked={isAdult} onChange={(e) => setIsAdult(e.target.checked)} required /> I am 18 or older.</label>
+              <label className="flex items-start gap-2"><input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} required /> I accept the <Link className="text-accent underline" href="/terms">Terms</Link> and <Link className="text-accent underline" href="/privacy">Privacy Policy</Link>.</label>
+            </div>}
             {error && (
               <p role="alert" className="text-sm text-[var(--bad)]">{error}</p>
             )}
             <button type="submit" disabled={isSubmitting} className="btn-primary w-full !py-3.5">
-              {isSubmitting ? t.busy : t.submit}
+              {isSubmitting ? <Spinner label={t.busy} /> : t.submit}
             </button>
           </form>
 
