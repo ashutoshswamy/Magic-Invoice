@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 type Toast = { id: number; message: string; kind: "success" | "error" };
 type ToastApi = { toast: (message: string, kind?: Toast["kind"]) => void };
@@ -12,7 +12,11 @@ export function useToast() {
 
 export default function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const lastToast = useRef<{ message: string; at: number } | null>(null);
   const toast = (message: string, kind: Toast["kind"] = "success") => {
+    const now = Date.now();
+    if (lastToast.current?.message === message && now - lastToast.current.at < 1000) return;
+    lastToast.current = { message, at: now };
     const id = Date.now() + Math.random();
     setToasts((current) => [...current, { id, message, kind }]);
     window.setTimeout(() => setToasts((current) => current.filter((item) => item.id !== id)), 3200);
@@ -24,19 +28,7 @@ export default function ToastProvider({ children }: { children: React.ReactNode 
       if (detail?.message) toast(detail.message, detail.kind);
     };
     window.addEventListener("magic-invoice:toast", onToast);
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const response = await originalFetch(...args);
-      const input = args[0];
-      const url = typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
-      const method = (args[1]?.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
-      if (response.ok && /^(POST|PATCH|DELETE)$/.test(method) && !url.includes("/api/auth/")) toast("Task completed.");
-      return response;
-    };
-    return () => {
-      window.removeEventListener("magic-invoice:toast", onToast);
-      window.fetch = originalFetch;
-    };
+    return () => window.removeEventListener("magic-invoice:toast", onToast);
   }, []);
 
   return (
