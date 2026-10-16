@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -113,7 +112,6 @@ const copy = {
 
 export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const t = copy[mode];
-  const router = useRouter();
   const { user, isLoaded } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -145,17 +143,16 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
       }).catch(() => null);
       if (cancelled) return;
       if (res?.ok) {
-        router.replace("/dashboard");
-        router.refresh();
+        window.location.replace("/dashboard");
       } else {
-        setError("You are signed in, but the server could not start your session. Try again in a moment.");
+        setError(`You are signed in, but the server could not start your session (${res?.status ?? "network error"}). Try again in a moment.`);
         setIsSubmitting(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [isLoaded, user, router]);
+  }, [isLoaded, user]);
 
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
