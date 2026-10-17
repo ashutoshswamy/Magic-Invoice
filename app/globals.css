@@ -101,6 +101,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* The invoice-blue pointer is the site's small carbon-copy signature. Keep
+   native cursors on touch devices and for text entry. */
+@media (pointer: fine) {
+  :root {
+    --cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5 2.5 19.5 16l-6.2.6 3.2 4.3-2.2 1.6-3.2-4.4-3.2 5.1Z' fill='%232e3eb8' stroke='%2315171c' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 5 3, auto;
+    --cursor-action: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8.5' fill='%232e3eb8' stroke='%2315171c' stroke-width='1.5'/%3E%3Cpath d='M12 8v8M8 12h8' stroke='%23f7f8ff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer;
+  }
+  :root[data-theme="dark"] {
+    --cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5 2.5 19.5 16l-6.2.6 3.2 4.3-2.2 1.6-3.2-4.4-3.2 5.1Z' fill='%238d9bff' stroke='%23f6f7f9' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 5 3, auto;
+    --cursor-action: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8.5' fill='%238d9bff' stroke='%23f6f7f9' stroke-width='1.5'/%3E%3Cpath d='M12 8v8M8 12h8' stroke='%230f1116' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer;
+  }
+  body { cursor: var(--cursor-default); }
+  a, button, summary, [role="button"], select,
+  input[type="checkbox"], input[type="radio"] { cursor: var(--cursor-action); }
+  input, textarea { cursor: text; }
+}
+
 h1, h2, h3 {
   font-stretch: 112%;
   letter-spacing: -0.025em;

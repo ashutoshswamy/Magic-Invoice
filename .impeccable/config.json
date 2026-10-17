@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "app/globals.css"
+        ],
+        "createdAt": "2026-10-17T18:57:33.955Z",
+        "reason": "sanctioned semantic toast status indicator: left color distinguishes success and error feedback"
+      }
+    ]
+  }
+}
