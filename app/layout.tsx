@@ -1,25 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Instrument_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "./lib/seo";
 import Analytics from "./components/Analytics";
 import CookieConsent from "./components/CookieConsent";
 import ToastProvider from "./components/ToastProvider";
 
-const archivo = Archivo({
-  variable: "--font-archivo",
-  subsets: ["latin"],
-  axes: ["wdth"],
-});
-const instrument = Instrument_Sans({
-  variable: "--font-instrument",
-  subsets: ["latin"],
-});
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
+const bricolage = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"], display: "swap" });
+const dmSans = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"], display: "swap" });
 
 // Site-wide defaults. Public pages set their own canonical/Open Graph via
 // pageMetadata() in lib/seo.ts; app screens use privateMetadata() (noindex).
@@ -62,13 +50,12 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f1f2ee" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f1116" },
+    { media: "(prefers-color-scheme: light)", color: "#f2f2ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#14110e" },
   ],
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
+const webApp = {
   "@type": "WebApplication",
   name: "Magic Invoice",
   url: SITE_URL,
@@ -93,7 +80,23 @@ const jsonLd = {
   ],
 };
 
-const themeScript = `(function(){var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function s(){try{return localStorage.getItem("theme")}catch(e){return null}}function a(){d.dataset.theme=s()||(m.matches?"dark":"light")}a();m.addEventListener("change",function(){if(!s())a()})})()`;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    webApp,
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#org`,
+      name: "Magic Invoice",
+      url: SITE_URL,
+      logo: `${SITE_URL}/android-chrome-512x512.png`,
+      sameAs: ["https://github.com/ashutoshswamy", "https://twitter.com/ashutoshswamy_", "https://linkedin.com/in/ashutoshswamy"],
+    },
+    { "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "Magic Invoice", url: SITE_URL, inLanguage: "en-IN" },
+  ],
+};
+
+const themeScript = `(function(){var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function s(){try{return localStorage.getItem("theme")}catch(e){return null}}function a(){d.dataset.theme=s()||(m.matches?"dark":"light");d.dataset.themeChoice=s()||"system"}a();m.addEventListener("change",function(){if(!s())a()})})()`;
 
 export default function RootLayout({
   children,
@@ -101,7 +104,7 @@ export default function RootLayout({
   return (
     <html
       lang="en-IN"
-      className={`${archivo.variable} ${instrument.variable} ${plexMono.variable}`}
+      className={`${bricolage.variable} ${dmSans.variable}`}
       suppressHydrationWarning
     >
       <head>

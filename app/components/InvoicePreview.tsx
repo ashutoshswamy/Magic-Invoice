@@ -74,13 +74,13 @@ export default function InvoicePreview({ invoice, showBranding = false }: { invo
   return (
     <article className="@container relative w-full overflow-hidden rounded-xl print:rounded-none print:shadow-none print:ring-0 bg-white text-[13px] leading-relaxed text-[#4a4e58] shadow-[0_1px_0_rgba(21,23,28,0.04),0_18px_40px_-18px_rgba(35,45,110,0.28)] ring-1 ring-[#e3e5e0]">
       {/* Carbon-copy rule: the one brand mark on the document */}
-      <div className="h-1.5 bg-[#2e3eb8]" aria-hidden />
+      <div className="h-1.5 bg-[#c8321a]" aria-hidden />
 
       <div className="p-6 @2xl:p-10">
         {/* ── Header ───────────────────────────────────────────── */}
         <header className="flex flex-col gap-6 @lg:flex-row @lg:items-start @lg:justify-between">
           <div className="min-w-0">
-            <p className="font-head text-2xl font-bold leading-tight tracking-tight text-[#15171c] [font-stretch:112%] @2xl:text-[28px]">
+            <p className="font-head text-2xl font-bold leading-tight tracking-tight text-[#15171c] @2xl:text-[28px]">
               {invoice.from.company || invoice.from.name}
             </p>
             {invoice.from.gstin && (
@@ -88,7 +88,7 @@ export default function InvoicePreview({ invoice, showBranding = false }: { invo
             )}
           </div>
           <div className="@lg:text-right">
-            <p className="font-code text-[11px] font-semibold uppercase tracking-[0.16em] text-[#2e3eb8]">Tax invoice</p>
+            <p className="font-code text-[11px] font-semibold uppercase tracking-[0.16em] text-[#c8321a]">Tax invoice</p>
             <p className="mt-1 break-all font-code text-lg font-semibold text-[#15171c]">{invoice.invoiceNumber}</p>
           </div>
         </header>
@@ -152,7 +152,7 @@ export default function InvoicePreview({ invoice, showBranding = false }: { invo
         <div className="mt-6 grid gap-8 @xl:grid-cols-[minmax(0,1fr)_minmax(240px,300px)]">
           <div className="order-2 min-w-0 @xl:order-1">
             {invoice.paid && (
-              <p className="mb-6 inline-block -rotate-6 rounded-md border-[3px] border-[#2e3eb8] px-4 py-1 font-code text-2xl font-semibold uppercase tracking-[0.2em] text-[#2e3eb8] opacity-85">
+              <p className="mb-6 inline-block -rotate-6 rounded-md border-[3px] border-[#c8321a] px-4 py-1 font-code text-2xl font-semibold uppercase tracking-[0.2em] text-[#c8321a] opacity-85">
                 Paid
               </p>
             )}
@@ -197,7 +197,7 @@ export default function InvoicePreview({ invoice, showBranding = false }: { invo
         {showBranding && (
           <p className="mt-10 border-t border-[#e3e5e0] pt-4 text-center text-[11px] text-[#6b707b]">
             Made with{" "}
-            <a href="https://magicinvoice.in" target="_blank" rel="noopener noreferrer" className="font-medium text-[#2e3eb8]">
+            <a href="https://magicinvoice.in" target="_blank" rel="noopener noreferrer" className="font-medium text-[#c8321a]">
               Magic Invoice
             </a>
           </p>

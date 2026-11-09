@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  redirects: async () => [
+    {
+      source: "/:path*",
+      has: [{ type: "host", value: "www.magicinvoice.in" }],
+      destination: "https://magicinvoice.in/:path*",
+      permanent: true,
+    },
+  ],
   headers: async () => [
     {
       source: "/(.*)",

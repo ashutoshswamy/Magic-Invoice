@@ -139,7 +139,7 @@ export default function HeroDemo({ delay = 0 }: { delay?: number }) {
         <div
           data-stamp
           aria-hidden
-          className="pointer-events-none absolute right-6 top-24 -rotate-8 rounded-md border-2 border-accent px-3 py-1.5 font-code text-xs font-semibold uppercase tracking-[0.12em] text-accent opacity-90 sm:right-10"
+          className="pointer-events-none absolute right-3 top-24 -rotate-8 rounded-md border-2 border-accent px-2 py-1 font-code text-[10px] font-semibold uppercase tracking-[0.1em] text-accent opacity-90 sm:right-10 sm:px-3 sm:py-1.5 sm:text-xs sm:tracking-[0.12em]"
         >
           CGST + SGST applied
         </div>

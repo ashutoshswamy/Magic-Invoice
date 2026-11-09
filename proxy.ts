@@ -31,9 +31,28 @@ export default async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
+// Must be literals: Next reads the matcher statically.
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
+    "/dashboard",
+    "/dashboard/:path*",
+    "/invoices",
+    "/invoices/:path*",
+    "/clients",
+    "/clients/:path*",
+    "/analytics",
+    "/analytics/:path*",
+    "/expenses",
+    "/expenses/:path*",
+    "/items",
+    "/items/:path*",
+    "/gstr",
+    "/gstr/:path*",
+    "/recurring",
+    "/recurring/:path*",
+    "/profile",
+    "/profile/:path*",
+    "/settings",
+    "/settings/:path*",
   ],
 };

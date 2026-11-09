@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useStatus } from "../components/ToastProvider";
 import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import {
@@ -74,7 +75,7 @@ export default function ClientsPage() {
   const { userId, isLoaded } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
-  const [status, setStatus] = useState<string | null>(null);
+  const [, setStatus] = useStatus();
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -423,7 +424,6 @@ export default function ClientsPage() {
           </div>
         )}
 
-        {status && <p style={{ fontSize: 11, color: "var(--accent)", fontFamily: "var(--font-mono), monospace" }}>{status}</p>}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useToast } from "../../components/ToastProvider";
 import { useParams } from "next/navigation";
 import { useAuth } from "../../lib/useAuth";
 import { ArrowLeft, Link2, Printer } from "lucide-react";
@@ -115,7 +116,12 @@ export default function InvoiceDetailPage() {
   const params = useParams<{ id: string }>();
   const { userId, isLoaded } = useAuth();
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatusRaw] = useState<string | null>(null);
+  const { toast } = useToast();
+  const setStatus = useCallback((m: string | null) => {
+    setStatusRaw(m);
+    if (m) toast(m, /unable|fail|missing|log in/i.test(m) ? "error" : "success");
+  }, [toast]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isCreatingLink, setIsCreatingLink] = useState(false);
@@ -273,11 +279,6 @@ export default function InvoiceDetailPage() {
           </div>
         )}
 
-        {status && (
-          <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 11, color: "var(--accent)", letterSpacing: "0.08em" }}>
-            {status}
-          </p>
-        )}
 
         {isLoading ? (
           <div className="card" style={{ padding: 32 }}>

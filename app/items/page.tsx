@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useStatus } from "../components/ToastProvider";
 import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { Plus, Trash2 } from "lucide-react";
@@ -47,7 +48,7 @@ export default function ItemsPage() {
   const { userId, isLoaded } = useAuth();
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [, setStatus] = useStatus();
   const [draft, setDraft] = useState<DraftItem>(emptyDraft());
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -357,17 +358,6 @@ export default function ItemsPage() {
             >
               {isHsnLooking ? "Looking up..." : "AI: Suggest HSN/SAC"}
             </button>
-            {status && (
-              <span
-                style={{
-                  fontSize: 11,
-                  color: "var(--accent)",
-                  fontFamily: "var(--font-mono), monospace",
-                }}
-              >
-                {status}
-              </span>
-            )}
           </div>
         </Reveal>
 

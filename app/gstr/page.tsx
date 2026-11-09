@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useStatus } from "../components/ToastProvider";
 import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { Download, RefreshCw } from "lucide-react";
@@ -81,7 +82,7 @@ export default function GSTRPage() {
   const { userId, isLoaded } = useAuth();
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [, setStatus] = useStatus();
   const [activeTab, setActiveTab] = useState<"b2b" | "b2c" | "summary">(
     "summary",
   );
@@ -457,17 +458,6 @@ export default function GSTRPage() {
           )}
         </div>
 
-        {status && (
-          <p
-            style={{
-              fontSize: 11,
-              color: "var(--accent)",
-              fontFamily: "var(--font-mono), monospace",
-            }}
-          >
-            {status}
-          </p>
-        )}
 
         <div
           className="card"

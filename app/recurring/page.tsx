@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useToast } from "../components/ToastProvider";
 import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import {
@@ -132,9 +133,7 @@ export default function RecurringPage() {
   const { userId, isLoaded } = useAuth();
   const [items, setItems] = useState<RecurringInvoice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState<{ msg: string; ok: boolean } | null>(
-    null,
-  );
+  const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft());
   const [saving, setSaving] = useState(false);
@@ -142,10 +141,9 @@ export default function RecurringPage() {
   const [runningAll, setRunningAll] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const notify = (msg: string, ok = true) => {
-    setStatus({ msg, ok });
-    setTimeout(() => setStatus(null), 4000);
-  };
+  const notify = useCallback((msg: string, ok = true) => {
+    toast(msg, ok ? "success" : "error");
+  }, [toast]);
 
   const load = useCallback(async () => {
     if (!isLoaded || !userId) {
@@ -383,24 +381,6 @@ export default function RecurringPage() {
           </div>
         </div>
 
-        {status && (
-          <Reveal
-            vars={{ y: -6 }}
-            style={{
-              padding: "12px 18px",
-              borderRadius: 6,
-              background: status.ok
-                ? "color-mix(in srgb, var(--ok) 12%, transparent)"
-                : "color-mix(in srgb, var(--bad) 12%, transparent)",
-              borderLeft: `2px solid ${status.ok ? "var(--ok)" : "var(--bad)"}`,
-              fontSize: 13,
-              color: status.ok ? "var(--ok)" : "var(--bad)",
-              fontFamily: "var(--font-mono), monospace",
-            }}
-          >
-            {status.msg}
-          </Reveal>
-        )}
 
         {/* Create form */}
           {showForm && (

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "../lib/useAuth";
 import { Logo } from "./TopNav";
+import { GUIDES } from "../lib/guides";
 
 const contact = [
   { href: "mailto:ashutoshswamy397@gmail.com", label: "Email" },
@@ -24,6 +25,7 @@ export default function Footer() {
     { href: "/#how-it-works", label: "How it works" },
     { href: "/#pricing", label: "Pricing" },
     { href: "/#security", label: "Security" },
+    ...GUIDES.map((g) => ({ href: `/${g.slug}`, label: g.title })),
     ...(isSignedIn
       ? [
           { href: "/invoices", label: "Invoices" },

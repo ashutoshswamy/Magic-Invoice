@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useStatus } from "../components/ToastProvider";
 import Link from "next/link";
 import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
@@ -32,7 +33,7 @@ type StoredInvoice = {
 export default function InvoicesPage() {
   const { userId, isLoaded } = useAuth();
   const [stored, setStored] = useState<StoredInvoice[]>([]);
-  const [status, setStatus] = useState<string | null>(null);
+  const [, setStatus] = useStatus();
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -173,7 +174,6 @@ export default function InvoicesPage() {
           ))}
         </div>
 
-        {status && <p style={{ fontSize: 11, color: "var(--accent)", fontFamily: "var(--font-mono), monospace" }}>{status}</p>}
       </div>
     </div>
   );

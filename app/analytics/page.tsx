@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useStatus } from "../components/ToastProvider";
 import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import {
@@ -39,7 +40,7 @@ type LineRow = {
 
 export default function AnalyticsPage() {
   const { userId, isLoaded } = useAuth();
-  const [status, setStatus] = useState<string | null>(null);
+  const [, setStatus] = useStatus();
   const [isLoading, setIsLoading] = useState(false);
   const [invoiceCount, setInvoiceCount] = useState(0);
   const [paidCount, setPaidCount] = useState(0);
@@ -462,17 +463,6 @@ export default function AnalyticsPage() {
           </>
         )}
 
-        {status && (
-          <p
-            style={{
-              fontSize: 11,
-              color: "var(--accent)",
-              fontFamily: "var(--font-mono), monospace",
-            }}
-          >
-            {status}
-          </p>
-        )}
 
         {/* ── AI Insights Header ────────────────────────────────── */}
         <Reveal

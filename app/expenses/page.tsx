@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useStatus } from "../components/ToastProvider";
 import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { Plus, Trash2 } from "lucide-react";
@@ -62,7 +63,7 @@ export default function ExpensesPage() {
   const { userId, isLoaded } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [, setStatus] = useStatus();
   const [draft, setDraft] = useState<DraftExpense>(emptyDraft());
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -372,17 +373,6 @@ export default function ExpensesPage() {
             >
               <Plus size={13} /> {isSaving ? "Saving..." : "Add expense"}
             </button>
-            {status && (
-              <span
-                style={{
-                  fontSize: 11,
-                  color: "var(--accent)",
-                  fontFamily: "var(--font-mono), monospace",
-                }}
-              >
-                {status}
-              </span>
-            )}
           </div>
         </Reveal>
 

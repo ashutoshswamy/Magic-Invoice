@@ -1,0 +1,8 @@
+# Magic Invoice
+> AI GST invoice generator for Indian freelancers and small businesses. Type one sentence, get a GST invoice with SAC/HSN codes and the CGST, SGST or IGST split.
+
+- [Home](https://magicinvoice.in/)
+- [GST invoice generator](https://magicinvoice.in/gst-invoice-generator)
+- [SAC codes for freelancers](https://magicinvoice.in/sac-codes-for-freelancers)
+- [CGST, SGST and IGST explained](https://magicinvoice.in/cgst-sgst-igst-explained)
+- [GSTR-1 and GSTR-3B export](https://magicinvoice.in/gstr-1-gstr-3b-export)

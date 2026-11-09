@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useStatus } from "../components/ToastProvider";
 import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { FileText, Save } from "lucide-react";
@@ -22,7 +23,7 @@ export default function SettingsPage() {
   const [fromState, setFromState] = useState("");
   const [fromPostalCode, setFromPostalCode] = useState("");
   const [fromCountry, setFromCountry] = useState("India");
-  const [status, setStatus] = useState<string | null>(null);
+  const [, setStatus] = useStatus();
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -141,7 +142,6 @@ export default function SettingsPage() {
               <Save size={13} />
               {isSaving ? "Saving..." : "Save defaults"}
             </button>
-            {status && <span style={{ fontSize: 11, color: "var(--accent)", fontFamily: "var(--font-mono), monospace" }}>{status}</span>}
           </div>
         </Reveal>
       </div>

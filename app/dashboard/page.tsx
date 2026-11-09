@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef } from "react";
+import { useStatus } from "../components/ToastProvider";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -130,7 +131,7 @@ export default function DashboardPage() {
   const planInfo = usePlan();
   const [prompt, setPrompt] = useState("");
   const [invoice, setInvoice] = useState<InvoiceData>(defaultInvoice);
-  const [status, setStatus] = useState<string | null>(null);
+  const [, setStatus] = useStatus();
   const [isParsing, setIsParsing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [hasLoadedDefaults, setHasLoadedDefaults] = useState(false);
@@ -906,17 +907,6 @@ export default function DashboardPage() {
                 <FileText size={13} />
                 Print
               </button>
-              {status && (
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: "var(--accent)",
-                    fontFamily: "var(--font-mono), monospace",
-                  }}
-                >
-                  {status}
-                </span>
-              )}
             </div>
           </div>
 
