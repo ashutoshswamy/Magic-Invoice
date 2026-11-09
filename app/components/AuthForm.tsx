@@ -5,8 +5,7 @@ import Link from "next/link";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
 import { auth } from "../lib/firebaseClient";
@@ -123,11 +122,6 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [isAdult, setIsAdult] = useState(false);
 
   useEffect(() => {
-    if (mode !== "signup") return;
-    getRedirectResult(auth).catch(() => setError(t.googleError));
-  }, [mode, t.googleError]);
-
-  useEffect(() => {
     if (isLoaded && user && !isSubmitting) window.location.replace("/dashboard");
   }, [isLoaded, user, isSubmitting]);
 
@@ -163,9 +157,12 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
         setIsSubmitting(false);
         return;
       }
-      await signInWithRedirect(auth, new GoogleAuthProvider());
-    } catch {
-      setError(t.googleError);
+      // popup, not redirect: redirect loses state when authDomain != app domain (storage partitioning)
+      await signInWithPopup(auth, new GoogleAuthProvider());
+      setIsSubmitting(false);
+    } catch (err) {
+      const code = (err as { code?: string }).code;
+      if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") setError(t.googleError);
       setIsSubmitting(false);
     }
   };
