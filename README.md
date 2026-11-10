@@ -14,7 +14,7 @@ A high-performance, AI-powered invoicing workspace built with Next.js 16, React 
 - Razorpay payment links — share links and auto-update status via webhooks
 - Live analytics — revenue tracking, payment status, and AI cash flow insights
 - Secure storage — per-user data isolation powered by Firebase (Firestore + Auth)
-- Modern UI — smooth GSAP animations and a premium design aesthetic
+- Modern UI — a premium design aesthetic
 - Free — unlimited invoices, clients, and AI generation
 
 ## Author

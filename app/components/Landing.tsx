@@ -1,19 +1,11 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SplitText } from "gsap/SplitText";
-import { TextPlugin } from "gsap/TextPlugin";
-import { useGSAP } from "@gsap/react";
 import { ArrowRight, ShieldCheck, KeyRound, History, Landmark } from "lucide-react";
 import { useAuth } from "../lib/useAuth";
 import TopNav from "./TopNav";
 import Footer from "./Footer";
 import HeroDemo from "./HeroDemo";
-
-gsap.registerPlugin(ScrollTrigger, SplitText, TextPlugin);
 
 const steps = [
   {
@@ -64,151 +56,13 @@ const codes = [
 export default function Landing() {
   const { isSignedIn, isLoaded } = useAuth();
   const signedIn = isLoaded && isSignedIn;
-  const root = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        // Hero copy settles in before the demo starts typing.
-        gsap
-          .timeline({ defaults: { ease: "power4.out" } })
-          .from(".hero-line", { yPercent: 110, duration: 0.9, stagger: 0.08 })
-          .from(".hero-fade", { autoAlpha: 0, y: 12, duration: 0.6, stagger: 0.08 }, "-=0.5");
-        gsap.set(".hero-copy", { visibility: "visible" });
-
-        // Scroll progress: how far through the page you are, as a carbon-blue hairline.
-        gsap.to(".scroll-progress", {
-          scaleX: 1,
-          ease: "none",
-          scrollTrigger: { start: 0, end: "max", scrub: 0.2 },
-        });
-
-        // Depth: copy, invoice and glow drift at different speeds as the hero leaves.
-        const hero = { trigger: ".hero", start: "top top", end: "bottom top", scrub: true };
-        gsap.to(".hero-copy", { y: 70, ease: "none", scrollTrigger: hero });
-        gsap.to(".hero-demo", { y: -70, ease: "none", scrollTrigger: hero });
-        gsap.to(".hero-dots", { y: 60, ease: "none", scrollTrigger: hero });
-
-        // Section headings rise out of a line mask.
-        gsap.utils.toArray<HTMLElement>(".reveal-h").forEach((el) =>
-          SplitText.create(el, {
-            type: "lines",
-            mask: "lines",
-            autoSplit: true,
-            onSplit: (self) =>
-              gsap.from(self.lines, {
-                yPercent: 110,
-                duration: 0.9,
-                stagger: 0.1,
-                ease: "power4.out",
-                scrollTrigger: { trigger: el, start: "top 85%", once: true },
-              }),
-          }),
-        );
-
-        // Feature tiles arrive as a group, not one by one per scroll tick.
-        ScrollTrigger.batch(".bento-cell", {
-          start: "top 88%",
-          once: true,
-          onEnter: (els) =>
-            gsap.from(els, {
-              autoAlpha: 0,
-              y: 48,
-              scale: 0.96,
-              duration: 0.9,
-              stagger: 0.1,
-              ease: "power3.out",
-              clearProps: "transform,opacity,visibility", // hand transform back to CSS hover
-            }),
-        });
-        // Extracted fields pop in, as if the sentence were being read.
-        gsap.from(".field-chip", {
-          autoAlpha: 0,
-          scale: 0.7,
-          y: 10,
-          duration: 0.45,
-          stagger: 0.09,
-          ease: "back.out(2)",
-          scrollTrigger: { trigger: ".field-chips", start: "top 85%", once: true },
-        });
-
-        // Receipt prints out of the slot, then each row is struck.
-        gsap
-          .timeline({ scrollTrigger: { trigger: ".receipt", start: "top 80%", once: true } })
-          .from(".receipt", { clipPath: "inset(0 0 100% 0)", duration: 1.1, ease: "power2.inOut" })
-          .from(".receipt-row", { autoAlpha: 0, y: -6, duration: 0.3, stagger: 0.05, ease: "power2.out" }, "-=0.7");
-
-        // Security points settle in together.
-        ScrollTrigger.batch(".sec-item", {
-          start: "top 88%",
-          once: true,
-          onEnter: (els) => gsap.from(els, { autoAlpha: 0, y: 24, duration: 0.7, stagger: 0.1, ease: "power3.out" }),
-        });
-
-        // Closing panel grows to full width as it arrives.
-        gsap.fromTo(
-          ".closing-panel",
-          { scale: 0.9, borderRadius: 56 },
-          {
-            scale: 1,
-            borderRadius: 18,
-            ease: "none",
-            scrollTrigger: { trigger: ".closing-panel", start: "top 95%", end: "top 45%", scrub: true },
-          },
-        );
-      });
-
-      // The road: lit stretch of highway follows the scroll, each milestone stone
-      // rises as you reach it, and its proof sheet plays once.
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        const lit = (sel: string, from: string, to: string) =>
-          gsap.fromTo(sel, { clipPath: from }, {
-            clipPath: to,
-            ease: "none",
-            scrollTrigger: { trigger: ".road-track", start: "top 75%", end: "bottom 55%", scrub: 0.5 },
-          });
-        const mq = gsap.matchMedia();
-        mq.add("(min-width: 1024px)", () => lit(".road-lit-h", "inset(0 100% 0 0)", "inset(0 0% 0 0)"));
-        mq.add("(max-width: 1023px)", () => lit(".road-lit-v", "inset(0 0 100% 0)", "inset(0 0 0% 0)"));
-
-        gsap.set(".stone", { autoAlpha: 0, y: 36, scale: 0.8 });
-        gsap.set(".scene-prompt", { text: "" });
-        gsap.set(".scene-field", { autoAlpha: 0, y: 10 });
-        gsap.set(".scene-row", { autoAlpha: 0, x: -12 });
-        gsap.set(".scene-pay", { autoAlpha: 0, y: 12 });
-        gsap.set(".scene-stamp", { autoAlpha: 0, scale: 1.9, rotation: -16 });
-
-        gsap.utils.toArray<HTMLElement>(".road-step").forEach((el, i) => {
-          const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: "top 72%", once: true } });
-          tl.to(el.querySelector(".stone"), { autoAlpha: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.8)" });
-          if (i === 0)
-            tl.to(".scene-prompt", { text: SAMPLE_PROMPT, duration: 1.8, ease: "none" }, "-=0.2")
-              .to(".scene-field", { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.12, ease: "power2.out" }, "-=0.2");
-          if (i === 1) tl.to(".scene-row", { autoAlpha: 1, x: 0, duration: 0.4, stagger: 0.14, ease: "power2.out" }, "-=0.3");
-          if (i === 2)
-            tl.to(".scene-pay", { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.2, ease: "power2.out" }, "-=0.3")
-              .to(".scene-stamp", { autoAlpha: 1, scale: 1, rotation: -8, duration: 0.45, ease: "back.out(2.4)" }, "+=0.1");
-        });
-        return () => mq.revert();
-      });
-
-      return () => mm.revert();
-    },
-    { scope: root },
-  );
 
   const primaryCta = signedIn
     ? { href: "/dashboard", label: "Open dashboard" }
     : { href: "/signup", label: "Start free" };
 
   return (
-    <div ref={root} className="min-h-dvh bg-bg text-ink">
-      <div
-        aria-hidden
-        className="scroll-progress fixed inset-x-0 top-0 z-[60] h-[3px] origin-left bg-accent motion-reduce:hidden"
-        style={{ transform: "scaleX(0)" }}
-      />
+    <div className="min-h-dvh bg-bg text-ink">
       <TopNav />
 
       <main>
@@ -216,7 +70,7 @@ export default function Landing() {
         <div className="hero hero-ground fringe mb-4">
           <div aria-hidden className="hero-dots pointer-events-none absolute inset-0" />
           <section className="relative mx-auto grid max-w-[1240px] items-center gap-12 px-4 pb-24 pt-12 sm:px-6 lg:min-h-[calc(100dvh-64px)] lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pb-20 lg:pt-8">
-            <div data-prehide className="hero-copy max-w-[680px]">
+            <div className="hero-copy max-w-[680px]">
               <h1 className="font-head text-[clamp(38px,4.8vw,72px)] leading-[1.05]">
                 <span className="block overflow-hidden pb-3"><span className="hero-line block">Type the job.</span></span>
                 <span className="block overflow-hidden pb-3"><span className="hero-line block">Get a <span className="underline-paint">GST invoice.</span></span></span>
@@ -236,7 +90,7 @@ export default function Landing() {
 
             <div className="hero-demo w-full max-w-[580px] justify-self-center lg:justify-self-end">
               <div className="painted-frame -rotate-1">
-                <HeroDemo delay={0.9} />
+                <HeroDemo />
               </div>
             </div>
           </section>
@@ -343,10 +197,10 @@ export default function Landing() {
             <ol className="road-track relative mt-16 grid gap-14 lg:grid-cols-3 lg:gap-10">
               {/* Road: horizontal on desktop, vertical on small screens. The lit copy is what scroll drives. */}
               <div aria-hidden className="road road-h absolute inset-x-0 top-[92px] hidden h-5 lg:block">
-                <div className="road-lit road-lit-h absolute inset-0" style={{ clipPath: "inset(0 100% 0 0)" }} />
+                <div className="road-lit road-lit-h absolute inset-0" />
               </div>
               <div aria-hidden className="road road-v absolute bottom-0 left-[37px] top-6 w-5 lg:hidden">
-                <div className="road-lit road-lit-v absolute inset-0" style={{ clipPath: "inset(0 0 100% 0)" }} />
+                <div className="road-lit road-lit-v absolute inset-0" />
               </div>
 
               {steps.map((st, i) => (

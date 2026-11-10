@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useToast } from "../components/ToastProvider";
-import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import {
   Plus,
@@ -384,8 +383,7 @@ export default function RecurringPage() {
 
         {/* Create form */}
           {showForm && (
-            <Reveal
-              vars={{ y: -12 }}
+            <div
               className="card"
               style={{ padding: 28 }}
             >
@@ -762,7 +760,7 @@ export default function RecurringPage() {
                   Cancel
                 </button>
               </div>
-            </Reveal>
+            </div>
           )}
 
         {/* List */}
@@ -803,8 +801,7 @@ export default function RecurringPage() {
               const total = lineTotal(item.lines ?? [], item.tax_rate);
               const expanded = expandedId === item.id;
               return (
-                <Reveal
-                  vars={{ y: 8, delay: i * 0.03 }}
+                <div
                   key={item.id}
                   className="card"
                   style={{
@@ -947,8 +944,7 @@ export default function RecurringPage() {
 
                   {/* Expanded details */}
                     {expanded && (
-                      <Reveal
-                        vars={{ y: 0, height: 0, duration: 0.2, clearProps: "height,visibility" }}
+                      <div
                         style={{ overflow: "hidden" }}
                       >
                         <div
@@ -1082,9 +1078,9 @@ export default function RecurringPage() {
                             </div>
                           )}
                         </div>
-                      </Reveal>
+                      </div>
                     )}
-                </Reveal>
+                </div>
               );
             })}
           </div>

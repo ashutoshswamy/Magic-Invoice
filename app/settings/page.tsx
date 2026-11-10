@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useStatus } from "../components/ToastProvider";
-import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { FileText, Save } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -115,8 +114,7 @@ export default function SettingsPage() {
           </h1>
         </div>
 
-        <Reveal
-          vars={{ y: 12 }}
+        <div
           className="card"
           style={{ padding: 32 }}
         >
@@ -143,7 +141,7 @@ export default function SettingsPage() {
               {isSaving ? "Saving..." : "Save defaults"}
             </button>
           </div>
-        </Reveal>
+        </div>
       </div>
     </div>
   );

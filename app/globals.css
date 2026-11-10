@@ -479,12 +479,6 @@ img, video { max-width: 100%; height: auto; }
 .auth-input[aria-invalid="true"] { border-color: var(--bad); }
 .auth-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
 
-/* Hide elements GSAP is about to animate until their start state is set,
-   so the server-rendered final state never flashes. JS reveals them. */
-@media (prefers-reduced-motion: no-preference) {
-  [data-prehide] { visibility: hidden; }
-}
-
 /* ── Theme toggle ───────────────────────────────────────────────────────────── */
 /* Trigger shows the current choice: light, dark or system. */
 .theme-toggle .theme-i { display: none; }

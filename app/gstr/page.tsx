@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useStatus } from "../components/ToastProvider";
-import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { Download, RefreshCw } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -328,8 +327,7 @@ export default function GSTRPage() {
             { label: "Total tax", value: formatCurrency(totalTax) },
             { label: "Invoice total", value: formatCurrency(grandTotal) },
           ].map((c) => (
-            <Reveal
-              vars={{ y: 8 }}
+            <div
               key={c.label}
               className="card"
               style={{ padding: "18px 20px" }}
@@ -346,7 +344,7 @@ export default function GSTRPage() {
               >
                 {c.value}
               </p>
-            </Reveal>
+            </div>
           ))}
         </div>
 

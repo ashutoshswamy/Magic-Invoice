@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useStatus } from "../components/ToastProvider";
 import { useRouter } from "next/navigation";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { useAuth } from "../lib/useAuth";
 import {
   ArrowUpRight,
@@ -264,48 +262,6 @@ export default function DashboardPage() {
   }, [isAuthReady, userId]);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useGSAP(() => {
-    if (!isClient || !userId) return;
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    tl.fromTo(
-      [".ai-composer-card", ".invoice-editor-card", ".dashboard-stat-card", ".dashboard-tip-card"],
-      { opacity: 0, y: 30 },
-      {
-        opacity: 1,
-        y: 0,
-        stagger: 0.08,
-        duration: 0.7,
-        delay: 0.15,
-      }
-    );
-    tl.fromTo(
-      ".invoice-preview-container",
-      { opacity: 0, scale: 0.98, x: 15 },
-      {
-        opacity: 1,
-        scale: 1,
-        x: 0,
-        duration: 0.9,
-        ease: "back.out(1.05)",
-      },
-      "-=0.55"
-    );
-  }, [isClient, userId]);
-
-  useEffect(() => {
-    if (!isClient) return;
-    gsap.fromTo(
-      ".tab-content",
-      { opacity: 0, y: 8 },
-      { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" }
-    );
-  }, [editorTab, isClient]);
 
   const handleParse = async () => {
     setIsParsing(true);

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useStatus } from "../components/ToastProvider";
 import Link from "next/link";
-import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { FileText, RefreshCw, Trash2, UploadCloud } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -134,8 +133,7 @@ export default function InvoicesPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))", gap: 12 }}>
           {stored.map((invoice, index) => (
-            <Reveal
-              vars={{ delay: index * 0.04 }}
+            <div
               key={invoice.id}
               className="card"
               style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}
@@ -170,7 +168,7 @@ export default function InvoicesPage() {
                   {deletingId === invoice.id ? "..." : "Delete"}
                 </button>
               </div>
-            </Reveal>
+            </div>
           ))}
         </div>
 

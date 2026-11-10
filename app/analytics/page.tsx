@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useStatus } from "../components/ToastProvider";
-import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import {
   BarChart2,
@@ -248,8 +247,7 @@ export default function AnalyticsPage() {
         }}
       >
         {/* ── Hero Header ─────────────────────────────────── */}
-        <Reveal
-          vars={{ y: 14 }}
+        <div
           style={{ display: "flex", alignItems: "center", gap: 16 }}
         >
           <div
@@ -282,7 +280,7 @@ export default function AnalyticsPage() {
               Invoice analytics
             </h1>
           </div>
-        </Reveal>
+        </div>
 
         {isLoading ? (
           <div
@@ -307,8 +305,7 @@ export default function AnalyticsPage() {
         ) : (
           <>
             {/* ── Revenue Hero Card ────────────────────────── */}
-            <Reveal
-              vars={{ y: 12, delay: 0.05 }}
+            <div
               style={{
                 background: "linear-gradient(135deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 50%, transparent) 100%)",
                 border: "1px solid var(--line)",
@@ -372,8 +369,7 @@ export default function AnalyticsPage() {
                     </span>
                   </div>
                   <div style={{ height: 6, borderRadius: 6, background: "var(--surface-2)", overflow: "hidden" }}>
-                    <Reveal
-                      vars={{ y: 0, width: 0, duration: 0.8, delay: 0.3 }}
+                    <div
                       style={{
                         width: `${collectionRate}%`,
                         height: "100%",
@@ -391,7 +387,7 @@ export default function AnalyticsPage() {
                   </p>
                 </div>
               </div>
-            </Reveal>
+            </div>
 
             {/* ── Stat Cards Grid ─────────────────────────── */}
             <div
@@ -404,8 +400,7 @@ export default function AnalyticsPage() {
               {cards.map((card, index) => {
                 const Icon = card.icon;
                 return (
-                  <Reveal
-                    vars={{ delay: 0.1 + index * 0.06 }}
+                  <div
                     key={card.label}
                     style={{
                       background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 50%, transparent) 100%)",
@@ -456,7 +451,7 @@ export default function AnalyticsPage() {
                         {card.value}
                       </p>
                     </div>
-                  </Reveal>
+                  </div>
                 );
               })}
             </div>
@@ -465,8 +460,7 @@ export default function AnalyticsPage() {
 
 
         {/* ── AI Insights Header ────────────────────────────────── */}
-        <Reveal
-          vars={{ y: 14, delay: 0.15 }}
+        <div
           style={{ display: "flex", alignItems: "center", gap: 14 }}
         >
           <div
@@ -499,7 +493,7 @@ export default function AnalyticsPage() {
               AI-powered analysis
             </h2>
           </div>
-        </Reveal>
+        </div>
 
         {/* ── AI Cards Grid ──────────────────────────────────── */}
         <div
@@ -510,8 +504,7 @@ export default function AnalyticsPage() {
           }}
         >
           {/* Cash Flow Card */}
-          <Reveal
-            vars={{ y: 14, delay: 0.2 }}
+          <div
             style={{
               background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 60%, transparent) 100%)",
               border: "1px solid var(--line)",
@@ -582,11 +575,10 @@ export default function AnalyticsPage() {
                 {isLoadingInsight ? "Analysing..." : aiInsight ? "Refresh" : "Generate insight"}
               </button>
             </div>
-          </Reveal>
+          </div>
 
           {/* Payment Prediction Card */}
-          <Reveal
-            vars={{ y: 14, delay: 0.28 }}
+          <div
             style={{
               background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 60%, transparent) 100%)",
               border: "1px solid var(--line)",
@@ -656,11 +648,10 @@ export default function AnalyticsPage() {
                 {isLoadingPrediction ? "Predicting..." : aiPrediction ? "Refresh" : "Generate prediction"}
               </button>
             </div>
-          </Reveal>
+          </div>
 
           {/* Ask AI Card — full width */}
-          <Reveal
-            vars={{ y: 14, delay: 0.36 }}
+          <div
             style={{
               background: "linear-gradient(168deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 60%, transparent) 100%)",
               border: "1px solid var(--line)",
@@ -752,7 +743,7 @@ export default function AnalyticsPage() {
                 </div>
               )}
             </div>
-          </Reveal>
+          </div>
         </div>
       </div>
     </div>

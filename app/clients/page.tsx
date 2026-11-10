@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useStatus } from "../components/ToastProvider";
-import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import {
   Building2,
@@ -313,8 +312,7 @@ export default function ClientsPage() {
             {clients.map((client, index) => {
               const matchedInvoices = invoiceMatches(client);
               return (
-                <Reveal
-                  vars={{ delay: index * 0.04 }}
+                <div
                   key={client.id}
                   className="card"
                   style={{ padding: "24px" }}
@@ -414,7 +412,7 @@ export default function ClientsPage() {
                       <p style={{ fontSize: 13, color: "var(--text-3)" }}>No invoices yet.</p>
                     )}
                   </div>
-                </Reveal>
+                </div>
               );
             })}
           </div>

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useStatus } from "../components/ToastProvider";
-import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { Plus, Trash2 } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -211,8 +210,7 @@ export default function ExpensesPage() {
             { label: "GST paid (total)", value: formatINR(totalGstPaid) },
             { label: "ITC eligible", value: formatINR(itcEligible) },
           ].map((c) => (
-            <Reveal
-              vars={{ y: 8 }}
+            <div
               key={c.label}
               className="card"
               style={{ padding: "18px 20px" }}
@@ -229,12 +227,12 @@ export default function ExpensesPage() {
               >
                 {c.value}
               </p>
-            </Reveal>
+            </div>
           ))}
         </div>
 
         {/* Add form */}
-        <Reveal
+        <div
           className="card"
           style={{ padding: 28 }}
         >
@@ -374,7 +372,7 @@ export default function ExpensesPage() {
               <Plus size={13} /> {isSaving ? "Saving..." : "Add expense"}
             </button>
           </div>
-        </Reveal>
+        </div>
 
         {/* Expenses list */}
         {isLoading ? (
@@ -428,9 +426,8 @@ export default function ExpensesPage() {
                 </tr>
               </thead>
               <tbody>
-                {expenses.map((exp, i) => (
-                  <Reveal as="tr"
-                    vars={{ y: 0, delay: i * 0.02 }}
+                {expenses.map((exp) => (
+                  <tr
                     key={exp.id}
                     className="expense-row"
                   >
@@ -454,7 +451,7 @@ export default function ExpensesPage() {
                         <Trash2 size={12} />
                       </button>
                     </td>
-                  </Reveal>
+                  </tr>
                 ))}
               </tbody>
             </table>

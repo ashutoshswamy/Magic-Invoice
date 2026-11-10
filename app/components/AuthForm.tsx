@@ -246,7 +246,7 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
         </div>
 
         <div className="hidden justify-self-center lg:block">
-          <HeroDemo delay={0.4} />
+          <HeroDemo />
         </div>
       </main>
     </div>

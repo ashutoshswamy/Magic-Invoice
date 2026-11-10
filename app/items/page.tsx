@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useStatus } from "../components/ToastProvider";
-import Reveal from "../components/Reveal";
 import { useAuth } from "../lib/useAuth";
 import { Plus, Trash2 } from "lucide-react";
 import TopNav from "../components/TopNav";
@@ -230,7 +229,7 @@ export default function ItemsPage() {
         </div>
 
         {/* Add form */}
-        <Reveal
+        <div
           className="card"
           style={{ padding: 28 }}
         >
@@ -359,7 +358,7 @@ export default function ItemsPage() {
               {isHsnLooking ? "Looking up..." : "AI: Suggest HSN/SAC"}
             </button>
           </div>
-        </Reveal>
+        </div>
 
         {/* Items list */}
         {isLoading ? (
@@ -412,8 +411,7 @@ export default function ItemsPage() {
               ))}
             </div>
             {items.map((item, i) => (
-              <Reveal
-                vars={{ y: 6, delay: i * 0.03 }}
+              <div
                 key={item.id}
                 className="card items-grid"
                 style={{
@@ -531,7 +529,7 @@ export default function ItemsPage() {
                 >
                   <Trash2 size={13} />
                 </button>
-              </Reveal>
+              </div>
             ))}
           </div>
         )}

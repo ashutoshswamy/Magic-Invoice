@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Reveal from "../components/Reveal";
 import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebaseClient";
 import { useAuth } from "../lib/useAuth";
@@ -27,7 +26,7 @@ export default function ProfilePage() {
             Your profile
           </h1>
         </div>
-        <Reveal vars={{ y: 12 }} className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 16, maxWidth: 480 }}>
+        <div className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 16, maxWidth: 480 }}>
           <div>
             <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-3)" }}>Email</span>
             <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--text)" }}>
@@ -37,7 +36,7 @@ export default function ProfilePage() {
           <button onClick={handleSignOut} className="btn-primary" style={{ alignSelf: "flex-start" }}>
             Sign out
           </button>
-        </Reveal>
+        </div>
       </div>
     </div>
   );
