@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "../lib/useAuth";
 import { Logo } from "./TopNav";
 import { GUIDES } from "../lib/guides";
@@ -25,7 +24,6 @@ export default function Footer() {
     { href: "/#how-it-works", label: "How it works" },
     { href: "/#pricing", label: "Pricing" },
     { href: "/#security", label: "Security" },
-    ...GUIDES.map((g) => ({ href: `/${g.slug}`, label: g.title })),
     ...(isSignedIn
       ? [
           { href: "/invoices", label: "Invoices" },
@@ -44,25 +42,19 @@ export default function Footer() {
         <div className="footer-brand">
           <Logo />
           <p>AI invoicing for Indian freelancers and small businesses. GST worked out for you.</p>
-          <a
-            href="https://www.producthunt.com/products/magic-invoice-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-magic-invoice-2"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1065115&theme=light&t=1768842848845"
-              alt="Magic Invoice on Product Hunt"
-              width={200}
-              height={44}
-              unoptimized
-            />
-          </a>
         </div>
 
         <nav aria-label="Product">
           <h2>Product</h2>
           {product.map((l) => (
             <Link key={l.href} href={l.href}>{l.label}</Link>
+          ))}
+        </nav>
+
+        <nav aria-label="Guides">
+          <h2>Guides</h2>
+          {GUIDES.map((g) => (
+            <Link key={g.slug} href={`/${g.slug}`}>{g.title}</Link>
           ))}
         </nav>
 

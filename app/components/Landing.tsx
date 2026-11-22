@@ -187,87 +187,73 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* How it works: a highway with three milestone stones */}
+        {/* How it works: three signboards of different weight standing on one highway */}
         <section id="how-it-works" className="scroll-mt-20 border-y-2 border-ink bg-surface">
           <div className="steps mx-auto max-w-[1240px] px-4 py-24 sm:px-6">
             <h2 className="reveal-h max-w-[16ch] font-head text-[clamp(32px,4.2vw,56px)] leading-[1.05]">
               From sentence to sent in three steps.
             </h2>
 
-            <ol className="road-track relative mt-16 grid gap-14 lg:grid-cols-3 lg:gap-10">
-              {/* Road: horizontal on desktop, vertical on small screens. The lit copy is what scroll drives. */}
-              <div aria-hidden className="road road-h absolute inset-x-0 top-[92px] hidden h-5 lg:block">
-                <div className="road-lit road-lit-h absolute inset-0" />
-              </div>
-              <div aria-hidden className="road road-v absolute bottom-0 left-[37px] top-6 w-5 lg:hidden">
-                <div className="road-lit road-lit-v absolute inset-0" />
-              </div>
+            <ol className="relative mt-14 grid gap-5 lg:grid-cols-12 lg:items-end lg:gap-6 lg:pb-5">
+              <div aria-hidden className="road road-h absolute inset-x-0 bottom-0 hidden h-5 lg:block" />
 
-              {steps.map((st, i) => (
-                <li key={st.title} className="road-step relative pl-24 lg:pl-0">
-                  {/* Milestone stone: arched coloured top, paper base */}
-                  <div className="stone absolute left-[9px] top-0 w-[76px] lg:static" aria-hidden>
-                    <div className="grid h-[58px] place-items-center rounded-t-[38px] border-[3px] border-b-0 border-[#17130f] font-head text-[34px] leading-none" style={{ background: st.cap, color: st.capInk }}>
-                      {i + 1}
-                    </div>
-                    <div className="grid h-[38px] place-items-center border-[3px] border-[#17130f] bg-[#fbfbf8] font-code text-[11px] font-semibold uppercase tracking-[0.1em] text-[#17130f]">
-                      {st.verb}
-                    </div>
+              {/* 1: the sentence */}
+              <li className="lg:col-span-5">
+                <div className="bento-cell tone-gold flex flex-col rounded-[var(--radius-lg)] border-2 border-[#17130f] p-7 lg:p-9">
+                  <p aria-hidden className="font-head text-7xl leading-none">1</p>
+                  <h3 className="mt-5 font-head text-3xl lg:text-4xl">{steps[0].title}</h3>
+                  <p className="mt-2 max-w-[40ch]">{steps[0].body}</p>
+                  <p className="mt-7 max-w-[34ch] rounded-2xl rounded-bl-sm border-2 border-[#17130f] bg-[#17130f] px-5 py-4 text-[17px] font-medium leading-snug text-[#f4b400]">
+                    {SAMPLE_PROMPT}
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-2 text-[13px]">
+                    {[["client", "Rahul Sharma"], ["amount", "₹15,000"], ["gst", "18%"]].map(([k, v]) => (
+                      <span key={k} className="rounded-lg border-2 border-[#17130f] px-2.5 py-1">
+                        {k} <span className="font-bold">{v}</span>
+                      </span>
+                    ))}
                   </div>
+                </div>
+                <div aria-hidden className="mx-auto hidden h-7 w-3 bg-[var(--road-edge)] lg:block" />
+              </li>
 
-                  <div className="lg:mt-[52px]">
-                    <h3 className="font-head text-2xl md:text-3xl">{st.title}</h3>
-                    <p className="mt-2 max-w-[36ch] text-ink-2">{st.body}</p>
+              {/* 2: the draft */}
+              <li className="lg:col-span-3">
+                <div className="bento-cell tone-red flex flex-col rounded-[var(--radius-lg)] border-2 border-[#17130f] p-7">
+                  <p aria-hidden className="font-head text-7xl leading-none">2</p>
+                  <h3 className="mt-5 font-head text-3xl">{steps[1].title}</h3>
+                  <p className="mt-2">{steps[1].body}</p>
+                  <dl className="mt-7 text-[14px]">
+                    {[["Logo design", "₹10,000"], ["Brand guidelines", "₹5,000"], ["CGST 9% + SGST 9%", "₹2,700"]].map(([d, amt]) => (
+                      <div key={d} className="flex justify-between gap-3 border-b border-current/40 py-2">
+                        <dt>{d}</dt>
+                        <dd>{amt}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <p className="mt-4 flex items-baseline justify-between gap-3">
+                    <span className="font-semibold">Total</span>
+                    <span className="font-head text-4xl">₹17,700</span>
+                  </p>
+                </div>
+                <div aria-hidden className="mx-auto hidden h-7 w-3 bg-[var(--road-edge)] lg:block" />
+              </li>
 
-                    {/* Proof sheet. Always light, like real stock. */}
-                    <div className="paper-light mt-6 rounded-[var(--radius)] border-2 border-[#17130f] p-4 font-code text-[13px] shadow-[var(--shadow)]">
-                      {i === 0 && (
-                        <>
-                          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-3">You type</p>
-                          <p className="mt-2 min-h-[6.5em] text-[14px] leading-relaxed">
-                            <span className="scene-prompt">{SAMPLE_PROMPT}</span>
-                          </p>
-                          <div className="mt-3 flex flex-wrap gap-1.5">
-                            {[["client", "Rahul Sharma"], ["amount", "₹15,000"], ["gst", "18%"]].map(([k, v]) => (
-                              <span key={k} className="scene-field rounded-md border border-line-strong px-2 py-1 text-[12px]">
-                                <span className="text-ink-3">{k}</span> <span className="font-semibold text-accent">{v}</span>
-                              </span>
-                            ))}
-                          </div>
-                        </>
-                      )}
-                      {i === 1 && (
-                        <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2">
-                          {[["Logo design", "₹10,000"], ["Brand guidelines", "₹5,000"], ["CGST 9% + SGST 9%", "₹2,700"]].map(([d, amt]) => (
-                            <div key={d} className="scene-row col-span-2 grid grid-cols-subgrid border-b border-line pb-2">
-                              <span className="font-sans">{d}</span>
-                              <span className="text-right">{amt}</span>
-                            </div>
-                          ))}
-                          <div className="scene-row col-span-2 flex items-baseline justify-between pt-1">
-                            <span className="font-sans font-semibold">Total</span>
-                            <span className="font-head text-3xl text-accent">₹17,700</span>
-                          </div>
-                        </div>
-                      )}
-                      {i === 2 && (
-                        <div className="relative min-h-[11em]">
-                          <p className="scene-pay text-[11px] uppercase tracking-[0.08em] text-ink-3">Sent to Rahul Sharma</p>
-                          <div className="scene-pay mt-2 flex items-center justify-between gap-3 rounded-md border border-line-strong p-3">
-                            <span className="font-sans font-semibold">Pay ₹17,700 by UPI or card</span>
-                            <span className="shrink-0 whitespace-nowrap rounded-md bg-accent px-2.5 py-1.5 font-sans text-[12px] font-semibold text-on-accent">Pay now</span>
-                          </div>
-                          <div aria-hidden className="scene-stamp pointer-events-none absolute bottom-1 right-3 rounded-md border-[3px] border-[var(--ok)] px-4 py-1 font-head text-2xl uppercase tracking-wider text-[var(--ok)]">
-                            Paid
-                          </div>
-                        </div>
-                      )}
-                    </div>
+              {/* 3: send and get paid */}
+              <li className="lg:col-span-4">
+                <div className="bento-cell tone-teal flex flex-col rounded-[var(--radius-lg)] border-2 border-[#17130f] p-7 lg:p-9">
+                  <p aria-hidden className="font-head text-7xl leading-none">3</p>
+                  <h3 className="mt-5 font-head text-3xl lg:text-4xl">{steps[2].title}</h3>
+                  <p className="mt-2 max-w-[36ch]">{steps[2].body}</p>
+                  <div className="paper-light mt-7 flex items-center justify-between gap-3 rounded-xl border-2 border-[#17130f] p-3 text-[14px]">
+                    <span className="font-semibold">Pay ₹17,700 by UPI or card</span>
+                    <span className="shrink-0 whitespace-nowrap rounded-md bg-accent px-2.5 py-1.5 text-[12px] font-semibold text-on-accent">Pay now</span>
                   </div>
-                </li>
-              ))}
+                  <p aria-hidden className="bumper mt-6 self-end !text-xl">Paid</p>
+                </div>
+                <div aria-hidden className="mx-auto hidden h-7 w-3 bg-[var(--road-edge)] lg:block" />
+              </li>
             </ol>
-            <p className="mt-6 text-xs text-ink-3">Sample invoice.</p>
           </div>
         </section>
 
